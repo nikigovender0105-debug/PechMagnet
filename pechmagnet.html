@@ -267,24 +267,44 @@
     arch:{label:'Der Blumenbogen kracht um!',kind:'fall',boom:'RUMMS!',vis:'beam',fall:false},
     cart:{label:'Ein Einkaufswagen rollt Amok!',kind:'fall',boom:'SCHEPPER!',vis:'cart',fall:false},
     bees:{label:'Ein Bienenstock platzt auf!',kind:'animal',boom:'BZZZZ!',vis:'birds',fall:false},
-    car:{label:'Ein Auto rast heran und \u00fcberf\u00e4hrt dich fast!',kind:'fall',boom:'SCREECH!',vis:'car',fall:false},
-    mafia:{label:'Die Mafia ist aufgetaucht!',kind:'crime',boom:'KLICK-KLACK!',vis:'mafia',fall:false},
-    ufo:{label:'Ein UFO erfasst dich mit dem Traktorstrahl!',kind:'alien',boom:'WZZZT!',vis:'ufo',fall:false},
+    car:{label:'Ein Auto rast heran und \u00fcberf\u00e4hrt dich fast!',kind:'accident',boom:'SCREECH!',vis:'car',fall:false,special:true,snd:'honk',
+      subText:'Quietschende Reifen \u2013 das Auto erwischt dich fast und alle gaffen!'},
+    mafia:{label:'Die Mafia ist aufgetaucht!',kind:'crime',boom:'KLICK-KLACK!',vis:'mafia',fall:false,special:true,snd:'siren',
+      subText:'Zwei breite Typen im Anzug bauen sich auf: \u201eWir m\u00fcssen reden. Jetzt.\u201c'},
+    ufo:{label:'Ein UFO erfasst dich mit dem Traktorstrahl!',kind:'alien',boom:'WZZZT!',vis:'ufo',fall:false,special:true,snd:'zap',
+      subText:'Ein Traktorstrahl zieht dich hoch \u2013 die Aliens warten auf eine Erkl\u00e4rung.'},
+    cop:{label:'Ein Polizist nimmt dich ins Visier!',kind:'crime',boom:'TAT\u00dc-TATA!',vis:'cop',fall:false,special:true,snd:'siren',
+      subText:'Ein Streifenpolizist baut sich vor dir auf: \u201eAusweis. Sofort.\u201c'},
+    reporter:{label:'Eine Reporterin h\u00e4lt dir das Mikro ins Gesicht!',kind:'media',boom:'LIVE!',vis:'reporter',fall:false,special:true,snd:'click',
+      subText:'Kameras an, Mikro ins Gesicht: \u201eEin Statement zum Chaos hier?\u201c'},
+    ghost:{label:'Ein Geist materialisiert sich vor dir!',kind:'spooky',boom:'BUUUH!',vis:'ghost',fall:false,special:true,snd:'spooky',
+      subText:'Ein durchsichtiger Geist schwebt heran und starrt dich vorwurfsvoll an...'},
     meteor:{label:'Ein Meteorit schl\u00e4gt direkt neben dir ein!',kind:'fall',boom:'KAWUMM!',vis:'meteor',fall:true},
     rhino:{label:'Ein Nashorn bricht aus dem Zoo aus!',kind:'animal',boom:'TRAMPEL!',vis:'rhino',fall:false},
     blitz:{label:'Ein Blitz schl\u00e4gt direkt neben dir ein!',kind:'fire',boom:'ZACK!',vis:'blitz',fall:true},
     plane:{label:'Ein Kleinflugzeug macht eine Bruchlandung!',kind:'fall',boom:'KRRRSCH!',vis:'plane',fall:true},
-    monster:{label:'Ein Riesenmonster stapft an dir vorbei!',kind:'animal',boom:'GROOAR!',vis:'monster',fall:false}
+    monster:{label:'Ein Riesenmonster stapft an dir vorbei!',kind:'animal',boom:'GROOAR!',vis:'monster',fall:false},
+    barrels:{label:'Ein Stapel Ölfässer rollt los!',kind:'fall',boom:'POLTER!',vis:'safe',fall:false},
+    scaffold:{label:'Das Baugerüst kippt um!',kind:'fall',boom:'WACKEL-KRACH!',vis:'beam',fall:true},
+    paint:{label:'Ein Eimer Farbe kippt aus!',kind:'water',boom:'PLATSCH!',vis:'water',fall:false},
+    icecream:{label:'Der Eiswagen verliert seine Ladung!',kind:'fall',boom:'KLATSCH!',vis:'cart',fall:false},
+    sausage:{label:'Die Bratwurst-Bude geht in Flammen auf!',kind:'fire',boom:'ZISCH!',vis:'fire',fall:false},
+    swans:{label:'Wütende Schwäne attackieren!',kind:'animal',boom:'FAUCH!',vis:'birds',fall:false},
+    parrot:{label:'Ein Schwarm Papageien entkommt!',kind:'animal',boom:'KRAAH!',vis:'birds',fall:false},
+    champagne:{label:'Die Sektdusche explodiert!',kind:'water',boom:'KORK-KNALL!',vis:'water',fall:false}
   };
   const ZONE_TYPES=[
-    {id:'baustelle',name:'Baustelle',bld:'#E6A817',density:0.4,events:['anvil','piano','safe','brick','beam']},
-    {id:'markt',name:'Marktplatz',bld:'#FF7A45',density:1.3,events:['pot','fruit','fountain','cart']},
-    {id:'cafe',name:'Stra\u00dfencaf\u00e9',bld:'#19C3C3',density:1.0,events:['cake','coffee','waiter','grill']},
-    {id:'park',name:'Stadtpark',bld:'#2ECC40',density:0.8,events:['hydrant','pigeons','ducks','bees']},
-    {id:'zoo',name:'Tierhandlung',bld:'#C77DFF',density:0.7,events:['dogs','pigeons','cow','rhino']},
-    {id:'hochzeit',name:'Hochzeit',bld:'#FF5DA2',density:1.2,events:['cake','arch','pigeons']}
+    {id:'baustelle',name:'Baustelle',bld:'#E6A817',density:0.4,events:['anvil','piano','safe','brick','beam','barrels','scaffold','paint']},
+    {id:'markt',name:'Marktplatz',bld:'#FF7A45',density:1.3,events:['pot','fruit','fountain','cart','icecream','paint']},
+    {id:'cafe',name:'Stra\u00dfencaf\u00e9',bld:'#19C3C3',density:1.0,events:['cake','coffee','waiter','grill','sausage']},
+    {id:'park',name:'Stadtpark',bld:'#2ECC40',density:0.8,events:['hydrant','pigeons','ducks','bees','swans']},
+    {id:'zoo',name:'Tierhandlung',bld:'#C77DFF',density:0.7,events:['dogs','pigeons','cow','rhino','parrot']},
+    {id:'hochzeit',name:'Hochzeit',bld:'#FF5DA2',density:1.2,events:['cake','arch','pigeons','champagne']}
   ];
-  const RARE=['car','mafia','ufo','meteor','rhino','blitz','plane','monster'];
+  // Sonder-Events: seltene "Stehenbleiben"-Gro\u00dfereignisse ...
+  const RARE_FREEZE=['meteor','rhino','blitz','plane','monster','cow'];
+  // ... und sehr seltene Special-Events, die dich direkt zur Rede stellen.
+  const SPECIAL=['mafia','car','ufo','cop','reporter','ghost'];
   const EXCUSES={
     fall:[ {t:'Das war schon kaputt, bevor ich kam!',ok:true},
            {t:'Die Schwerkraft hat heute einfach frei.',ok:false},
@@ -309,7 +329,19 @@
     alien:[ {t:'Bringt mich zu eurem Anf\u00fchrer.',ok:true},
             {t:'Ich bin auch ein Alien, Kollege!',ok:false},
             {t:'Beam mich hoch, ich hab nichts gemacht.',ok:false},
-            {t:'Das ist nur ein Wetterballon.',ok:false} ]
+            {t:'Das ist nur ein Wetterballon.',ok:false} ],
+    accident:[ {t:'Ich lag da schon \u2013 das Auto kam zu mir!',ok:true},
+               {t:'Welches Auto? Ich sehe gar kein Auto.',ok:false},
+               {t:'Das war ein geplanter Stunt. Applaus bitte.',ok:false},
+               {t:'Sie sind gefahren, nicht ich. Ihr Problem.',ok:false} ],
+    media:[ {t:'Kein Kommentar. Mein Anwalt meldet sich.',ok:true},
+            {t:'Ich bin gar nicht hier. Das ist ein Double.',ok:false},
+            {t:'Drehen Sie das?! Sofort l\u00f6schen!',ok:false},
+            {t:'Ich rede nur gegen Bezahlung.',ok:false} ],
+    spooky:[ {t:'Buh zur\u00fcck! Ich spuke hier auch.',ok:true},
+             {t:'Geister gibt es nicht. Sie tr\u00e4umen.',ok:false},
+             {t:'Ich bin nur zuf\u00e4llig durchsichtig.',ok:false},
+             {t:'Das war Nebel. Ganz normaler Nebel.',ok:false} ]
   };
   const REACTIONS=[
     ['Hmm... ok?','Die Menge nickt verwirrt und geht weiter.'],
@@ -327,6 +359,7 @@
   let npcs=[], bursts=[], coins=[];
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
+  let specialTimer=0, specialMode=false, specialBanner='';
   let stick={active:false,ox:0,oy:0,x:0,y:0,id:null};
 
   // ---------- skins ----------
@@ -362,8 +395,8 @@
       game:{ tempo:0.16, melVol:0.2, bassVol:0.2, melType:'triangle', bassType:'square',
         mel:[523.25,0,659.25,587.33,523.25,0,392.00,0,440.00,0,523.25,587.33,659.25,0,587.33,523.25,587.33,0,440.00,523.25,392.00,0,329.63,0,440.00,0,587.33,523.25,440.00,0,392.00,0],
         bass:[130.81,0,0,0,98.00,0,0,0,110.00,0,0,0,87.31,0,0,0,87.31,0,0,0,130.81,0,0,0,98.00,0,0,0,98.00,0,0,0] },
-      menu:{ tempo:0.30, melVol:0.13, bassVol:0.12, melType:'sine', bassType:'triangle',
-        mel:[523.25,0,0,392.00,0,440.00,0,0,587.33,0,0,523.25,0,392.00,0,0,659.25,0,0,587.33,0,523.25,0,0,440.00,0,392.00,0,329.63,0,0,0],
+      menu:{ tempo:0.42, melVol:0.085, bassVol:0.06, melType:'sine', bassType:'sine',
+        mel:[392.00,0,0,0,523.25,0,0,440.00,0,0,587.33,0,523.25,0,0,0,659.25,0,0,0,587.33,0,440.00,0,523.25,0,0,392.00,0,0,0,0],
         bass:[130.81,0,0,0,0,0,0,0,98.00,0,0,0,0,0,0,0,110.00,0,0,0,0,0,0,0,87.31,0,0,0,0,0,0,0] }
     };
     function ensure(){
@@ -425,7 +458,9 @@
       gameover(){ tone(440,0.2,'sawtooth',0.33,0,330); tone(330,0.2,'sawtooth',0.33,0.18,247); tone(196,0.42,'sawtooth',0.33,0.36,150); },
       click(){ tone(820,0.04,'square',0.18,0); },
       zap(){ tone(1800,0.14,'sawtooth',0.26,0,300); noise(0.1,0.18,3000); },
-      honk(){ tone(392,0.26,'sawtooth',0.26,0); tone(523,0.26,'sawtooth',0.24,0); }
+      honk(){ tone(392,0.26,'sawtooth',0.26,0); tone(523,0.26,'sawtooth',0.24,0); },
+      siren(){ tone(740,0.2,'sawtooth',0.24,0); tone(560,0.2,'sawtooth',0.24,0.2); tone(740,0.2,'sawtooth',0.24,0.4); },
+      spooky(){ tone(220,0.5,'sine',0.22,0,150); tone(330,0.5,'sine',0.14,0.12,220); noise(0.4,0.12,800,0.05); }
     };
     return { ensure, play(n){ ensure(); if(S[n]) S[n](); }, setTrack, setMuted(m){ muted=!!m; if(musicGain) musicGain.gain.value=muted?0:0.7; if(muted) stopMusic(); else if(ctx&&trk) startMusic(); }, isMuted(){ return muted; } };
   })();
@@ -434,6 +469,8 @@
     if(vis==='fire'||vis==='blitz'||vis==='ufo') return 'zap';
     if(vis==='birds') return 'flutter';
     if(vis==='car') return 'honk';
+    if(vis==='cop'||vis==='mafia') return 'siren';
+    if(vis==='ghost') return 'spooky';
     return 'crash';
   }
 
@@ -486,7 +523,7 @@
     generateUpTo(player.y - H*1.8);
     camY=player.y-H*0.6;
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
-    phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; bumpCD=0; susLocked=false; suspicion=0;
+    phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; bumpCD=0; susLocked=false; suspicion=0;
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -503,7 +540,10 @@
   function triggerChaos(){
     const d=diff();
     const z=currentZone(player.y);
-    currentEvent=EVENTS[(Math.random()<0.07)?pick(RARE):pick(z.events)];
+    const roll=Math.random();
+    // ~4.5% sehr seltenes Special-Event (direkte Befragung), ~6% seltenes Großereignis
+    if(roll<0.045){ triggerSpecial(pick(SPECIAL)); return; }
+    currentEvent=EVENTS[(roll<0.105)?pick(RARE_FREEZE):pick(z.events)];
     phase='alarm'; alarmTimer=d.alarmDur+1.8; stareStill=player.moving?0:0.4;
     const bx=clamp(player.x+rand(-90,90),40,W-40);
     const by=clamp(player.y+rand(-110,40),z.y0+30,z.y1-20);
@@ -514,6 +554,22 @@
     if(!currentEvent.fall){ shake=reduceMotion?4:8; SND.play(soundForVis(currentEvent.vis)); }
     SND.play('alarm');
     setBanner('alarm');
+  }
+  // Special-Event: kein "Stehenbleiben" – du wirst nach kurzer Schrecksekunde direkt zur Rede gestellt.
+  function triggerSpecial(key){
+    const z=currentZone(player.y);
+    currentEvent=EVENTS[key];
+    phase='special'; specialTimer=1.0; specialMode=true;
+    const bx=clamp(player.x+rand(-44,44),40,W-40);
+    const by=clamp(player.y-6,z.y0+30,z.y1-20);
+    bursts.push({x:bx,y:by,vis:currentEvent.vis,boom:currentEvent.boom,fall:false,
+                 fallDur:0.5,impacted:true,t:0,life:2.4});
+    for(const n of npcs) n.point=true;
+    shake=reduceMotion?6:13;
+    SND.play(currentEvent.snd||'alarm');
+    SND.play('alarm');
+    specialBanner=currentEvent.boom||'AUFGEFLOGEN!';
+    setBanner('special');
   }
   function endAlarm(){ phase='calm'; currentEvent=null; for(const n of npcs) n.point=false; chaosTimer=rand(diff().chaosInterval*0.7,diff().chaosInterval); setBanner('calm'); }
 
@@ -528,10 +584,12 @@
     const box=document.getElementById('excuses'); box.innerHTML='';
     excuseSet.forEach((e,i)=>{ const b=document.createElement('button'); b.className='excuse'; b.textContent=e.t;
       b.onclick=()=>pickExcuse(i,b); box.appendChild(b); });
-    document.getElementById('caughtSub').textContent=confrontMode
-      ? 'Du bist direkt in jemanden reingerannt! Sag schnell was!'
-      : (currentEvent?('"'+currentEvent.label+'" \u2013 und alle starren dich an.'):'Die Menge br\u00fcllt. Sag irgendwas!');
-    confrontMode=false;
+    document.getElementById('caughtSub').textContent=specialMode
+      ? (currentEvent&&currentEvent.subText?currentEvent.subText:'Du wirst direkt zur Rede gestellt!')
+      : (confrontMode
+        ? 'Du bist direkt in jemanden reingerannt! Sag schnell was!'
+        : (currentEvent?('"'+currentEvent.label+'" \u2013 und alle starren dich an.'):'Die Menge br\u00fcllt. Sag irgendwas!'));
+    confrontMode=false; specialMode=false;
     document.getElementById('rageFill').style.width='100%';
     show('dialog');
   }
@@ -614,6 +672,7 @@
   function setBanner(mode){
     const b=document.getElementById('banner'), v=document.getElementById('vignette');
     if(mode==='alarm'){ b.textContent='STEHENBLEIBEN!'; b.className='freeze'; b.style.opacity=1; v.classList.add('on'); }
+    else if(mode==='special'){ b.textContent=specialBanner||'AUFGEFLOGEN!'; b.className='freeze'; b.style.opacity=1; v.classList.add('on'); }
     else if(mode==='calm'){ b.textContent='LOS!'; b.className='go'; b.style.opacity=1; v.classList.remove('on');
       setTimeout(()=>{ if(phase==='calm'&&state===ST.PLAY) document.getElementById('banner').style.opacity=0; },900); }
     else{ b.style.opacity=0; v.classList.remove('on'); }
@@ -666,6 +725,9 @@
     if(phase==='calm'){
       chaosTimer-=dt;
       if(chaosTimer<=0) triggerChaos();
+    } else if(phase==='special'){
+      specialTimer-=dt;
+      if(specialTimer<=0){ getCaught(); return; }
     } else {
       alarmTimer-=dt;
       if(player.moving){
@@ -682,7 +744,7 @@
 
     for(const n of npcs){
       n.bob+=dt*6;
-      if(phase==='alarm'){
+      if(phase==='alarm'||phase==='special'){
         n.ang=Math.atan2(player.y-n.y,player.x-n.x);
         n.lookTarget=n.ang; n.look=angTo(n.look,n.lookTarget,9*dt);
         if(suspicion>55 && !susLocked){ const s=(suspicion-55)/45*d.npcSpeed*0.9; n.x+=Math.cos(n.ang)*s*dt; n.y+=Math.sin(n.ang)*s*dt; }
@@ -701,7 +763,7 @@
     if(coins.some(c=>c.got)) coins=coins.filter(c=>!c.got);
 
     if(bumpCD>0){ bumpCD-=dt; }
-    else { for(const n of npcs){ if(Math.abs(n.y-player.y)>34) continue;
+    else if(phase!=='special'){ for(const n of npcs){ if(Math.abs(n.y-player.y)>34) continue;
       const dx=player.x-n.x, dy=player.y-n.y; if(dx*dx+dy*dy<(PR+13)*(PR+13)){ confrontNPC(n); break; } } }
     if(state!==ST.PLAY) return;
 
@@ -854,6 +916,30 @@
       ctx.lineWidth=1.5; for(let i=-8;i<12;i+=6){ ctx.beginPath(); ctx.moveTo(x+i,y-10); ctx.lineTo(x+i,y+6); ctx.stroke(); }
       ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x+12,y-10); ctx.lineTo(x+18,y-14); ctx.stroke();
       ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-9,y+10,3,0,6.283); ctx.arc(x+8,y+10,3,0,6.283); ctx.fill();
+    } else if(vis==='cop'){
+      ctx.fillStyle='#2a3d66'; rr(x-12,y-6,24,24,8); fs();
+      ctx.fillStyle='#FFD23F'; ctx.beginPath(); ctx.arc(x-4,y+4,2.5,0,6.283); ctx.fill();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,9,0,6.283); fs();
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-3,y-17,1.6,0,6.283); ctx.arc(x+3,y-17,1.6,0,6.283); ctx.fill();
+      ctx.fillStyle='#2a3d66'; rr(x-11,y-25,22,6,3); fs();
+      ctx.fillStyle='#1c2a4a'; rr(x-9,y-31,18,7,3); fs();
+      ctx.fillStyle='#FFD23F'; rr(x-3,y-29,6,3,1); ctx.fill();
+    } else if(vis==='reporter'){
+      ctx.fillStyle='#7C5CFF'; rr(x-12,y-6,24,24,8); fs();
+      ctx.fillStyle='#FF3B30'; rr(x-9,y+2,8,6,1); ctx.fill();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,9,0,6.283); fs();
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-3,y-17,1.6,0,6.283); ctx.arc(x+3,y-17,1.6,0,6.283); ctx.fill();
+      ctx.strokeStyle=INK; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x+8,y-2); ctx.lineTo(x+19,y-12); ctx.stroke();
+      ctx.fillStyle='#1f1f27'; ctx.beginPath(); ctx.arc(x+21,y-15,5,0,6.283); fs();
+    } else if(vis==='ghost'){
+      ctx.fillStyle='rgba(255,255,255,.93)'; ctx.strokeStyle=INK; ctx.lineWidth=3; ctx.lineJoin='round';
+      ctx.beginPath();
+      ctx.moveTo(x-15,y+12); ctx.lineTo(x-15,y-6); ctx.arc(x,y-6,15,Math.PI,0); ctx.lineTo(x+15,y+12);
+      ctx.quadraticCurveTo(x+11,y+5,x+7,y+12); ctx.quadraticCurveTo(x+3,y+5,x,y+12);
+      ctx.quadraticCurveTo(x-3,y+5,x-7,y+12); ctx.quadraticCurveTo(x-11,y+5,x-15,y+12);
+      ctx.closePath(); fs();
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-5,y-7,2.6,0,6.283); ctx.arc(x+5,y-7,2.6,0,6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,3.2,0,Math.PI); ctx.fill();
     }
   }
   function drawEffect(vis,x,y,t){
@@ -871,7 +957,7 @@
         const f=Math.sin(t*22+i)*4; ctx.beginPath(); ctx.moveTo(bx-7,by); ctx.quadraticCurveTo(bx,by-5+f,bx+7,by); ctx.stroke(); }
     }
   }
-  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart'];
+  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost'];
   function drawBurst(b){
     const solid=SOLIDS.indexOf(b.vis)>=0;
     if(b.fall&&b.t<b.fallDur){
@@ -933,7 +1019,7 @@
 
     for(const c of coins){ if(c.y<camY-40||c.y>camY+H+40) continue; drawCoin(c.x,c.y); }
 
-    for(const n of npcs){ if(n.y<camY-60||n.y>camY+H+60) continue; visionCone(n.x,n.y,n.look,phase==='alarm'?'#FF3B30':n.color,phase==='alarm'); }
+    for(const n of npcs){ if(n.y<camY-60||n.y>camY+H+60) continue; const al=(phase==='alarm'||phase==='special'); visionCone(n.x,n.y,n.look,al?'#FF3B30':n.color,al); }
 
     const ents=[];
     for(const n of npcs){ if(n.y<camY-50||n.y>camY+H+50) continue; ents.push({y:n.y,d:()=>person(n.x,n.y,n.color,n.ang,n.point,n.bob,false)}); }
