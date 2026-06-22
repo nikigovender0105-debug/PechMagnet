@@ -88,9 +88,21 @@
   .brow .bst{ font-size:11px; color:var(--ink); opacity:.7; }
   .bempty{ font-size:13px; color:var(--ink); opacity:.6; }
   #coinsHud{ display:flex; align-items:center; gap:6px; padding:4px 10px; font-size:16px; }
+  #ticketChip{ background:var(--purple); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1s infinite alternate; }
+  @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
   #shop .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
+  .shopSecTitle{ font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--purple); margin:14px 0 6px; text-align:left; }
+  .pwr{ display:flex; align-items:center; gap:10px; background:#fff; border:3px solid var(--ink); border-radius:14px; padding:10px; box-shadow:3px 3px 0 var(--ink); }
+  .pwr .pico{ font-size:30px; line-height:1; }
+  .pwr .pinfo{ flex:1; text-align:left; }
+  .pwr .pname{ font-size:14px; font-weight:700; color:var(--ink); }
+  .pwr .pdesc{ font-size:11px; color:var(--ink); opacity:.75; line-height:1.2; }
+  .pwr .pown{ font-size:11px; color:#1ca233; font-weight:700; margin-top:2px; }
+  .pwr .pbtn{ pointer-events:auto; cursor:pointer; font-family:inherit; font-weight:700; font-size:13px; color:var(--cream); background:var(--purple); border:2px solid var(--ink); border-radius:10px; padding:9px 12px; box-shadow:2px 2px 0 var(--ink); white-space:nowrap; }
+  .pwr .pbtn:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
+  .pwr .pbtn.cant{ background:#c4c4cc; color:#6a6a72; cursor:default; }
   .skinGrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
   .skin{ background:#fff; border:3px solid var(--ink); border-radius:14px; padding:10px 8px; box-shadow:3px 3px 0 var(--ink); display:flex; flex-direction:column; align-items:center; gap:4px; }
   .skin.sel{ background:var(--warn); }
@@ -116,7 +128,10 @@
 
   <div id="hud">
     <div id="toprow">
-      <div class="chip" id="scene">Stra&szlig;e</div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;">
+        <div class="chip" id="scene">Stra&szlig;e</div>
+        <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
+      </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <div class="chip" id="score">Punkte <span class="num">0</span></div>
         <div class="chip" id="coinsHud"><span class="coinDot"></span><span id="coinsNum">0</span></div>
@@ -154,6 +169,9 @@
     <div class="card">
       <h2 style="font-size:26px;color:var(--purple);margin-bottom:4px;">SHOP</h2>
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsShop">0</div></div></div>
+      <div class="shopSecTitle">POWER-UPS</div>
+      <div id="powerups"></div>
+      <div class="shopSecTitle">SKINS</div>
       <div id="skinGrid" class="skinGrid"></div>
     </div>
     <button class="btn go" id="shopBack">ZUR&Uuml;CK</button>
@@ -360,6 +378,7 @@
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
   let specialTimer=0, specialMode=false, specialBanner='';
+  let guaranteedActive=false, guaranteedAtStreet=0;
   let stick={active:false,ox:0,oy:0,x:0,y:0,id:null};
 
   // ---------- skins ----------
@@ -379,8 +398,8 @@
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0 };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -392,12 +411,17 @@
   const SND=(function(){
     let ctx=null, master=null, musicGain=null, muted=false, musicTimer=null, nextTime=0, step=0, trk=null;
     const TRACKS={
-      game:{ tempo:0.16, melVol:0.2, bassVol:0.2, melType:'triangle', bassType:'square',
+      game:{ tempo:0.16, melVol:0.18, bassVol:0.2, melType:'triangle', bassType:'square', detune:7,
+        drums:true, hatVol:0.04, padVol:0.045, padHold:3.7, harmType:'sine', harmVol:0.05,
         mel:[523.25,0,659.25,587.33,523.25,0,392.00,0,440.00,0,523.25,587.33,659.25,0,587.33,523.25,587.33,0,440.00,523.25,392.00,0,329.63,0,440.00,0,587.33,523.25,440.00,0,392.00,0],
-        bass:[130.81,0,0,0,98.00,0,0,0,110.00,0,0,0,87.31,0,0,0,87.31,0,0,0,130.81,0,0,0,98.00,0,0,0,98.00,0,0,0] },
-      menu:{ tempo:0.42, melVol:0.085, bassVol:0.06, melType:'sine', bassType:'sine',
+        bass:[130.81,0,0,0,98.00,0,0,0,110.00,0,0,0,87.31,0,0,0,87.31,0,0,0,130.81,0,0,0,98.00,0,0,0,98.00,0,0,0],
+        pad:[261.63,0,0,0,196.00,0,0,0,220.00,0,0,0,174.61,0,0,0,174.61,0,0,0,261.63,0,0,0,196.00,0,0,0,196.00,0,0,0],
+        harm:[0,0,0,0,0,0,0,0,329.63,0,0,0,261.63,0,0,0,349.23,0,0,0,392.00,0,0,0,293.66,0,0,0,293.66,0,0,0] },
+      menu:{ tempo:0.42, melVol:0.085, bassVol:0.06, melType:'sine', bassType:'sine', detune:5,
+        padVol:0.05, padHold:7.5,
         mel:[392.00,0,0,0,523.25,0,0,440.00,0,0,587.33,0,523.25,0,0,0,659.25,0,0,0,587.33,0,440.00,0,523.25,0,0,392.00,0,0,0,0],
-        bass:[130.81,0,0,0,0,0,0,0,98.00,0,0,0,0,0,0,0,110.00,0,0,0,0,0,0,0,87.31,0,0,0,0,0,0,0] }
+        bass:[130.81,0,0,0,0,0,0,0,98.00,0,0,0,0,0,0,0,110.00,0,0,0,0,0,0,0,87.31,0,0,0,0,0,0,0],
+        pad:[261.63,0,0,0,0,0,0,0,196.00,0,0,0,0,0,0,0,220.00,0,0,0,0,0,0,0,174.61,0,0,0,0,0,0,0] }
     };
     function ensure(){
       if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.5; master.connect(ctx.destination); musicGain=ctx.createGain(); musicGain.gain.value=muted?0:0.7; musicGain.connect(master); }catch(e){ ctx=null; } }
@@ -425,19 +449,37 @@
       const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=cut||1200;
       src.connect(f); f.connect(g); g.connect(master); src.start(t0);
     }
-    function mnote(freq,dur,vol,type,t0){
-      const o=ctx.createOscillator(), g=ctx.createGain();
-      o.type=type; o.frequency.value=freq;
+    function mnote(freq,dur,vol,type,t0,detune){
+      const g=ctx.createGain();
       g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
-      o.connect(g); g.connect(musicGain); o.start(t0); o.stop(t0+dur+0.03);
+      g.connect(musicGain);
+      const o=ctx.createOscillator(); o.type=type; o.frequency.value=freq; o.connect(g); o.start(t0); o.stop(t0+dur+0.04);
+      if(detune){ const o2=ctx.createOscillator(); o2.type=type; o2.frequency.value=freq; o2.detune.value=detune; o2.connect(g); o2.start(t0); o2.stop(t0+dur+0.04); }
+    }
+    function mkick(t0){
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(150,t0); o.frequency.exponentialRampToValueAtTime(50,t0+0.12);
+      g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.16,t0+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.18);
+      o.connect(g); g.connect(musicGain); o.start(t0); o.stop(t0+0.2);
+    }
+    function mhat(t0,vol){
+      const n=Math.floor(ctx.sampleRate*0.03), buf=ctx.createBuffer(1,n,ctx.sampleRate), d=buf.getChannelData(0);
+      for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+      const src=ctx.createBufferSource(); src.buffer=buf;
+      const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=7000;
+      const g=ctx.createGain(); g.gain.value=vol||0.045;
+      src.connect(f); f.connect(g); g.connect(musicGain); src.start(t0); src.stop(t0+0.04);
     }
     function tick(){
       if(!ctx||!trk) return;
       const T=trk.tempo;
       while(nextTime<ctx.currentTime+0.12){
         const m=trk.mel[step%trk.mel.length], b=trk.bass[step%trk.bass.length];
-        if(m) mnote(m,T*0.9,trk.melVol,trk.melType,nextTime);
+        if(m) mnote(m,T*0.9,trk.melVol,trk.melType,nextTime,trk.detune||0);
         if(b) mnote(b,T*3.6,trk.bassVol,trk.bassType,nextTime);
+        if(trk.pad){ const p=trk.pad[step%trk.pad.length]; if(p) mnote(p,T*(trk.padHold||4),trk.padVol||0.05,'sine',nextTime,6); }
+        if(trk.harm){ const h=trk.harm[step%trk.harm.length]; if(h) mnote(h,T*1.4,trk.harmVol||(trk.melVol*0.5),trk.harmType||'sine',nextTime); }
+        if(trk.drums){ if(step%4===0) mkick(nextTime); if(step%2===1) mhat(nextTime,trk.hatVol||0.04); if(step%8===4) mhat(nextTime,(trk.hatVol||0.04)*1.7); }
         nextTime+=T; step++;
       }
     }
@@ -524,6 +566,7 @@
     camY=player.y-H*0.6;
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; bumpCD=0; susLocked=false; suspicion=0;
+    guaranteedActive=false; updateTicketHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -535,11 +578,24 @@
     hide('menu'); hide('gameover'); hide('dialog'); hide('reaction');
     show('tutorial'); state=ST.MENU;
   }
-  function beginPlay(){ firstRound=false; hide('tutorial'); state=ST.PLAY; SND.setTrack('game'); lastT=performance.now(); }
+  function beginPlay(){ firstRound=false; hide('tutorial'); state=ST.PLAY; SND.setTrack('game'); armGuaranteed(); lastT=performance.now(); }
+  // Spezial-Ticket: garantiert ein Special-Event innerhalb der ersten 2 Viertel dieser Runde.
+  function armGuaranteed(){
+    guaranteedActive=false;
+    if(save.specialTokens>0){
+      save.specialTokens--; persist();
+      guaranteedActive=true;
+      guaranteedAtStreet=streetsCleared; // löst beim ersten Ereignis aus – sicher in den ersten 2 Vierteln
+    }
+    updateTicketHUD();
+  }
+  function updateTicketHUD(){ const t=document.getElementById('ticketChip'); if(t) t.classList.toggle('hidden',!guaranteedActive); }
 
   function triggerChaos(){
     const d=diff();
     const z=currentZone(player.y);
+    // Garantiertes Special aus dem Shop-Ticket einlösen, sobald das Ziel-Viertel erreicht ist.
+    if(guaranteedActive && streetsCleared>=guaranteedAtStreet){ guaranteedActive=false; updateTicketHUD(); triggerSpecial(pick(SPECIAL)); return; }
     const roll=Math.random();
     // ~4.5% sehr seltenes Special-Event (direkte Befragung), ~6% seltenes Großereignis
     if(roll<0.045){ triggerSpecial(pick(SPECIAL)); return; }
@@ -650,8 +706,24 @@
       '<div class="'+(e===latest?'brow new':'brow')+'"><span class="brk">#'+(i+1)+'</span><span class="bsc">'+e.score+'</span><span class="bst">'+e.streets+' Viertel</span></div>'
     ).join('');
   }
+  const SPECIAL_PRICE=100;
   function renderShop(){
     document.getElementById('coinsShop').textContent=save.coins;
+    const pw=document.getElementById('powerups');
+    if(pw){
+      pw.innerHTML='';
+      const row=document.createElement('div'); row.className='pwr';
+      const ico=document.createElement('div'); ico.className='pico'; ico.textContent='🎫'; row.appendChild(ico);
+      const info=document.createElement('div'); info.className='pinfo';
+      info.innerHTML='<div class="pname">Spezial-Ticket</div><div class="pdesc">Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.</div>'
+        +(save.specialTokens>0?'<div class="pown">Im Vorrat: '+save.specialTokens+'</div>':'');
+      row.appendChild(info);
+      const btn=document.createElement('button'); btn.className='pbtn';
+      if(save.coins>=SPECIAL_PRICE){ btn.textContent=SPECIAL_PRICE+' Münzen';
+        btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return; save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI(); SND.play('correct'); }; }
+      else { btn.textContent=SPECIAL_PRICE+' Münzen'; btn.classList.add('cant'); }
+      row.appendChild(btn); pw.appendChild(row);
+    }
     const grid=document.getElementById('skinGrid'); grid.innerHTML='';
     for(const sk of SKINS){
       const owned=save.owned.indexOf(sk.id)>=0, sel=save.selected===sk.id;
@@ -791,6 +863,7 @@
     ctx.fillStyle='#FFD23F'; ctx.strokeStyle=INK; ctx.lineWidth=2.5;
     ctx.beginPath(); ctx.ellipse(x,y,w,11,0,0,6.283); ctx.fill(); ctx.stroke();
     ctx.fillStyle='#E6A817'; ctx.beginPath(); ctx.ellipse(x,y,w*0.5,6.5,0,0,6.283); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(x-w*0.34,y-3,w*0.16,2.6,0,0,6.283); ctx.fill();
   }
   function drawSkinPreview(cnv,skin){
     const c=cnv.getContext('2d'); const x=27,y=36;
@@ -805,8 +878,11 @@
     const b=Math.sin(bob)*2;
     ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(x,y+18,15,5,0,0,6.283); ctx.fill();
     ctx.lineWidth=3.5; ctx.strokeStyle=INK; ctx.lineJoin='round';
-    ctx.fillStyle=color; rr(x-12,y-6+b,24,26,9); fs();
+    const bg=ctx.createLinearGradient(0,y-6+b,0,y+20+b);
+    bg.addColorStop(0,shade(color,34)); bg.addColorStop(1,shade(color,-20));
+    ctx.fillStyle=bg; rr(x-12,y-6+b,24,26,9); fs();
     ctx.beginPath(); ctx.arc(x,y-16+b,11,0,6.283); ctx.fillStyle='#FFE0B2'; fs();
+    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(x-3.5,y-19+b,3,0,6.283); ctx.fill();
     ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-17+b,2,0,6.283); ctx.arc(x+4,y-17+b,2,0,6.283); ctx.fill();
     if(isPlayer){ ctx.fillStyle=curSkin.cap; ctx.beginPath(); ctx.arc(x,y-22+b,11,Math.PI,0); fs();
       ctx.beginPath(); ctx.moveTo(x-11,y-22+b); ctx.lineTo(x+13,y-22+b); ctx.stroke(); }
@@ -823,6 +899,7 @@
   }
   function boomColor(vis){ return vis==='fire'?'#FF7A45':(vis==='water'?'#3A86FF':(vis==='birds'?'#C77DFF':'#FFD23F')); }
   function hexA(h,a){ const n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255; return 'rgba('+r+','+g+','+b+','+a+')'; }
+  function shade(h,amt){ const n=parseInt(h.slice(1),16); const r=clamp(((n>>16)&255)+amt,0,255),g=clamp(((n>>8)&255)+amt,0,255),b=clamp((n&255)+amt,0,255); return 'rgb('+(r|0)+','+(g|0)+','+(b|0)+')'; }
   function angTo(cur,tgt,step){ let d=((tgt-cur+Math.PI*3)%(Math.PI*2))-Math.PI; return Math.abs(d)<=step?tgt:cur+(d<0?-step:step); }
   function visionCone(x,y,ang,color,alarm){
     const len=alarm?76:62, spread=0.4, tw=Math.tan(spread)*len;
@@ -975,14 +1052,34 @@
 
   function drawStreetBase(){
     const top=camY-120, bot=camY+H+120;
-    ctx.fillStyle='#cdd2d8'; ctx.fillRect(-20,top,W+40,bot-top);
-    ctx.fillStyle='#5f636b'; ctx.fillRect(ROAD_L,top,W-ROAD_L-ROAD_R,bot-top);
+    // Gehweg
+    ctx.fillStyle='#d7dce2'; ctx.fillRect(-20,top,W+40,bot-top);
+    // Plattenfugen auf dem Gehweg
+    ctx.strokeStyle='rgba(26,26,46,.07)'; ctx.lineWidth=2;
+    const gs=Math.floor(top/40)*40;
+    for(let y=gs;y<bot;y+=40){ ctx.beginPath(); ctx.moveTo(-20,y); ctx.lineTo(ROAD_L,y); ctx.moveTo(W-ROAD_R,y); ctx.lineTo(W+20,y); ctx.stroke(); }
+    // Bordstein-Kanten (Glanz + Schatten)
+    ctx.fillStyle='#eef1f5'; ctx.fillRect(ROAD_L-6,top,4,bot-top); ctx.fillRect(W-ROAD_R+2,top,4,bot-top);
+    ctx.fillStyle='rgba(26,26,46,.22)'; ctx.fillRect(ROAD_L-2,top,3,bot-top); ctx.fillRect(W-ROAD_R-1,top,3,bot-top);
+    // Asphalt mit sanftem Verlauf zur Mitte
+    const rg=ctx.createLinearGradient(ROAD_L,0,W-ROAD_R,0);
+    rg.addColorStop(0,'#54585f'); rg.addColorStop(0.5,'#686c75'); rg.addColorStop(1,'#54585f');
+    ctx.fillStyle=rg; ctx.fillRect(ROAD_L,top,W-ROAD_L-ROAD_R,bot-top);
+    // Mittellinie
     ctx.fillStyle='#FFD23F';
     const start=Math.floor(top/46)*46;
     for(let y=start;y<bot;y+=46){ rr(W/2-4,y,8,24,3); ctx.fill(); }
   }
-  function facade(x,w,z){ ctx.fillStyle=z.bld; ctx.strokeStyle=INK; ctx.lineWidth=4; rr(x,z.y0,w,z.y1-z.y0,6); fs();
-    ctx.fillStyle='rgba(255,255,255,.5)'; for(let wy=z.y0+34;wy<z.y1-30;wy+=72){ rr(x+9,wy,w-18,26,4); fs(); } }
+  function facade(x,w,z){
+    const g=ctx.createLinearGradient(0,z.y0,0,z.y1);
+    g.addColorStop(0,shade(z.bld,30)); g.addColorStop(1,shade(z.bld,-24));
+    ctx.fillStyle=g; ctx.strokeStyle=INK; ctx.lineWidth=4; rr(x,z.y0,w,z.y1-z.y0,6); fs();
+    for(let wy=z.y0+34;wy<z.y1-30;wy+=72){
+      ctx.fillStyle='rgba(255,255,255,.5)'; rr(x+9,wy,w-18,26,4); fs();
+      ctx.fillStyle='rgba(255,255,255,.8)'; rr(x+12,wy+3,(w-18)*0.42,7,2); ctx.fill();
+    }
+    ctx.fillStyle='rgba(26,26,46,.16)'; ctx.fillRect(x+2,z.y1-6,w-4,5);
+  }
   function drawZones(){
     for(const z of zones){
       if(z.y1<camY-20||z.y0>camY+H+20) continue;
@@ -1035,7 +1132,13 @@
     for(const b of bursts) drawBurst(b);
 
     ctx.restore();
+    drawLighting();
     drawStick();
+  }
+  function drawLighting(){
+    const g=ctx.createRadialGradient(W/2,H*0.42,H*0.28,W/2,H*0.5,H*0.92);
+    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(10,10,26,0.26)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
   }
 
   let lastT=performance.now();
@@ -1047,7 +1150,7 @@
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
   document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); firstRound=false; score=0; streetsCleared=0; bestNerve=0; suspicion=0;
-    resetWorld(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
+    resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); show('menu'); };
