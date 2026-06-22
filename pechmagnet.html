@@ -89,6 +89,11 @@
   .bempty{ font-size:13px; color:var(--ink); opacity:.6; }
   #coinsHud{ display:flex; align-items:center; gap:6px; padding:4px 10px; font-size:16px; }
   #ambientChip{ font-size:15px; padding:3px 9px; letter-spacing:1px; }
+  #buffChip{ background:var(--gold); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse .7s infinite alternate; }
+  #miniBarWrap{ position:relative; height:34px; background:var(--cream); border:4px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); overflow:hidden; margin:10px 0 6px; }
+  #miniBar{ height:100%; width:50%; background:linear-gradient(90deg,var(--safe),var(--gold)); transition:width .05s linear; }
+  #miniMid{ position:absolute; top:-4px; bottom:-4px; left:50%; width:3px; background:var(--ink); transform:translateX(-50%); }
+  #miniTime{ font-weight:700; font-size:20px; color:var(--ink); margin-bottom:8px; }
   #ticketChip{ background:var(--purple); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1s infinite alternate; }
   @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
@@ -153,6 +158,7 @@
         <div class="chip" id="scene">Stra&szlig;e</div>
         <div class="chip" id="ambientChip">&#9728;&#65039;</div>
         <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
+        <div class="chip hidden" id="buffChip">&#9889; 40s</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <div class="chip" id="score">Punkte <span class="num">0</span></div>
@@ -248,6 +254,16 @@
     <div class="card">
       <h2 id="reactTitle">Hmm... ok?</h2>
       <p id="reactText">Die Menge nickt verwirrt und geht weiter.</p>
+    </div>
+  </div>
+
+  <div id="minigame" class="screen hidden">
+    <div class="card">
+      <h2 id="miniTitle" style="font-size:26px;color:var(--danger);">ARMDR&Uuml;CKEN!</h2>
+      <p class="lead" style="font-size:13px;margin-bottom:8px;">Spam-klicke so schnell du kannst, um den Bodybuilder wegzudr&uuml;cken!</p>
+      <div id="miniBarWrap"><div id="miniBar"></div><div id="miniMid"></div></div>
+      <div id="miniTime">6.0s</div>
+      <button class="btn go" id="miniBtn" style="width:100%;font-size:24px;">DR&Uuml;CKEN!</button>
     </div>
   </div>
 
@@ -428,7 +444,7 @@
     ['Na gut...','Die Menge zuckt mit den Schultern und zerstreut sich.']
   ];
 
-  const ST={MENU:0,PLAY:1,CAUGHT:2,REACT:3,OVER:4};
+  const ST={MENU:0,PLAY:1,CAUGHT:2,REACT:3,OVER:4,MINI:5,DEATH:6};
   let state=ST.MENU;
   let score=0,highscore=0,streetsCleared=0,bestNerve=0,coinsRun=0;
   let zones=[], camY=0, topGenY=0, bottomY=0, lastZone=null, lastZoneName='', bestY=0, confrontMode=false, bumpCD=0;
@@ -437,8 +453,12 @@
   let npcs=[], bursts=[], coins=[];
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
-  let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false;
+  let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
   const SPECIAL_DUR=2.1;
+  // Death-Animation, Minigame & Speed-Buff
+  let deathAnim={style:'wasted',t:0,dur:1.7,msg:''};
+  let mini={prog:0.5,time:0,decay:0,clicks:0};
+  let speedBuff=0; const SPEED_BUFF_DUR=40;
   let spawnProtect=0; const SPAWN_PROTECT=3.0;
   let dust=[]; let nearMiss=false;
   // Tag-Nacht & Wetter
@@ -490,6 +510,73 @@
     {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'🪙'},
     {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'😰'}
   ];
+
+  // ---------- Special-Event-Katalog (Event + Achievement + Belohnungs-Skin + Death-Stil) ----------
+  // mob = Anzahl Figuren in der Cinematic, mini = Minigame-Typ, death = Death-Animationsstil
+  const SPECIAL_DEFS=[
+    {key:'mafia', mob:5, death:'jail',  ach:{name:'Schutzgeld',desc:'Triff die Mafia.',icon:'🕴️'},      skin:{name:'Mafioso',body:'#1f1f27',cap:'#E63946',acc:'tophat'}},
+    {key:'car',   death:'crush', ach:{name:'Fast platt',desc:'Werde fast überfahren.',icon:'🚗'},        skin:{name:'Raser',body:'#E63946',cap:'#1A1A2E'}},
+    {key:'ufo',   death:'abduct',ach:{name:'Entführt',desc:'Triff das UFO.',icon:'🛸'},                  skin:{name:'Marsmensch',body:'#7CFF8E',cap:'#5C8AA6',glow:'#7CFF8E'}},
+    {key:'cop',   death:'jail',  ach:{name:'Festgenommen',desc:'Triff den Polizisten.',icon:'👮'},       skin:{name:'Streife',body:'#2a3d66',cap:'#FFD23F'}},
+    {key:'reporter',death:'wasted',ach:{name:'Schlagzeile',desc:'Triff die Reporterin.',icon:'🎤'},      skin:{name:'Star-Reporter',body:'#7C5CFF',cap:'#FF3B30',acc:'glasses'}},
+    {key:'ghost', death:'spook', ach:{name:'Spukhaft',desc:'Triff den Geist.',icon:'👻'},                skin:{name:'Gespenst',body:'#EFEFF6',cap:'#B388FF',glow:'#FFFFFF'}},
+    {key:'tornado',death:'sweep',ach:{name:'Vom Winde verweht',desc:'Triff den Tornado.',icon:'🌪️'},     skin:{name:'Sturmjäger',body:'#9aa0a6',cap:'#19C3C3'}},
+    {key:'dino',  death:'eaten', ach:{name:'Ausgestorben',desc:'Triff den Dino.',icon:'🦖'},             skin:{name:'Urzeit',body:'#2ECC40',cap:'#1ca233',acc:'horns'}},
+    {key:'robot', death:'crush', ach:{name:'Aussortiert',desc:'Triff den Roboter.',icon:'🤖'},           skin:{name:'Android',body:'#9aa0a6',cap:'#FF3B30',glow:'#FF3B30'}},
+    {key:'zombie',death:'eaten', ach:{name:'Infiziert',desc:'Triff den Zombie.',icon:'🧟'},              skin:{name:'Untoter',body:'#7a9b5e',cap:'#9bbe78'}},
+    // --- neue Specials ---
+    {key:'bodybuilder',mini:'armwrestle',death:'ko',
+      label:'Ein Bodybuilder fordert dich zum Armdrücken!',kind:'sport',boom:'GRRR!',vis:'bodybuilder',snd:'sting',
+      subText:'Ein riesiger Bodybuilder knallt seinen Arm auf den Tisch.',
+      ach:{name:'Muckis',desc:'Gewinne das Armdrücken.',icon:'💪'}, skin:{name:'Muskelprotz',body:'#FF7A45',cap:'#1A1A2E',glow:'#FF7A45'}},
+    {key:'shark', death:'eaten',
+      label:'Ein Hai schnappt mitten auf der Straße nach dir!',kind:'animal',boom:'CHOMP!',vis:'shark',snd:'sting',
+      subText:'Ein Hai gleitet durch eine Pfütze direkt auf dich zu.',
+      ach:{name:'Landhai',desc:'Triff den Hai.',icon:'🦈'}, skin:{name:'Hai-Alarm',body:'#5C8AA6',cap:'#EFEFF6'}},
+    {key:'clown', death:'spook',
+      label:'Ein Horror-Clown taucht direkt vor dir auf!',kind:'spooky',boom:'HIHIHI!',vis:'clown',snd:'spooky',
+      subText:'Ein grinsender Clown starrt dich aus toten Augen an...',
+      ach:{name:'Spaßbremse',desc:'Triff den Clown.',icon:'🤡'}, skin:{name:'Clownerie',body:'#FF5DA2',cap:'#39FF14',acc:'party'}},
+    {key:'ninja', death:'wasted',
+      label:'Ein Ninja springt aus dem Schatten!',kind:'crime',boom:'HYAH!',vis:'ninja',snd:'siren',
+      subText:'Ein vermummter Ninja zückt blitzschnell seine Klinge.',
+      ach:{name:'Schattenkrieger',desc:'Triff den Ninja.',icon:'🥷'}, skin:{name:'Ninja',body:'#2b2b33',cap:'#FF3B30'}},
+    {key:'bear',  death:'eaten',
+      label:'Ein Bär stellt sich brüllend vor dir auf!',kind:'animal',boom:'GROAR!',vis:'bear',snd:'spooky',
+      subText:'Ein riesiger Bär richtet sich auf und brüllt dich an.',
+      ach:{name:'Bärenstark',desc:'Triff den Bären.',icon:'🐻'}, skin:{name:'Grizzly',body:'#8B5A2B',cap:'#3e2f20',acc:'horns'}},
+    {key:'dragon',death:'crush',
+      label:'Ein Drache landet krachend vor dir!',kind:'fire',boom:'FAUCH!',vis:'dragon',snd:'zap',
+      subText:'Ein Drache faltet die Flügel zusammen und mustert dich hungrig.',
+      ach:{name:'Drachenzähmer',desc:'Triff den Drachen.',icon:'🐉'}, skin:{name:'Drache',body:'#2ECC40',cap:'#FF3B30',glow:'#2ECC40'}},
+    {key:'pirate',death:'wasted',
+      label:'Ein Pirat entert die Straße!',kind:'crime',boom:'ARRR!',vis:'pirate',snd:'siren',
+      subText:'Ein Pirat fuchtelt mit dem Säbel: „Wo ist mein Gold?!“',
+      ach:{name:'Landratte',desc:'Triff den Piraten.',icon:'🏴‍☠️'}, skin:{name:'Freibeuter',body:'#8C7B6B',cap:'#1A1A2E',acc:'tophat'}},
+    {key:'reaper',death:'spook',
+      label:'Der Sensenmann winkt dich zu sich!',kind:'spooky',boom:'…',vis:'reaper',snd:'spooky',
+      subText:'Eine knochige Hand zeigt direkt auf dich.',
+      ach:{name:'Dem Tod entkommen',desc:'Triff den Sensenmann.',icon:'💀'}, skin:{name:'Sensenmann',body:'#12122a',cap:'#EFEFF6',glow:'#B388FF'}},
+    {key:'tank',  death:'crush',
+      label:'Ein Panzer rollt auf dich zu!',kind:'tech',boom:'BRRRM!',vis:'tank',snd:'zap',
+      subText:'Ein Panzer richtet seinen Lauf genau auf dich.',
+      ach:{name:'Schwer bewaffnet',desc:'Triff den Panzer.',icon:'🪖'}, skin:{name:'Kommandant',body:'#6B8E7F',cap:'#3e2f20'}},
+    {key:'demon', death:'spook',
+      label:'Ein Dämon steigt aus dem Asphalt!',kind:'spooky',boom:'RAAAH!',vis:'demon',snd:'spooky',
+      subText:'Der Boden reißt auf und ein Dämon klettert heraus.',
+      ach:{name:'Höllisch',desc:'Triff den Dämon.',icon:'😈'}, skin:{name:'Dämon',body:'#E63946',cap:'#1A1A2E',acc:'horns',glow:'#FF3B30'}}
+  ];
+  function setupSpecials(){
+    for(const d of SPECIAL_DEFS){
+      if(!EVENTS[d.key] && d.label){ EVENTS[d.key]={label:d.label,kind:d.kind,boom:d.boom,vis:d.vis,fall:false,special:true,snd:d.snd,subText:d.subText}; }
+      const ev=EVENTS[d.key]; if(ev){ ev.death=d.death; if(d.mob) ev.mob=d.mob; if(d.mini) ev.mini=d.mini; ev.aKey=d.key; }
+      if(SPECIAL.indexOf(d.key)<0) SPECIAL.push(d.key);
+      if(d.ach && !ACHIEVEMENTS.some(a=>a.id==='sp_'+d.key)) ACHIEVEMENTS.push({id:'sp_'+d.key,name:d.ach.name,desc:d.ach.desc,icon:d.ach.icon,skin:'sk_'+d.key});
+      if(d.skin && !SKINS.some(s=>s.id==='sk_'+d.key)) SKINS.push(Object.assign({id:'sk_'+d.key,unlock:'sp_'+d.key},d.skin));
+    }
+  }
+  setupSpecials();
+
   let achQueue=[], achShowing=false;
   function unlockAch(id){
     if(!save.achievements) save.achievements={};
@@ -719,7 +806,7 @@
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; updateTicketHUD();
-    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false;
+    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -767,7 +854,7 @@
   // Special-Event: grosse Cinematic-Einblendung mit eigener Musik, dann direkte Befragung.
   function triggerSpecial(key){
     const z=currentZone(player.y);
-    currentEvent=EVENTS[key];
+    currentEvent=EVENTS[key]; currentSpecialKey=key;
     phase='special'; specialTimer=SPECIAL_DUR; specialAnimT=0; specialMode=true;
     noteSpecialSeen(key);
     const bx=clamp(player.x+rand(-44,44),playMinX(),playMaxX());
@@ -814,7 +901,7 @@
   }
   function escapeCatch(){
     SND.play('correct');
-    if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); }
+    if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); }
     else score+=40+streetsCleared*5;
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
@@ -825,6 +912,45 @@
     show('reaction'); state=ST.REACT; reactTimer=1.5;
     endAlarm(); chaosTimer=Math.max(2.5,diff().chaosInterval*0.6); updateHUD();
   }
+  // ----- Bodybuilder-Armdrück-Minigame -----
+  function startMinigame(){
+    state=ST.MINI;
+    mini={prog:0.42,time:6.0,decay:0.40+streetsCleared*0.012,clicks:0};
+    setBanner('hide'); document.getElementById('vignette').classList.remove('on');
+    updateMiniUI(); show('minigame');
+  }
+  function updateMini(dt){
+    if(state!==ST.MINI) return;
+    mini.time-=dt; mini.prog-=mini.decay*dt;
+    if(mini.prog>=1){ mini.prog=1; updateMiniUI(); return miniWin(); }
+    if(mini.prog<=0||mini.time<=0){ mini.prog=Math.max(0,mini.prog); updateMiniUI(); return miniLose(); }
+    updateMiniUI();
+  }
+  function miniClick(){
+    if(state!==ST.MINI) return;
+    mini.clicks++; mini.prog=clamp(mini.prog+0.052,0,1); SND.play('click');
+    if(mini.prog>=1) miniWin();
+  }
+  function updateMiniUI(){
+    const b=document.getElementById('miniBar'); if(b) b.style.width=Math.round(mini.prog*100)+'%';
+    const t=document.getElementById('miniTime'); if(t) t.textContent=Math.max(0,mini.time).toFixed(1)+'s';
+  }
+  function miniWin(){
+    if(state!==ST.MINI) return; hide('minigame'); SND.play('correct');
+    unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey);
+    score+=200+streetsCleared*5; speedBuff=SPEED_BUFF_DUR; updateBuffHUD();
+    document.getElementById('reactTitle').textContent='BUFF! 💪';
+    document.getElementById('reactText').textContent='Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.';
+    show('reaction'); state=ST.REACT; reactTimer=1.9;
+    caughtWasSpecial=false; bumpCD=1.2; SND.setTrack('game');
+    endAlarm(); chaosTimer=Math.max(2.5,diff().chaosInterval*0.6); updateHUD();
+  }
+  function miniLose(){
+    if(state!==ST.MINI) return; hide('minigame');
+    caughtWasSpecial=true; endGame('Der Bodybuilder hat dich plattgemacht.');
+  }
+  function updateBuffHUD(){ const el=document.getElementById('buffChip'); if(!el) return;
+    el.classList.toggle('hidden',!(speedBuff>0)); if(speedBuff>0) el.textContent='⚡ '+Math.ceil(speedBuff)+'s'; }
   function districtCrossed(){
     streetsCleared++; score+=150; SND.play('district');
     if(streetsCleared>=5) unlockAch('district_5');
@@ -840,7 +966,21 @@
     player.y=Math.min(player.y+Math.sin(a)*28,bottomY-40);
     bumpCD=1.2; getCaught();
   }
+  // Startet die Death-Animation (WASTED bzw. themed je nach Special), danach Game-Over.
   function endGame(msg){
+    const style = caughtWasSpecial && currentEvent && currentEvent.death ? currentEvent.death : 'wasted';
+    deathAnim={style:style,t:0,dur:style==='wasted'?1.5:1.9,msg:msg||'Die Menge hat dich erwischt.'};
+    state=ST.DEATH;
+    hide('dialog'); hide('reaction'); hide('minigame');
+    setBanner('hide'); document.getElementById('vignette').classList.remove('on');
+    SND.setTrack(null); SND.play(style==='wasted'?'gameover':'sting');
+  }
+  function updateDeath(dt){
+    if(state!==ST.DEATH) return;
+    deathAnim.t+=dt;
+    if(deathAnim.t>=deathAnim.dur) finishGame(deathAnim.msg);
+  }
+  function finishGame(msg){
     state=ST.OVER; SND.play('gameover'); SND.setTrack('menu');
     const earned=coinsRun+streetsCleared*2;
     save.coins+=earned;
@@ -953,7 +1093,9 @@
     if(state===ST.REACT){ reactTimer-=dt; if(reactTimer<=0){ hide('reaction'); state=ST.PLAY; } return; }
     if(state!==ST.PLAY) return;
     const d=diff(), inp=readInput();
-    const tvx=inp.dx*MAX_SPEED, tvy=inp.dy*MAX_SPEED;
+    if(speedBuff>0){ speedBuff=Math.max(0,speedBuff-dt); updateBuffHUD(); }
+    const ms=MAX_SPEED*(speedBuff>0?1.55:1);
+    const tvx=inp.dx*ms, tvy=inp.dy*ms;
     player.vx+=(tvx-player.vx)*Math.min(1,dt*16);
     player.vy+=(tvy-player.vy)*Math.min(1,dt*16);
     player.x=clamp(player.x+player.vx*dt,playMinX(),playMaxX());
@@ -981,7 +1123,7 @@
     } else if(phase==='special'){
       specialTimer-=dt;
       specialAnimT=clamp(1-Math.max(0,specialTimer)/SPECIAL_DUR,0,1);
-      if(specialTimer<=0){ getCaught(); return; }
+      if(specialTimer<=0){ if(currentEvent&&currentEvent.mini) startMinigame(); else getCaught(); return; }
     } else {
       alarmTimer-=dt;
       if(player.moving){
@@ -1290,6 +1432,85 @@
       ctx.beginPath(); ctx.moveTo(x-6,y-19); ctx.lineTo(x-2,y-15); ctx.moveTo(x-2,y-19); ctx.lineTo(x-6,y-15); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x+2,y-19); ctx.lineTo(x+6,y-15); ctx.moveTo(x+6,y-19); ctx.lineTo(x+2,y-15); ctx.stroke();
       ctx.beginPath(); ctx.arc(x,y-11,2.5,0,Math.PI); ctx.stroke();
+    } else if(vis==='bodybuilder'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#E8A87C'; // riesige Arme
+      ctx.beginPath(); ctx.arc(x-17,y+2,9,0,6.283); fs(); ctx.beginPath(); ctx.arc(x+17,y+2,9,0,6.283); fs();
+      ctx.fillStyle='#F0B48C'; rr(x-12,y-4,24,22,9); fs(); // Brust
+      ctx.fillStyle='#E8A87C'; ctx.beginPath(); ctx.arc(x,y-17,10,0,6.283); fs(); // Kopf
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-18,1.7,0,6.283); ctx.arc(x+4,y-18,1.7,0,6.283); ctx.fill();
+      ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-6,y-12); ctx.lineTo(x+6,y-12); ctx.stroke(); // Mund grimmig
+      ctx.fillStyle='#2b2b33'; rr(x-12,y+12,24,8,3); fs(); // Tanktop-Saum
+    } else if(vis==='shark'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#7895a6'; ctx.beginPath(); ctx.moveTo(x-24,y); ctx.quadraticCurveTo(x-6,y-16,x+16,y-8);
+      ctx.quadraticCurveTo(x+30,y-4,x+30,y); ctx.quadraticCurveTo(x+30,y+4,x+16,y+8);
+      ctx.quadraticCurveTo(x-6,y+16,x-24,y); ctx.closePath(); fs();
+      ctx.beginPath(); ctx.moveTo(x-4,y-13); ctx.lineTo(x+2,y-28); ctx.lineTo(x+8,y-12); ctx.closePath(); fs(); // Flosse
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(x+16,y+1); ctx.lineTo(x+30,y-2); ctx.lineTo(x+28,y+5); ctx.closePath(); fs(); // Maul
+      ctx.fillStyle=INK; for(let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(x+18+i*3,y+2); ctx.lineTo(x+19.5+i*3,y-2); ctx.lineTo(x+21+i*3,y+2); ctx.closePath(); ctx.fill(); }
+      ctx.beginPath(); ctx.arc(x+6,y-4,1.8,0,6.283); ctx.fill(); // Auge
+    } else if(vis==='clown'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#FF5DA2'; rr(x-12,y-6,24,24,9); fs();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,11,0,6.283); fs();
+      ctx.fillStyle='#FF3B30'; ctx.beginPath(); ctx.arc(x,y-12,3,0,6.283); fs(); // rote Nase
+      ctx.fillStyle='#39FF14'; ctx.beginPath(); ctx.arc(x-13,y-18,6,0,6.283); ctx.arc(x+13,y-18,6,0,6.283); fs(); // Haare
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-19,1.8,0,6.283); ctx.arc(x+4,y-19,1.8,0,6.283); ctx.fill();
+      ctx.strokeStyle='#FF3B30'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(x,y-12,5,0.1,Math.PI-0.1); ctx.stroke();
+    } else if(vis==='ninja'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#2b2b33'; rr(x-11,y-6,22,24,8); fs();
+      ctx.beginPath(); ctx.arc(x,y-16,10,0,6.283); fs();
+      ctx.fillStyle='#FFE0B2'; rr(x-10,y-19,20,6,3); fs(); // Augenschlitz
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-16,1.6,0,6.283); ctx.arc(x+4,y-16,1.6,0,6.283); ctx.fill();
+      ctx.strokeStyle='#cfd8e0'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x+10,y-22); ctx.lineTo(x+26,y-30); ctx.stroke(); // Klinge
+      ctx.fillStyle='#FF3B30'; rr(x+8,y-24,5,5,1); fs();
+    } else if(vis==='bear'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#8B5A2B'; rr(x-14,y-8,28,28,11); fs();
+      ctx.beginPath(); ctx.arc(x-12,y-20,6,0,6.283); fs(); ctx.beginPath(); ctx.arc(x+12,y-20,6,0,6.283); fs(); // Ohren
+      ctx.beginPath(); ctx.arc(x,y-15,12,0,6.283); fs(); // Kopf
+      ctx.fillStyle='#C8956A'; ctx.beginPath(); ctx.arc(x,y-10,6,0,6.283); fs(); // Schnauze
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x,y-12,2,0,6.283); ctx.arc(x-5,y-18,1.8,0,6.283); ctx.arc(x+5,y-18,1.8,0,6.283); ctx.fill();
+    } else if(vis==='dragon'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#1ca233'; ctx.beginPath(); ctx.moveTo(x-22,y-18); ctx.lineTo(x-6,y-4); ctx.lineTo(x-20,y+2); ctx.closePath(); fs(); // Flügel
+      ctx.beginPath(); ctx.moveTo(x+22,y-18); ctx.lineTo(x+6,y-4); ctx.lineTo(x+20,y+2); ctx.closePath(); fs();
+      ctx.fillStyle='#2ECC40'; rr(x-12,y-4,24,22,9); fs();
+      ctx.beginPath(); ctx.arc(x,y-15,11,0,6.283); fs();
+      ctx.fillStyle='#1ca233'; for(let i=-1;i<2;i++){ ctx.beginPath(); ctx.moveTo(x+i*7-3,y-24); ctx.lineTo(x+i*7,y-31); ctx.lineTo(x+i*7+3,y-24); ctx.closePath(); fs(); }
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-17,1.8,0,6.283); ctx.arc(x+4,y-17,1.8,0,6.283); ctx.fill();
+      ctx.fillStyle='#FF7A45'; ctx.beginPath(); ctx.arc(x,y-9,2.5,0,6.283); ctx.fill(); // Nasenfeuer
+    } else if(vis==='pirate'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#8C7B6B'; rr(x-11,y-6,22,24,8); fs();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,10,0,6.283); fs();
+      ctx.fillStyle='#1A1A2E'; ctx.beginPath(); ctx.arc(x,y-24,11,Math.PI,0); fs(); // Hut
+      ctx.beginPath(); ctx.moveTo(x-12,y-24); ctx.lineTo(x+13,y-24); ctx.stroke();
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y-27,2,0,6.283); ctx.fill(); // Totenkopf
+      ctx.fillStyle=INK; rr(x-7,y-18,5,4,1); ctx.fill(); // Augenklappe
+      ctx.beginPath(); ctx.arc(x+4,y-16,1.7,0,6.283); ctx.fill();
+    } else if(vis==='reaper'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#12122a'; ctx.beginPath(); ctx.moveTo(x-13,y+18); ctx.lineTo(x-11,y-12); ctx.quadraticCurveTo(x,y-26,x+11,y-12); ctx.lineTo(x+13,y+18); ctx.closePath(); fs();
+      ctx.fillStyle='#0a0a14'; ctx.beginPath(); ctx.arc(x,y-12,7,0,6.283); ctx.fill(); // dunkle Kapuze
+      ctx.fillStyle='#B388FF'; ctx.beginPath(); ctx.arc(x-3,y-13,1.8,0,6.283); ctx.arc(x+3,y-13,1.8,0,6.283); ctx.fill();
+      ctx.strokeStyle='#cfd8e0'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x+14,y+16); ctx.lineTo(x+14,y-26); ctx.stroke();
+      ctx.fillStyle='#cfd8e0'; ctx.beginPath(); ctx.moveTo(x+14,y-26); ctx.quadraticCurveTo(x+2,y-30,x+4,y-20); ctx.quadraticCurveTo(x+12,y-20,x+14,y-26); ctx.closePath(); fs(); // Sense
+    } else if(vis==='tank'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#6B8E7F'; rr(x-24,y+2,48,14,5); fs(); // Wanne
+      rr(x-12,y-10,24,14,5); fs(); // Turm
+      ctx.fillStyle='#52705f'; ctx.fillRect(x+10,y-6,26,5); ctx.strokeRect(x+10,y-6,26,5); // Rohr
+      ctx.fillStyle=INK; for(const wx of [-16,-6,4,14]){ ctx.beginPath(); ctx.arc(x+wx,y+18,5,0,6.283); fs(); }
+    } else if(vis==='demon'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#E63946'; rr(x-12,y-6,24,24,9); fs();
+      ctx.beginPath(); ctx.arc(x,y-16,11,0,6.283); fs();
+      ctx.fillStyle='#1A1A2E'; for(const s of [-1,1]){ ctx.beginPath(); ctx.moveTo(x+s*6,y-22); ctx.quadraticCurveTo(x+s*16,y-30,x+s*9,y-34); ctx.quadraticCurveTo(x+s*7,y-26,x+s*3,y-22); ctx.closePath(); fs(); } // Hörner
+      ctx.fillStyle='#FFD23F'; ctx.beginPath(); ctx.moveTo(x-6,y-18); ctx.lineTo(x-1,y-16); ctx.lineTo(x-6,y-14); ctx.closePath(); ctx.moveTo(x+6,y-18); ctx.lineTo(x+1,y-16); ctx.lineTo(x+6,y-14); ctx.closePath(); ctx.fill(); // böse Augen
+      ctx.strokeStyle='#1A1A2E'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(x,y-9,5,Math.PI,0); ctx.stroke(); // fieses Grinsen
     }
   }
   function drawEffect(vis,x,y,t){
@@ -1307,7 +1528,7 @@
         const f=Math.sin(t*22+i)*4; ctx.beginPath(); ctx.moveTo(bx-7,by); ctx.quadraticCurveTo(bx,by-5+f,bx+7,by); ctx.stroke(); }
     }
   }
-  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost','tornado','dino','robot','zombie'];
+  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost','tornado','dino','robot','zombie','bodybuilder','shark','clown','ninja','bear','dragon','pirate','reaper','tank','demon'];
   function drawBurst(b){
     const solid=SOLIDS.indexOf(b.vis)>=0;
     if(b.fall&&b.t<b.fallDur){
@@ -1451,6 +1672,7 @@
     drawWeather();
     drawLighting();
     if(phase==='special'&&(state===ST.PLAY||state===ST.CAUGHT)) drawSpecialCinematic();
+    if(state===ST.DEATH) drawDeath();
     drawStick();
   }
   function drawLighting(){
@@ -1544,7 +1766,7 @@
     ctx.fillStyle='#BFE3FF'; ctx.fillText('🛡 '+sec,px,py-r-12);
     ctx.restore();
   }
-  const KIND_COL={crime:'#FF5D5D',accident:'#FF7A45',media:'#FFD23F',spooky:'#B388FF',alien:'#7CFF8E',nature:'#19C3C3',tech:'#9aa0a6',animal:'#C77DFF'};
+  const KIND_COL={crime:'#FF5D5D',accident:'#FF7A45',media:'#FFD23F',spooky:'#B388FF',alien:'#7CFF8E',nature:'#19C3C3',tech:'#9aa0a6',animal:'#C77DFF',fire:'#FF7A45',sport:'#FFB300'};
   function drawSpecialCinematic(){
     if(!currentEvent) return;
     const p=clamp(specialAnimT,0,1), now=performance.now();
@@ -1569,14 +1791,26 @@
     ctx.fillStyle=col; ctx.fillRect(0,barH-3,W,3); ctx.fillRect(0,H-barH,W,3);
     // grosses, animiertes Objekt (Auto fährt herein, Rest poppt mit Overshoot)
     const pop=p<0.45?(p/0.45):1, overs=1+0.18*Math.sin(Math.min(p,0.55)*11);
-    const scale=(2.8+1.0*pop)*overs;
-    let ox=W/2; const oy=H*0.46;
-    if(currentEvent.vis==='car') ox=-W*0.35+(W*0.85)*Math.min(1,p/0.55);
-    ctx.save(); ctx.translate(ox,oy);
-    if(p<0.55){ ctx.translate((Math.random()-0.5)*7*(1-p),(Math.random()-0.5)*7*(1-p)); }
-    ctx.scale(scale,scale*(currentEvent.vis==='ghost'?(1+0.05*Math.sin(now/120)):1));
-    drawObject(currentEvent.vis,0,0);
-    ctx.restore();
+    const oy=H*0.46;
+    if(currentEvent.mob){
+      // mehrere Figuren (z.B. 5 Mafiosi) in einer Reihe
+      const n=currentEvent.mob, sc=1.5*overs, span=Math.min(W-60,n*62);
+      for(let i=0;i<n;i++){
+        const fx=W/2-span/2+span*(n===1?0.5:i/(n-1)), delay=i*0.06;
+        const pp=clamp((p-delay)/0.45,0,1); if(pp<=0) continue;
+        ctx.save(); ctx.translate(fx,oy+18); ctx.scale(sc*(0.6+0.4*pp),sc*(0.6+0.4*pp));
+        drawObject(currentEvent.vis,0,0); ctx.restore();
+      }
+    } else {
+      const scale=(2.8+1.0*pop)*overs;
+      let ox=W/2;
+      if(currentEvent.vis==='car'||currentEvent.vis==='shark'||currentEvent.vis==='tank') ox=-W*0.35+(W*0.85)*Math.min(1,p/0.55);
+      ctx.save(); ctx.translate(ox,oy);
+      if(p<0.55){ ctx.translate((Math.random()-0.5)*7*(1-p),(Math.random()-0.5)*7*(1-p)); }
+      ctx.scale(scale,scale*(currentEvent.vis==='ghost'?(1+0.05*Math.sin(now/120)):1));
+      drawObject(currentEvent.vis,0,0);
+      ctx.restore();
+    }
     // Titel
     ctx.save(); ctx.translate(W/2,H*0.78);
     const ts=0.92+0.08*Math.sin(now/110); ctx.scale(ts,ts);
@@ -1588,10 +1822,50 @@
     ctx.fillStyle='#FFF6E5'; ctx.fillText(currentEvent.label,0,2);
     ctx.restore();
   }
+  function starShape(cx,cy,r){
+    ctx.beginPath();
+    for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, rr2=i%2?r*0.45:r; ctx.lineTo(cx+Math.cos(a)*rr2,cy+Math.sin(a)*rr2); }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  function drawDeath(){
+    const p=clamp(deathAnim.t/deathAnim.dur,0,1), st=deathAnim.style, now=performance.now();
+    ctx.fillStyle='rgba(8,8,16,'+(0.84*Math.min(1,p*2.2))+')'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    let word='ERWISCHT', col='#FF3B30';
+    if(st==='wasted'){ word='WASTED'; col='#C0392B'; ctx.fillStyle='rgba(140,20,20,'+(0.34*p)+')'; ctx.fillRect(0,0,W,H); }
+    else if(st==='jail'){ word='EINGESPERRT!'; col='#BFD3E6';
+      const yy=-H+H*Math.min(1,p*1.7); ctx.fillStyle='#8b97a6'; ctx.strokeStyle='#5a626c'; ctx.lineWidth=3;
+      for(let bx=18;bx<W;bx+=44){ ctx.fillRect(bx,yy,13,H); ctx.strokeRect(bx,yy,13,H); }
+      ctx.fillRect(0,yy+44,W,11); ctx.fillRect(0,yy+H-66,W,11); }
+    else if(st==='abduct'){ word='ENTFÜHRT!'; col='#7CFF8E'; const cx=W/2;
+      ctx.fillStyle='rgba(124,255,142,.22)'; ctx.beginPath(); ctx.moveTo(cx-22,-10); ctx.lineTo(cx+22,-10); ctx.lineTo(cx+95,H*0.72); ctx.lineTo(cx-95,H*0.72); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#9aa0a6'; ctx.strokeStyle=INK; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(cx,22,48,15,0,0,6.283); fs();
+      ctx.fillStyle='#BFE3FF'; ctx.beginPath(); ctx.arc(cx,12,12,Math.PI,0); fs();
+      const py=H*0.72-(H*0.6)*p; ctx.fillStyle=curSkin.body; ctx.strokeStyle=INK; rr(cx-10,py-10,20,22,8); fs(); }
+    else if(st==='crush'){ word='PLATT!'; col='#FF7A45'; const h=H*0.5*Math.min(1,p*1.6);
+      ctx.fillStyle='#3a3a44'; ctx.fillRect(0,0,W,h); ctx.fillStyle='#2b2b33'; ctx.fillRect(0,h-12,W,12);
+      ctx.fillStyle='#555'; for(let i=0;i<6;i++){ ctx.fillRect(i*W/6+6,h-4,W/6-12,6); } }
+    else if(st==='eaten'){ word='VERSPEIST!'; col='#FF5D5D'; const close=Math.min(1,p*1.5)*(W*0.34);
+      for(const side of [-1,1]){ const baseX=side<0?close:W-close;
+        ctx.fillStyle='#cf5b5b'; ctx.beginPath(); ctx.moveTo(side<0?0:W,0); ctx.lineTo(baseX,0); ctx.lineTo(baseX,H); ctx.lineTo(side<0?0:W,H); ctx.closePath(); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=2;
+        for(let ty=14;ty<H;ty+=38){ ctx.beginPath(); ctx.moveTo(baseX,ty); ctx.lineTo(baseX-side*22,ty+19); ctx.lineTo(baseX,ty+38); ctx.closePath(); fs(); } } }
+    else if(st==='spook'){ word='VERFLUCHT!'; col='#B388FF'; ctx.fillStyle='rgba(120,60,180,'+(0.28*p)+')'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(255,255,255,.55)'; for(let i=0;i<7;i++){ const gx=(i*101+now/16)%W, gy=H*0.32+Math.sin(now/280+i)*46+i*16; ctx.beginPath(); ctx.arc(gx,gy,12,0,6.283); ctx.fill(); } }
+    else if(st==='sweep'){ word='WEGGEWEHT!'; col='#19C3C3'; ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=3;
+      for(let i=0;i<11;i++){ const yy=(i*H/11+now/7)%H; ctx.beginPath(); for(let xx=0;xx<=W;xx+=18) ctx.lineTo(xx,yy+Math.sin((xx+now/4)/40)*11); ctx.stroke(); } }
+    else if(st==='ko'){ word='K.O.!'; col='#FFB300'; ctx.fillStyle='#FFD23F'; ctx.strokeStyle=INK; ctx.lineWidth=2;
+      for(let i=0;i<7;i++){ const a=now/300+i*0.9, rx=W/2+Math.cos(a)*78, ry=H*0.38+Math.sin(a)*30; starShape(rx,ry,8); } }
+    const sc=0.4+0.6*Math.min(1,p*2.2)+0.03*Math.sin(now/120);
+    ctx.save(); ctx.translate(W/2,H*0.5); ctx.scale(sc,sc);
+    ctx.font='900 44px Fredoka,sans-serif'; ctx.lineWidth=8; ctx.lineJoin='round'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.strokeStyle='#0a0a14'; ctx.strokeText(word,0,0); ctx.fillStyle=col; ctx.fillText(word,0,0);
+    ctx.restore();
+  }
 
   let lastT=performance.now();
   function loop(now){ let dt=(now-lastT)/1000; lastT=now; if(dt>0.05) dt=0.05;
-    advanceAmbient(dt); update(dt); updateCaught(dt); render(); setAmbientHUD(); requestAnimationFrame(loop); }
+    advanceAmbient(dt); update(dt); updateCaught(dt); updateMini(dt); updateDeath(dt); render(); setAmbientHUD(); requestAnimationFrame(loop); }
 
   function show(id){ document.getElementById(id).classList.remove('hidden'); }
   function hide(id){ document.getElementById(id).classList.add('hidden'); }
@@ -1604,6 +1878,8 @@
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); show('menu'); };
   document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAchievements(); hide('menu'); show('achievements'); };
   document.getElementById('achBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('achievements'); show('menu'); };
+  document.getElementById('miniBtn').onclick=()=>miniClick();
+  document.getElementById('minigame').addEventListener('pointerdown',e=>{ if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
 
   const muteBtn=document.getElementById('muteBtn');
   function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted); }
