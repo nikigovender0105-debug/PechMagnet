@@ -96,6 +96,7 @@
   #coinsHud{ display:flex; align-items:center; gap:6px; padding:4px 10px; font-size:16px; }
   #ambientChip{ font-size:15px; padding:3px 9px; letter-spacing:1px; }
   #buffChip{ background:var(--gold); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse .7s infinite alternate; }
+  #magnetChip{ background:var(--danger); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); }
   #miniBarWrap{ position:relative; height:34px; background:var(--cream); border:4px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); overflow:hidden; margin:10px 0 6px; }
   #miniBar{ height:100%; width:50%; background:linear-gradient(90deg,var(--safe),var(--gold)); transition:width .05s linear; }
   #miniMid{ position:absolute; top:-4px; bottom:-4px; left:50%; width:3px; background:var(--ink); transform:translateX(-50%); }
@@ -165,6 +166,7 @@
         <div class="chip" id="ambientChip">&#9728;&#65039;</div>
         <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
         <div class="chip hidden" id="buffChip">&#9889; 40s</div>
+        <div class="chip hidden" id="magnetChip">&#129522; 10s</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <div class="chip" id="score">Punkte <span class="num">0</span></div>
@@ -478,6 +480,15 @@
   let suspicion=0, susLocked=false, phase='calm', chaosTimer=2.6, alarmTimer=0, currentEvent=null;
   let player={x:0,y:0,vx:0,vy:0,bob:0,moving:false,spd:0};
   let npcs=[], bursts=[], coins=[];
+  let items=[], magnetTime=0, pickFx=[];
+  const ITEMS={
+    shield:{col:'#3A86FF',name:'Schild',dur:5},
+    boost:{col:'#FF7A45',name:'Speed',dur:12},
+    magnet:{col:'#E63946',name:'Magnet',dur:10},
+    coins:{col:'#FFD23F',name:'+10'},
+    calm:{col:'#2ECC40',name:'Ruhe'}
+  };
+  const ITEM_KEYS=['shield','boost','magnet','coins','calm'];
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
@@ -783,7 +794,8 @@
       siren(){ tone(740,0.2,'sawtooth',0.24,0); tone(560,0.2,'sawtooth',0.24,0.2); tone(740,0.2,'sawtooth',0.24,0.4); },
       spooky(){ tone(220,0.5,'sine',0.22,0,150); tone(330,0.5,'sine',0.14,0.12,220); noise(0.4,0.12,800,0.05); },
       achieve(){ tone(659.25,0.1,'square',0.26,0); tone(830.61,0.1,'square',0.26,0.1); tone(987.77,0.12,'square',0.26,0.2); tone(1318.51,0.22,'square',0.26,0.32); },
-      sting(){ noise(0.5,0.45,500); tone(110,0.5,'sawtooth',0.34,0,55); tone(220,0.4,'square',0.2,0.05,110); }
+      sting(){ noise(0.5,0.45,500); tone(110,0.5,'sawtooth',0.34,0,55); tone(220,0.4,'square',0.2,0.05,110); },
+      powerup(){ tone(523.25,0.08,'triangle',0.26,0); tone(783.99,0.08,'triangle',0.26,0.07); tone(1046.5,0.16,'triangle',0.26,0.14); }
     };
     return { ensure, play(n){ ensure(); if(S[n]) S[n](); }, setTrack, setMuted(m){ muted=!!m; if(musicGain) musicGain.gain.value=muted?0:0.7; if(muted) stopMusic(); else if(ctx&&trk) startMusic(); }, isMuted(){ return muted; } };
   })();
@@ -844,18 +856,22 @@
     const n=3+((Math.random()*3)|0);
     for(let i=0;i<n;i++){ coins.push({x:rand(ROAD_L+22,W-ROAD_R-22), y:rand(z.y0+60,z.y1-60)}); }
   }
+  function spawnZoneItems(z){
+    // pro Zone ~55% Chance auf ein Power-up
+    if(Math.random()<0.55){ items.push({x:rand(ROAD_L+24,W-ROAD_R-24), y:rand(z.y0+70,z.y1-70), type:pick(ITEM_KEYS), bob:rand(0,6.28)}); }
+  }
   function addZoneAbove(){
     const t=chooseZoneType();
     const z={id:t.id,name:t.name,bld:t.bld,density:t.density,events:t.events, y0:topGenY-ZONE_H, y1:topGenY};
     z.bL=genBuildingRow(z); z.bR=genBuildingRow(z);
-    zones.push(z); spawnZoneCrowd(z); spawnZoneCoins(z); topGenY=z.y0;
+    zones.push(z); spawnZoneCrowd(z); spawnZoneCoins(z); spawnZoneItems(z); topGenY=z.y0;
   }
   function generateUpTo(targetY){ let g=0; while(topGenY>targetY && g++<40) addZoneAbove(); }
-  function cullBehind(limitY){ zones=zones.filter(z=>z.y0<=limitY); npcs=npcs.filter(n=>n.y<=limitY); coins=coins.filter(c=>c.y<=limitY); }
+  function cullBehind(limitY){ zones=zones.filter(z=>z.y0<=limitY); npcs=npcs.filter(n=>n.y<=limitY); coins=coins.filter(c=>c.y<=limitY); items=items.filter(it=>it.y<=limitY); }
   function currentZone(y){ for(const z of zones){ if(y>=z.y0 && y<z.y1) return z; } return zones[0]||null; }
 
   function resetWorld(){
-    zones=[]; npcs=[]; coins=[]; coinsRun=0; lastZoneTypeId=null;
+    zones=[]; npcs=[]; coins=[]; items=[]; magnetTime=0; pickFx=[]; coinsRun=0; lastZoneTypeId=null;
     player.x=W/2; player.y=0; player.vx=player.vy=0; player.moving=false;
     bottomY=240; topGenY=bottomY;
     addZoneAbove();
@@ -864,7 +880,7 @@
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; updateTicketHUD();
-    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD();
+    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -1009,6 +1025,18 @@
   }
   function updateBuffHUD(){ const el=document.getElementById('buffChip'); if(!el) return;
     el.classList.toggle('hidden',!(speedBuff>0)); if(speedBuff>0) el.textContent='⚡ '+Math.ceil(speedBuff)+'s'; }
+  function updateMagnetHUD(){ const el=document.getElementById('magnetChip'); if(!el) return;
+    el.classList.toggle('hidden',!(magnetTime>0)); if(magnetTime>0) el.textContent='🧲 '+Math.ceil(magnetTime)+'s'; }
+  function addPickFx(x,y,txt,col){ pickFx.push({x,y,txt,col,t:0}); if(pickFx.length>12) pickFx.shift(); }
+  function applyItem(it){
+    const def=ITEMS[it.type]; SND.play('powerup');
+    if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,5); }
+    else if(it.type==='boost'){ speedBuff=Math.max(speedBuff,12); updateBuffHUD(); }
+    else if(it.type==='magnet'){ magnetTime=Math.max(magnetTime,10); updateMagnetHUD(); }
+    else if(it.type==='coins'){ coinsRun+=10; updateHUD(); }
+    else if(it.type==='calm'){ suspicion=0; if(phase==='alarm') endAlarm(); setSusBar(); }
+    addPickFx(it.x,it.y-18,def.name,def.col);
+  }
   function districtCrossed(){
     streetsCleared++; score+=150; SND.play('district');
     if(streetsCleared>=5) unlockAch('district_5');
@@ -1244,9 +1272,20 @@
       }
     }
 
-    for(const c of coins){ if(Math.abs(c.y-player.y)>30) continue;
-      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+12)*(PR+12)){ c.got=true; coinsRun++; SND.play('coin'); if(coinsRun>=15) unlockAch('coins_run'); } }
+    // Münzmagnet: zieht Münzen heran
+    if(magnetTime>0){ magnetTime=Math.max(0,magnetTime-dt); updateMagnetHUD();
+      for(const c of coins){ if(Math.abs(c.y-player.y)>150) continue; const dx=player.x-c.x, dy=player.y-c.y, dl=Math.hypot(dx,dy)||1;
+        if(dl<150){ const s=260*dt; c.x+=dx/dl*s; c.y+=dy/dl*s; } } }
+    const grab=magnetTime>0?22:12;
+    for(const c of coins){ if(Math.abs(c.y-player.y)>30+grab) continue;
+      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun++; SND.play('coin'); if(coinsRun>=15) unlockAch('coins_run'); } }
     if(coins.some(c=>c.got)) coins=coins.filter(c=>!c.got);
+    // Power-up-Items einsammeln
+    for(const it of items){ if(Math.abs(it.y-player.y)>34) continue;
+      const dx=player.x-it.x, dy=player.y-it.y; if(dx*dx+dy*dy<(PR+15)*(PR+15)){ it.got=true; applyItem(it); } }
+    if(items.some(it=>it.got)) items=items.filter(it=>!it.got);
+    for(const f of pickFx){ f.t+=dt; f.y-=24*dt; }
+    if(pickFx.length) pickFx=pickFx.filter(f=>f.t<0.9);
 
     if(bumpCD>0){ bumpCD-=dt; }
     else if(phase!=='special' && spawnProtect<=0){ for(const n of npcs){ if(Math.abs(n.y-player.y)>34) continue;
@@ -1283,6 +1322,26 @@
     ctx.beginPath(); ctx.ellipse(x,y,w,11,0,0,6.283); ctx.fill(); ctx.stroke();
     ctx.fillStyle='#E6A817'; ctx.beginPath(); ctx.ellipse(x,y,w*0.5,6.5,0,0,6.283); ctx.fill();
     ctx.fillStyle='rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(x-w*0.34,y-3,w*0.16,2.6,0,0,6.283); ctx.fill();
+  }
+  function drawItem(it){
+    const def=ITEMS[it.type], b=Math.sin(performance.now()/300+it.bob)*3, x=it.x, y=it.y+b;
+    // Schatten
+    ctx.fillStyle='rgba(0,0,0,.16)'; ctx.beginPath(); ctx.ellipse(x,it.y+14,11,4,0,0,6.283); ctx.fill();
+    // Glow
+    const gl=ctx.createRadialGradient(x,y,2,x,y,20); gl.addColorStop(0,hexA(def.col,0.5)); gl.addColorStop(1,hexA(def.col,0));
+    ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(x,y,20,0,6.283); ctx.fill();
+    // Scheibe
+    ctx.fillStyle=def.col; ctx.strokeStyle=INK; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y,13,0,6.283); fs();
+    ctx.fillStyle='rgba(255,255,255,.85)'; ctx.lineWidth=2.4; ctx.strokeStyle='#fff';
+    // Symbol je Item
+    if(it.type==='shield'){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(x,y-8); ctx.lineTo(x+7,y-5); ctx.lineTo(x+7,y+1); ctx.quadraticCurveTo(x+7,y+7,x,y+9); ctx.quadraticCurveTo(x-7,y+7,x-7,y+1); ctx.lineTo(x-7,y-5); ctx.closePath(); ctx.fill(); }
+    else if(it.type==='boost'){ ctx.fillStyle='#FFF6E5'; ctx.beginPath(); ctx.moveTo(x+3,y-9); ctx.lineTo(x-5,y+1); ctx.lineTo(x-1,y+1); ctx.lineTo(x-3,y+9); ctx.lineTo(x+6,y-2); ctx.lineTo(x+1,y-2); ctx.closePath(); ctx.fill(); }
+    else if(it.type==='magnet'){ ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(x,y-1,6,Math.PI,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x-6,y-1); ctx.lineTo(x-6,y+7); ctx.moveTo(x+6,y-1); ctx.lineTo(x+6,y+7); ctx.stroke();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(x-6,y+7); ctx.lineTo(x-6,y+8); ctx.stroke(); }
+    else if(it.type==='coins'){ ctx.fillStyle='#FFF6E5'; ctx.font='800 13px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('$',x,y+1); }
+    else if(it.type==='calm'){ ctx.strokeStyle='#fff'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(x,y+2,6,Math.PI*0.15,Math.PI*0.85); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y-9); ctx.quadraticCurveTo(x+6,y-3,x,y+2); ctx.quadraticCurveTo(x-6,y-3,x,y-9); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill(); }
   }
   function drawSkinPreview(cnv,skin){
     const c=cnv.getContext('2d'); const x=27,y=36;
@@ -1738,6 +1797,9 @@
     drawStreetBase(); drawZones(); drawLamps();
 
     for(const c of coins){ if(c.y<camY-40||c.y>camY+H+40) continue; drawCoin(c.x,c.y); }
+    for(const it of items){ if(it.y<camY-40||it.y>camY+H+40) continue; drawItem(it); }
+    for(const f of pickFx){ const a=1-f.t/0.9; ctx.globalAlpha=a; ctx.font='800 14px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.lineWidth=4; ctx.lineJoin='round'; ctx.strokeStyle='#0a0a14'; ctx.strokeText(f.txt,f.x,f.y); ctx.fillStyle=f.col; ctx.fillText(f.txt,f.x,f.y); ctx.globalAlpha=1; }
 
     for(const p of dust){ const a=(1-p.t/p.life)*0.4; ctx.fillStyle='rgba(120,120,130,'+a+')'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(1+p.t*1.5),0,6.283); ctx.fill(); }
 
