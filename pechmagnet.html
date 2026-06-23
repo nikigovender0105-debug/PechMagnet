@@ -80,6 +80,12 @@
   #gameover h2{ font-size:36px; color:var(--danger); -webkit-text-stroke:3px var(--ink); paint-order:stroke fill; transform:rotate(-3deg); }
   .boardWrap{ margin-top:14px; }
   .boardTitle{ font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--purple); margin-bottom:6px; }
+  .nameRow{ display:flex; align-items:center; gap:8px; margin-top:12px; }
+  .nameRow .nameLbl{ font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--purple); }
+  #nameInput{ flex:1; pointer-events:auto; font-family:inherit; font-weight:700; font-size:15px; color:var(--ink);
+    background:#fff; border:3px solid var(--ink); border-radius:11px; padding:8px 11px; box-shadow:2px 2px 0 var(--ink); outline:none; -webkit-user-select:text; user-select:text; }
+  #online .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
+  #onlineList .brow .brk{ color:var(--teal); }
   .board{ display:flex; flex-direction:column; gap:5px; }
   .brow{ display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--ink); border-radius:10px; padding:6px 10px; }
   .brow.new{ background:var(--warn); }
@@ -186,11 +192,16 @@
         <div class="boardTitle">BESTENLISTE</div>
         <div id="boardMenu" class="board"></div>
       </div>
+      <div class="nameRow">
+        <span class="nameLbl">NAME</span>
+        <input id="nameInput" maxlength="20" placeholder="Dein Name" autocomplete="off" />
+      </div>
     </div>
     <div class="btnrow">
       <button class="btn go" id="startBtn">LOS GEHT'S</button>
       <button class="btn" id="shopBtn">SHOP</button>
       <button class="btn" id="achBtn">ERFOLGE</button>
+      <button class="btn" id="onlineBtn">ONLINE</button>
     </div>
   </div>
 
@@ -213,6 +224,18 @@
       <div id="achList"></div>
     </div>
     <button class="btn go" id="achBack">ZUR&Uuml;CK</button>
+  </div>
+
+  <div id="online" class="screen hidden">
+    <div class="card">
+      <h2 style="font-size:26px;color:var(--teal);margin-bottom:4px;">ONLINE BESTENLISTE</h2>
+      <p class="lead" style="font-size:12.5px;margin-bottom:6px;">Die besten Pechv&ouml;gel weltweit.</p>
+      <div id="onlineList" class="board"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="onlineRefresh">AKTUALISIEREN</button>
+      <button class="btn go" id="onlineBack">ZUR&Uuml;CK</button>
+    </div>
   </div>
 
   <div id="achToast" class="hidden">
@@ -283,6 +306,10 @@
       <div class="boardWrap">
         <div class="boardTitle">BESTENLISTE</div>
         <div id="board" class="board"></div>
+      </div>
+      <div class="boardWrap hidden" id="goOnlineWrap">
+        <div class="boardTitle" style="color:var(--teal);">ONLINE TOP <span id="goOnlineStatus" style="opacity:.7;font-weight:600;"></span></div>
+        <div id="goOnline" class="board"></div>
       </div>
     </div>
     <div class="btnrow">
@@ -614,10 +641,36 @@
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[] };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'' };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
+
+  // ---------- Online-Bestenliste (Supabase) ----------
+  // TODO: Hier deine Supabase-Werte eintragen (anon-Key ist öffentlich, durch RLS geschützt):
+  const SUPABASE_URL='';                 // z.B. 'https://xxxxxxxx.supabase.co'
+  const SUPABASE_ANON_KEY='';            // dein anon/public API-Key
+  const SB_OK = /^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>20;
+  const SB=(function(){
+    const base = SUPABASE_URL.replace(/\/$/,'');
+    function hdr(extra){ return Object.assign({ 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer '+SUPABASE_ANON_KEY, 'Content-Type':'application/json' }, extra||{}); }
+    async function submit(name,score,streets){
+      if(!SB_OK) return false;
+      try{
+        const r=await fetch(base+'/rest/v1/leaderboard',{ method:'POST', headers:hdr({'Prefer':'return=minimal'}),
+          body:JSON.stringify({ name:(name||'Anonym').slice(0,20), score:score|0, streets:streets|0 }) });
+        return r.ok;
+      }catch(e){ return false; }
+    }
+    async function top(limit){
+      if(!SB_OK) return null;
+      try{
+        const r=await fetch(base+'/rest/v1/leaderboard?select=name,score,streets&order=score.desc&limit='+(limit||20), { headers:hdr() });
+        if(!r.ok) return null; return await r.json();
+      }catch(e){ return null; }
+    }
+    return { ok:SB_OK, submit, top };
+  })();
 
   function rand(a,b){return a+Math.random()*(b-a);}
   function pick(a){return a[(Math.random()*a.length)|0];}
@@ -998,6 +1051,38 @@
     renderBoard(document.getElementById('board'),entry); renderBoard(document.getElementById('boardMenu'),entry);
     updateCoinUI();
     hide('dialog'); hide('reaction'); show('gameover');
+    submitAndShowOnline(score,streetsCleared);
+  }
+  function escHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function renderOnlineRows(el,rows,highlightName){
+    if(!el) return;
+    if(rows===null){ el.innerHTML='<div class="bempty">Offline – keine Verbindung.</div>'; return; }
+    if(!rows.length){ el.innerHTML='<div class="bempty">Noch keine Einträge – sei der Erste!</div>'; return; }
+    el.innerHTML=rows.map((e,i)=>
+      '<div class="'+((highlightName&&e.name===highlightName)?'brow new':'brow')+'"><span class="brk">#'+(i+1)+'</span>'
+      +'<span class="bsc" style="display:flex;gap:8px;align-items:baseline;"><span style="font-size:13px;color:var(--ink);opacity:.8;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(e.name)+'</span>'+e.score+'</span>'
+      +'<span class="bst">'+(e.streets|0)+' Viertel</span></div>'
+    ).join('');
+  }
+  async function renderOnline(){
+    const list=document.getElementById('onlineList'); if(!list) return;
+    if(!SB.ok){ list.innerHTML='<div class="bempty">Online-Bestenliste nicht konfiguriert.<br>Trage SUPABASE_URL & SUPABASE_ANON_KEY im Code ein.</div>'; return; }
+    list.innerHTML='<div class="bempty">Lädt …</div>';
+    const rows=await SB.top(20);
+    renderOnlineRows(list,rows,save.playerName);
+  }
+  async function submitAndShowOnline(sc,st){
+    const wrap=document.getElementById('goOnlineWrap'), statusEl=document.getElementById('goOnlineStatus'), list=document.getElementById('goOnline');
+    if(!wrap) return;
+    if(!SB.ok){ wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    if(!save.playerName){ if(statusEl) statusEl.textContent=''; renderOnlineRows(list,[]); list.innerHTML='<div class="bempty">Setze deinen Namen im Menü, um teilzunehmen.</div>';
+      const top=await SB.top(5); if(top) renderOnlineRows(list,top,''); return; }
+    if(statusEl) statusEl.textContent='… wird gesendet';
+    const okk=await SB.submit(save.playerName,sc,st);
+    if(statusEl) statusEl.textContent=okk?'✓':'(offline)';
+    const top=await SB.top(5);
+    renderOnlineRows(list,top,save.playerName);
   }
 
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
@@ -1878,6 +1963,12 @@
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); show('menu'); };
   document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAchievements(); hide('menu'); show('achievements'); };
   document.getElementById('achBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('achievements'); show('menu'); };
+  document.getElementById('onlineBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('menu'); show('online'); renderOnline(); };
+  document.getElementById('onlineBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('online'); show('menu'); };
+  document.getElementById('onlineRefresh').onclick=()=>{ SND.play('click'); renderOnline(); };
+  const nameInput=document.getElementById('nameInput');
+  nameInput.value=save.playerName||'';
+  nameInput.addEventListener('input',()=>{ save.playerName=nameInput.value.slice(0,20); persist(); });
   document.getElementById('miniBtn').onclick=()=>miniClick();
   document.getElementById('minigame').addEventListener('pointerdown',e=>{ if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
 
