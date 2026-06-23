@@ -653,21 +653,26 @@
   const SB_OK = /^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>20;
   const SB=(function(){
     const base = SUPABASE_URL.replace(/\/$/,'');
-    function hdr(extra){ return Object.assign({ 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer '+SUPABASE_ANON_KEY, 'Content-Type':'application/json' }, extra||{}); }
+    const isJWT = /^eyJ/.test(SUPABASE_ANON_KEY); // klassischer anon-Key ist ein JWT, publishable-Key nicht
+    function hdr(extra){ const h={ 'apikey':SUPABASE_ANON_KEY, 'Content-Type':'application/json' };
+      if(isJWT) h['Authorization']='Bearer '+SUPABASE_ANON_KEY; // Bearer nur fuer JWT-Keys, sonst 401
+      return Object.assign(h,extra||{}); }
     async function submit(name,score,streets){
       if(!SB_OK) return false;
       try{
         const r=await fetch(base+'/rest/v1/leaderboard',{ method:'POST', headers:hdr({'Prefer':'return=minimal'}),
           body:JSON.stringify({ name:(name||'Anonym').slice(0,20), score:score|0, streets:streets|0 }) });
+        if(!r.ok){ const t=await r.text().catch(()=>''); console.warn('[Leaderboard] Senden fehlgeschlagen', r.status, t); }
         return r.ok;
-      }catch(e){ return false; }
+      }catch(e){ console.warn('[Leaderboard] Netzwerkfehler beim Senden', e); return false; }
     }
     async function top(limit){
       if(!SB_OK) return null;
       try{
         const r=await fetch(base+'/rest/v1/leaderboard?select=name,score,streets&order=score.desc&limit='+(limit||20), { headers:hdr() });
-        if(!r.ok) return null; return await r.json();
-      }catch(e){ return null; }
+        if(!r.ok){ const t=await r.text().catch(()=>''); console.warn('[Leaderboard] Laden fehlgeschlagen', r.status, t); return null; }
+        return await r.json();
+      }catch(e){ console.warn('[Leaderboard] Netzwerkfehler beim Laden', e); return null; }
     }
     return { ok:SB_OK, submit, top };
   })();
