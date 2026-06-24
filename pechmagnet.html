@@ -547,7 +547,8 @@
   ];
   function upLvl(key){ return (save.upgrades&&save.upgrades[key])|0; }
   function upVal(key){ const u=UPGRADES.find(x=>x.key===key); return u?u.base+upLvl(key)*u.step:0; }
-  function upCost(lvl){ return 40+lvl*40; }
+  const UP_COSTS=[300,750,1600,3200,6000];
+  function upCost(lvl){ return UP_COSTS[lvl]!=null?UP_COSTS[lvl]:UP_COSTS[UP_COSTS.length-1]; }
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
