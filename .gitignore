@@ -1,0 +1,13 @@
+# Node
+node_modules/
+package-lock.json
+
+# Capacitor native projects (lokal mit `npx cap add` erzeugen)
+/android/
+/ios/
+
+# Build-/IDE-Kram
+.DS_Store
+*.log
+.gradle/
+.idea/

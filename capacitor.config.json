@@ -1,0 +1,13 @@
+{
+  "appId": "com.pechmagnet.app",
+  "appName": "Pech-Magnet",
+  "webDir": "www",
+  "backgroundColor": "#0e0e1a",
+  "android": {
+    "backgroundColor": "#0e0e1a"
+  },
+  "ios": {
+    "backgroundColor": "#0e0e1a",
+    "contentInset": "always"
+  }
+}
