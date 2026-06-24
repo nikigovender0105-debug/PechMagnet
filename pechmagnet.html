@@ -97,6 +97,10 @@
   #ambientChip{ font-size:15px; padding:3px 9px; letter-spacing:1px; }
   #buffChip{ background:var(--gold); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse .7s infinite alternate; }
   #magnetChip{ background:var(--danger); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); }
+  #hintChip{ background:var(--teal); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); }
+  .upBar{ display:flex; gap:3px; margin-top:3px; }
+  .upBar .ud{ width:13px; height:7px; border:2px solid var(--ink); border-radius:3px; background:#fff; }
+  .upBar .ud.on{ background:var(--gold); }
   #miniBarWrap{ position:relative; height:34px; background:var(--cream); border:4px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); overflow:hidden; margin:10px 0 6px; }
   #miniBar{ height:100%; width:50%; background:linear-gradient(90deg,var(--safe),var(--gold)); transition:width .05s linear; }
   #miniMid{ position:absolute; top:-4px; bottom:-4px; left:50%; width:3px; background:var(--ink); transform:translateX(-50%); }
@@ -167,6 +171,7 @@
         <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
         <div class="chip hidden" id="buffChip">&#9889; 40s</div>
         <div class="chip hidden" id="magnetChip">&#129522; 10s</div>
+        <div class="chip hidden" id="hintChip">&#128269; 1</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <div class="chip" id="score">Punkte <span class="num">0</span></div>
@@ -213,6 +218,8 @@
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsShop">0</div></div></div>
       <div class="shopSecTitle">POWER-UPS</div>
       <div id="powerups"></div>
+      <div class="shopSecTitle">ITEM-UPGRADES</div>
+      <div id="upgrades"></div>
       <div class="shopSecTitle">SKINS</div>
       <div id="skinGrid" class="skinGrid"></div>
     </div>
@@ -520,15 +527,27 @@
   let suspicion=0, susLocked=false, phase='calm', chaosTimer=2.6, alarmTimer=0, currentEvent=null;
   let player={x:0,y:0,vx:0,vy:0,bob:0,moving:false,spd:0};
   let npcs=[], bursts=[], coins=[];
-  let items=[], magnetTime=0, pickFx=[];
+  let items=[], magnetTime=0, pickFx=[], hintCharges=0;
   const ITEMS={
-    shield:{col:'#3A86FF',name:'Schild',dur:5},
-    boost:{col:'#FF7A45',name:'Speed',dur:12},
-    magnet:{col:'#E63946',name:'Magnet',dur:10},
-    coins:{col:'#FFD23F',name:'+10'},
+    shield:{col:'#3A86FF',name:'Schild'},
+    boost:{col:'#FF7A45',name:'Speed'},
+    magnet:{col:'#E63946',name:'Magnet'},
+    hint:{col:'#19C3C3',name:'Spicker'},
+    coins:{col:'#FFD23F',name:'Geld'},
     calm:{col:'#2ECC40',name:'Ruhe'}
   };
-  const ITEM_KEYS=['shield','boost','magnet','coins','calm'];
+  const ITEM_KEYS=['shield','boost','magnet','hint','coins','calm'];
+  // Item-Upgrades (Subway-Surfers-Stil): mit Münzen Stufen kaufen
+  const UPGRADES=[
+    {key:'shield',name:'Schild',icon:'🛡️',unit:'s',base:5,step:2,max:5,desc:'Unverwundbarkeit beim Aufsammeln'},
+    {key:'boost', name:'Speed-Boost',icon:'⚡',unit:'s',base:12,step:3,max:5,desc:'Dauer des Tempo-Boosts'},
+    {key:'magnet',name:'Münzmagnet',icon:'🧲',unit:'s',base:10,step:3,max:5,desc:'Dauer der Münz-Anziehung'},
+    {key:'hint',  name:'Spicker',icon:'🔍',unit:'×',base:1,step:1,max:5,desc:'Aufgedeckte Antworten pro Spicker'},
+    {key:'coins', name:'Geldsack',icon:'💰',unit:' Mü.',base:10,step:5,max:5,desc:'Münzen pro Geldsack'}
+  ];
+  function upLvl(key){ return (save.upgrades&&save.upgrades[key])|0; }
+  function upVal(key){ const u=UPGRADES.find(x=>x.key===key); return u?u.base+upLvl(key)*u.step:0; }
+  function upCost(lvl){ return 40+lvl*40; }
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
@@ -692,8 +711,8 @@
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'' };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{} };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -911,7 +930,7 @@
   function currentZone(y){ for(const z of zones){ if(y>=z.y0 && y<z.y1) return z; } return zones[0]||null; }
 
   function resetWorld(){
-    zones=[]; npcs=[]; coins=[]; items=[]; magnetTime=0; pickFx=[]; coinsRun=0; lastZoneTypeId=null;
+    zones=[]; npcs=[]; coins=[]; items=[]; magnetTime=0; pickFx=[]; hintCharges=0; coinsRun=0; lastZoneTypeId=null;
     player.x=W/2; player.y=0; player.vx=player.vy=0; player.moving=false;
     bottomY=240; topGenY=bottomY;
     addZoneAbove();
@@ -920,7 +939,7 @@
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; updateTicketHUD();
-    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD();
+    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -998,8 +1017,17 @@
     for(let i=base.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[base[i],base[j]]=[base[j],base[i]];}
     excuseSet=base;
     const box=document.getElementById('excuses'); box.innerHTML='';
+    const btns=[];
     excuseSet.forEach((e,i)=>{ const b=document.createElement('button'); b.className='excuse'; b.textContent=e.t;
-      b.onclick=()=>pickExcuse(i,b); box.appendChild(b); });
+      b.onclick=()=>pickExcuse(i,b); box.appendChild(b); btns.push(b); });
+    // Spicker: deckt eine falsche Antwort auf (markiert sie, nicht mehr anklickbar)
+    if(hintCharges>0){
+      const wrongIdx=[]; excuseSet.forEach((e,i)=>{ if(!e.ok) wrongIdx.push(i); });
+      const reveal=Math.min(hintCharges,wrongIdx.length-1); // mind. 1 falsche bleibt verdeckt
+      for(let r=0;r<reveal;r++){ const k=(Math.random()*wrongIdx.length)|0, idx=wrongIdx.splice(k,1)[0];
+        btns[idx].classList.add('wrong'); btns[idx].textContent='🚫 '+btns[idx].textContent; }
+      hintCharges-=reveal; updateHintHUD();
+    }
     document.getElementById('caughtSub').textContent=specialMode
       ? (currentEvent&&currentEvent.subText?currentEvent.subText:'Du wirst direkt zur Rede gestellt!')
       : (confrontMode
@@ -1071,13 +1099,16 @@
     el.classList.toggle('hidden',!(speedBuff>0)); if(speedBuff>0) el.textContent='⚡ '+Math.ceil(speedBuff)+'s'; }
   function updateMagnetHUD(){ const el=document.getElementById('magnetChip'); if(!el) return;
     el.classList.toggle('hidden',!(magnetTime>0)); if(magnetTime>0) el.textContent='🧲 '+Math.ceil(magnetTime)+'s'; }
+  function updateHintHUD(){ const el=document.getElementById('hintChip'); if(!el) return;
+    el.classList.toggle('hidden',!(hintCharges>0)); if(hintCharges>0) el.textContent='🔍 '+hintCharges; }
   function addPickFx(x,y,txt,col){ pickFx.push({x,y,txt,col,t:0}); if(pickFx.length>12) pickFx.shift(); }
   function applyItem(it){
     const def=ITEMS[it.type]; SND.play('powerup');
-    if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,5); }
-    else if(it.type==='boost'){ speedBuff=Math.max(speedBuff,12); updateBuffHUD(); }
-    else if(it.type==='magnet'){ magnetTime=Math.max(magnetTime,10); updateMagnetHUD(); }
-    else if(it.type==='coins'){ coinsRun+=10; updateHUD(); }
+    if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,upVal('shield')); }
+    else if(it.type==='boost'){ speedBuff=Math.max(speedBuff,upVal('boost')); updateBuffHUD(); }
+    else if(it.type==='magnet'){ magnetTime=Math.max(magnetTime,upVal('magnet')); updateMagnetHUD(); }
+    else if(it.type==='hint'){ hintCharges+=upVal('hint'); updateHintHUD(); }
+    else if(it.type==='coins'){ coinsRun+=upVal('coins'); updateHUD(); }
     else if(it.type==='calm'){ suspicion=0; if(phase==='alarm') endAlarm(); setSusBar(); }
     addPickFx(it.x,it.y-18,def.name,def.col);
   }
@@ -1172,6 +1203,25 @@
     ).join('');
   }
   const SPECIAL_PRICE=100;
+  function renderUpgrades(){
+    const wrap=document.getElementById('upgrades'); if(!wrap) return; wrap.innerHTML='';
+    if(!save.upgrades) save.upgrades={};
+    for(const u of UPGRADES){
+      const lvl=upLvl(u.key), val=u.base+lvl*u.step, maxed=lvl>=u.max;
+      const row=document.createElement('div'); row.className='pwr';
+      const ico=document.createElement('div'); ico.className='pico'; ico.textContent=u.icon; row.appendChild(ico);
+      const info=document.createElement('div'); info.className='pinfo';
+      let dots=''; for(let d=0;d<u.max;d++) dots+='<span class="ud'+(d<lvl?' on':'')+'"></span>';
+      info.innerHTML='<div class="pname">'+u.name+'</div><div class="pdesc">'+u.desc+' &middot; jetzt <b>'+val+u.unit+'</b></div><div class="upBar">'+dots+'</div>';
+      row.appendChild(info);
+      const btn=document.createElement('button'); btn.className='pbtn';
+      if(maxed){ btn.textContent='MAX'; btn.classList.add('cant'); }
+      else { const cost=upCost(lvl);
+        if(save.coins>=cost){ btn.textContent=cost+' 🪙'; btn.onclick=()=>{ if(save.coins<cost) return; save.coins-=cost; save.upgrades[u.key]=lvl+1; persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup'); }; }
+        else { btn.textContent=cost+' 🪙'; btn.classList.add('cant'); } }
+      row.appendChild(btn); wrap.appendChild(row);
+    }
+  }
   function renderShop(){
     document.getElementById('coinsShop').textContent=save.coins;
     const pw=document.getElementById('powerups');
@@ -1189,6 +1239,7 @@
       else { btn.textContent=SPECIAL_PRICE+' Münzen'; btn.classList.add('cant'); }
       row.appendChild(btn); pw.appendChild(row);
     }
+    renderUpgrades();
     const grid=document.getElementById('skinGrid'); grid.innerHTML='';
     for(const sk of SKINS){
       const owned=save.owned.indexOf(sk.id)>=0, sel=save.selected===sk.id;
@@ -1384,6 +1435,8 @@
       ctx.beginPath(); ctx.moveTo(x-6,y-1); ctx.lineTo(x-6,y+7); ctx.moveTo(x+6,y-1); ctx.lineTo(x+6,y+7); ctx.stroke();
       ctx.strokeStyle='#fff'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(x-6,y+7); ctx.lineTo(x-6,y+8); ctx.stroke(); }
     else if(it.type==='coins'){ ctx.fillStyle='#FFF6E5'; ctx.font='800 13px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('$',x,y+1); }
+    else if(it.type==='hint'){ ctx.strokeStyle='#fff'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(x-1,y-2,5,0,6.283); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x+2.5,y+1.5); ctx.lineTo(x+7,y+6); ctx.stroke(); }
     else if(it.type==='calm'){ ctx.strokeStyle='#fff'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(x,y+2,6,Math.PI*0.15,Math.PI*0.85); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x,y-9); ctx.quadraticCurveTo(x+6,y-3,x,y+2); ctx.quadraticCurveTo(x-6,y-3,x,y-9); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill(); }
   }
