@@ -1447,22 +1447,12 @@
     const body=skin.rainbow?rainbowHex(performance.now()/300):skin.body;
     const glow=skin.glow||(skin.rainbow?body:null);
     if(glow){ const gl=c.createRadialGradient(x,y-2,2,x,y-2,26); gl.addColorStop(0,hexA(glow,0.55)); gl.addColorStop(1,hexA(glow,0)); c.fillStyle=gl; c.beginPath(); c.arc(x,y-2,26,0,6.283); c.fill(); }
-    // Schuhe + Körper
-    c.fillStyle=shade(body,-46); rrC(c,x-9,y+14,7,6,2); c.fill(); c.stroke(); rrC(c,x+2,y+14,7,6,2); c.fill(); c.stroke();
-    const bg=c.createLinearGradient(0,y-6,0,y+16); bg.addColorStop(0,shade(body,36)); bg.addColorStop(1,shade(body,-22));
-    c.fillStyle=bg; rrC(c,x-11,y-6,22,22,8); c.fill(); c.stroke();
-    // Kopf
+    c.fillStyle=body; rrC(c,x-11,y-6,22,22,8); c.fill(); c.stroke();
     c.beginPath(); c.arc(x,y-15,9,0,6.283); c.fillStyle='#FFE0B2'; c.fill(); c.stroke();
-    // Augen + Glanz + Lächeln
-    c.fillStyle='#fff'; c.lineWidth=1.6; c.beginPath(); c.arc(x-3.2,y-15,2.4,0,6.283); c.arc(x+3.2,y-15,2.4,0,6.283); c.fill(); c.stroke();
-    c.fillStyle=INK; c.beginPath(); c.arc(x-2.7,y-15,1.2,0,6.283); c.arc(x+3.7,y-15,1.2,0,6.283); c.fill();
-    c.fillStyle='rgba(255,120,120,.4)'; c.beginPath(); c.arc(x-6,y-12,1.6,0,6.283); c.arc(x+6,y-12,1.6,0,6.283); c.fill();
-    c.strokeStyle=INK; c.lineWidth=1.4; c.beginPath(); c.arc(x,y-12,2.4,0.12*Math.PI,0.88*Math.PI); c.stroke();
-    c.lineWidth=3;
+    c.fillStyle=INK; c.beginPath(); c.arc(x-3,y-16,1.6,0,6.283); c.arc(x+3,y-16,1.6,0,6.283); c.fill();
     if(skin.acc){ drawAcc(c,skin.acc,x,y-15,9,skin.cap); }
     else { c.fillStyle=skin.cap; c.beginPath(); c.arc(x,y-20,9,Math.PI,0); c.fill(); c.stroke();
-      c.beginPath(); c.moveTo(x-9,y-20); c.lineTo(x+11,y-20); c.stroke();
-      c.fillStyle=shade(skin.cap,40); c.beginPath(); c.arc(x,y-27,2,0,6.283); c.fill(); c.stroke(); }
+      c.beginPath(); c.moveTo(x-9,y-20); c.lineTo(x+11,y-20); c.stroke(); }
   }
   // zeichnet Accessoires (Zylinder, Krone, Brille, …) auf einen Kopf an (hx,hy) mit Radius r
   function drawAcc(g,acc,hx,hy,r,cap){
@@ -1511,31 +1501,15 @@
     if(glow){ const gl=ctx.createRadialGradient(x,y+b,3,x,y+b,32); const pul=0.4+0.18*Math.sin(performance.now()/180);
       gl.addColorStop(0,hexA(glow,pul)); gl.addColorStop(1,hexA(glow,0)); ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(x,y+b,32,0,6.283); ctx.fill(); }
     ctx.lineWidth=3.5; ctx.strokeStyle=INK; ctx.lineJoin='round';
-    // Schuhe
-    ctx.fillStyle=shade(body,-46); rr(x-10,y+15+b,8,7,3); fs(); rr(x+2,y+15+b,8,7,3); fs();
-    // Ärmchen (nur im Ruhezustand)
-    if(!pointing){ ctx.fillStyle=shade(body,-6); rr(x-15.5,y-3+b,7,13,3); fs(); rr(x+8.5,y-3+b,7,13,3); fs(); }
-    // Körper mit Verlauf
     const bg=ctx.createLinearGradient(0,y-6+b,0,y+20+b);
-    bg.addColorStop(0,shade(body,36)); bg.addColorStop(1,shade(body,-22));
+    bg.addColorStop(0,shade(body,34)); bg.addColorStop(1,shade(body,-20));
     ctx.fillStyle=bg; rr(x-12,y-6+b,24,26,9); fs();
-    ctx.fillStyle='rgba(255,255,255,.16)'; rr(x-8,y-3+b,6,15,3); ctx.fill();
-    // Kopf
     ctx.beginPath(); ctx.arc(x,y-16+b,11,0,6.283); ctx.fillStyle='#FFE0B2'; fs();
-    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(x-4,y-19+b,3.2,0,6.283); ctx.fill();
-    // Augen (Weiß + Pupille + Glanz)
-    ctx.lineWidth=2; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x-4,y-16+b,3,0,6.283); ctx.arc(x+4,y-16+b,3,0,6.283); fs();
-    ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-3.3,y-16+b,1.5,0,6.283); ctx.arc(x+4.7,y-16+b,1.5,0,6.283); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x-3.8,y-16.8+b,0.7,0,6.283); ctx.arc(x+4.2,y-16.8+b,0.7,0,6.283); ctx.fill();
-    // Wangen + Lächeln
-    ctx.fillStyle='rgba(255,120,120,.4)'; ctx.beginPath(); ctx.arc(x-7,y-12+b,2,0,6.283); ctx.arc(x+7,y-12+b,2,0,6.283); ctx.fill();
-    ctx.strokeStyle=INK; ctx.lineWidth=1.7; ctx.beginPath(); ctx.arc(x,y-13+b,3,0.12*Math.PI,0.88*Math.PI); ctx.stroke();
-    ctx.lineWidth=3.5; ctx.strokeStyle=INK;
-    // Mütze / Accessoire
+    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(x-3.5,y-19+b,3,0,6.283); ctx.fill();
+    ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-17+b,2,0,6.283); ctx.arc(x+4,y-17+b,2,0,6.283); ctx.fill();
     if(isPlayer){ if(curSkin.acc){ drawAcc(ctx,curSkin.acc,x,y-16+b,11,curSkin.cap); }
       else { ctx.fillStyle=curSkin.cap; ctx.beginPath(); ctx.arc(x,y-22+b,11,Math.PI,0); fs();
-        ctx.beginPath(); ctx.moveTo(x-11,y-22+b); ctx.lineTo(x+13,y-22+b); ctx.stroke();
-        ctx.fillStyle=shade(curSkin.cap,40); ctx.beginPath(); ctx.arc(x,y-31+b,2.4,0,6.283); fs(); } }
+        ctx.beginPath(); ctx.moveTo(x-11,y-22+b); ctx.lineTo(x+13,y-22+b); ctx.stroke(); } }
     else if(hat){ ctx.fillStyle=hat; ctx.beginPath(); ctx.arc(x,y-21+b,10,Math.PI,0); fs();
       ctx.beginPath(); ctx.moveTo(x-10,y-21+b); ctx.lineTo(x+12,y-21+b); ctx.stroke(); }
     if(pointing){ const hx=x+Math.cos(ang)*22, hy=(y-2+b)+Math.sin(ang)*16;
