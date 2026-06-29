@@ -1043,8 +1043,8 @@
   function pickExcuse(i,btn){
     if(state!==ST.CAUGHT) return;
     if(excuseSet[i].ok){ escapeCatch(); }
-    else{ btn.classList.add('wrong'); rageTimer-=1.4; shake=reduceMotion?5:13; SND.play('wrong');
-      if(rageTimer<=0) endGame('Die Menge hat dich \u00fcberrollt.'); }
+    else{ btn.classList.add('wrong'); shake=reduceMotion?6:14; SND.play('wrong');
+      endGame('Falsche Ausrede \u2013 die Menge rastet aus!'); }
   }
   function escapeCatch(){
     SND.play('correct');
