@@ -1007,7 +1007,7 @@
 
   function getCaught(){
     state=ST.CAUGHT; SND.play('caught');
-    rageMax=Math.max(3.0,4.6-streetsCleared*0.12); rageTimer=rageMax;
+    rageMax=Math.max(3.0,4.6-streetsCleared*0.12)*5; rageTimer=rageMax;
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
     const kind=(currentEvent&&EXCUSES[currentEvent.kind])?currentEvent.kind:'fall';
     const pool=EXCUSES[kind];
