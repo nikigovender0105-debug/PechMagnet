@@ -416,12 +416,18 @@
     champagne:{label:'Die Sektdusche explodiert!',kind:'water',boom:'KORK-KNALL!',vis:'water',fall:false}
   };
   const ZONE_TYPES=[
-    {id:'baustelle',name:'Baustelle',bld:'#E6A817',density:0.4,events:['anvil','piano','safe','brick','beam','barrels','scaffold','paint']},
-    {id:'markt',name:'Marktplatz',bld:'#FF7A45',density:1.3,events:['pot','fruit','fountain','cart','icecream','paint']},
-    {id:'cafe',name:'Stra\u00dfencaf\u00e9',bld:'#19C3C3',density:1.0,events:['cake','coffee','waiter','grill','sausage']},
-    {id:'park',name:'Stadtpark',bld:'#2ECC40',density:0.8,events:['hydrant','pigeons','ducks','bees','swans']},
-    {id:'zoo',name:'Tierhandlung',bld:'#C77DFF',density:0.7,events:['dogs','pigeons','cow','rhino','parrot']},
-    {id:'hochzeit',name:'Hochzeit',bld:'#FF5DA2',density:1.2,events:['cake','arch','pigeons','champagne']}
+    {id:'baustelle',name:'Baustelle',bld:'#E6A817',density:0.4,events:['anvil','piano','safe','brick','beam','barrels','scaffold','paint'],
+      road:'#6b675f',side:'#b9a17a',deco:'rubble',lane:true, obs:{type:'fence',label:'Du bist in den Bauzaun gekracht!',kind:'fall'}},
+    {id:'markt',name:'Marktplatz',bld:'#FF7A45',density:1.3,events:['pot','fruit','fountain','cart','icecream','paint'],
+      road:'#9d8a6e',side:'#c7b48b',deco:'cobble',lane:false, obs:{type:'stall',label:'Du bist in einen Marktstand gerast!',kind:'fall'}},
+    {id:'cafe',name:'Stra\u00dfencaf\u00e9',bld:'#19C3C3',density:1.0,events:['cake','coffee','waiter','grill','sausage'],
+      road:'#7c8a8f',side:'#cdbBa0',deco:'tile',lane:true, obs:{type:'tables',label:'Du bist in die Caf\u00e9-St\u00fchle gest\u00fcrzt!',kind:'fall'}},
+    {id:'park',name:'Stadtpark',bld:'#2ECC40',density:0.8,events:['hydrant','pigeons','ducks','bees','swans'],
+      road:'#8ed07a',side:'#4fae46',deco:'grass',lane:false, obs:{type:'river',label:'Du bist in den Fluss gefallen!',kind:'accident'}},
+    {id:'zoo',name:'Tierhandlung',bld:'#C77DFF',density:0.7,events:['dogs','pigeons','cow','rhino','parrot'],
+      road:'#9a917a',side:'#b6a987',deco:'straw',lane:false, obs:{type:'cage',label:'Du bist gegen ein Gehege gelaufen!',kind:'animal'}},
+    {id:'hochzeit',name:'Hochzeit',bld:'#FF5DA2',density:1.2,events:['cake','arch','pigeons','champagne'],
+      road:'#c25b7e',side:'#ff9ec4',deco:'petals',lane:false, obs:{type:'cake',label:'Du hast die Hochzeitstorte umgeworfen!',kind:'fall'}}
   ];
   // Sonder-Events: seltene "Stehenbleiben"-Gro\u00dfereignisse ...
   const RARE_FREEZE=['meteor','rhino','blitz','plane','monster','cow'];
@@ -527,7 +533,7 @@
   let suspicion=0, susLocked=false, phase='calm', chaosTimer=2.6, alarmTimer=0, currentEvent=null;
   let player={x:0,y:0,vx:0,vy:0,bob:0,moving:false,spd:0};
   let npcs=[], bursts=[], coins=[];
-  let items=[], magnetTime=0, pickFx=[], hintCharges=0;
+  let items=[], magnetTime=0, pickFx=[], hintCharges=0, obstacles=[];
   const ITEMS={
     shield:{col:'#3A86FF',name:'Schild'},
     boost:{col:'#FF7A45',name:'Speed'},
@@ -922,16 +928,26 @@
   }
   function addZoneAbove(){
     const t=chooseZoneType();
-    const z={id:t.id,name:t.name,bld:t.bld,density:t.density,events:t.events, y0:topGenY-ZONE_H, y1:topGenY};
+    const z={id:t.id,name:t.name,bld:t.bld,density:t.density,events:t.events,
+      road:t.road,side:t.side,deco:t.deco,lane:t.lane,obsDef:t.obs, y0:topGenY-ZONE_H, y1:topGenY};
     z.bL=genBuildingRow(z); z.bR=genBuildingRow(z);
-    zones.push(z); spawnZoneCrowd(z); spawnZoneCoins(z); spawnZoneItems(z); topGenY=z.y0;
+    zones.push(z); spawnZoneCrowd(z); spawnZoneCoins(z); spawnZoneItems(z); spawnZoneObstacle(z); topGenY=z.y0;
+  }
+  function spawnZoneObstacle(z){
+    if(!z.obsDef) return;
+    if(Math.random()<0.78){
+      const gapW=Math.max(80, (W-ROAD_L-ROAD_R)*0.42);
+      const gapX=rand(ROAD_L+12, W-ROAD_R-12-gapW);
+      const y=rand(z.y0+ZONE_H*0.25, z.y1-ZONE_H*0.22);
+      obstacles.push({type:z.obsDef.type,label:z.obsDef.label,kind:z.obsDef.kind,y:y,gapX:gapX,gapW:gapW,hit:false});
+    }
   }
   function generateUpTo(targetY){ let g=0; while(topGenY>targetY && g++<40) addZoneAbove(); }
-  function cullBehind(limitY){ zones=zones.filter(z=>z.y0<=limitY); npcs=npcs.filter(n=>n.y<=limitY); coins=coins.filter(c=>c.y<=limitY); items=items.filter(it=>it.y<=limitY); }
+  function cullBehind(limitY){ zones=zones.filter(z=>z.y0<=limitY); npcs=npcs.filter(n=>n.y<=limitY); coins=coins.filter(c=>c.y<=limitY); items=items.filter(it=>it.y<=limitY); obstacles=obstacles.filter(o=>o.y<=limitY); }
   function currentZone(y){ for(const z of zones){ if(y>=z.y0 && y<z.y1) return z; } return zones[0]||null; }
 
   function resetWorld(){
-    zones=[]; npcs=[]; coins=[]; items=[]; magnetTime=0; pickFx=[]; hintCharges=0; coinsRun=0; lastZoneTypeId=null;
+    zones=[]; npcs=[]; coins=[]; items=[]; obstacles=[]; magnetTime=0; pickFx=[]; hintCharges=0; coinsRun=0; lastZoneTypeId=null;
     player.x=W/2; player.y=0; player.vx=player.vy=0; player.moving=false;
     bottomY=240; topGenY=bottomY;
     addZoneAbove();
@@ -1127,6 +1143,12 @@
     player.x=clamp(player.x+Math.cos(a)*28,playMinX(),playMaxX());
     player.y=Math.min(player.y+Math.sin(a)*28,bottomY-40);
     bumpCD=1.2; getCaught();
+  }
+  function hitObstacle(o){
+    currentEvent={kind:o.kind,label:o.label,subText:o.label};
+    confrontMode=false; specialMode=false; currentSpecialKey='';
+    shake=reduceMotion?7:15; SND.play('caught'); bumpCD=1.2;
+    getCaught();
   }
   // Startet die Death-Animation (WASTED bzw. themed je nach Special), danach Game-Over.
   function endGame(msg){
@@ -1386,6 +1408,12 @@
     if(bumpCD>0){ bumpCD-=dt; }
     else if(phase!=='special' && spawnProtect<=0){ for(const n of npcs){ if(Math.abs(n.y-player.y)>34) continue;
       const dx=player.x-n.x, dy=player.y-n.y; if(dx*dx+dy*dy<(PR+13)*(PR+13)){ confrontNPC(n); break; } } }
+    // Viertel-Hindernisse (Fluss, Bauzaun, Stände …) – nur durch den Durchgang!
+    if(phase!=='special' && spawnProtect<=0 && bumpCD<=0){
+      for(const o of obstacles){ if(o.hit) continue; if(Math.abs(player.y-o.y)>15) continue;
+        const inGap = player.x>o.gapX+6 && player.x<o.gapX+o.gapW-6;
+        if(!inGap){ o.hit=true; hitObstacle(o); break; } }
+    }
     if(state!==ST.PLAY) return;
 
     for(const b of bursts){ b.t+=dt; if(b.fall&&!b.impacted&&b.t>=b.fallDur){ b.impacted=true; shake=reduceMotion?6:15; SND.play(soundForVis(b.vis)); } }
@@ -1793,23 +1821,72 @@
 
   function drawStreetBase(){
     const top=camY-120, bot=camY+H+120;
-    // Gehweg
-    ctx.fillStyle='#d7dce2'; ctx.fillRect(-20,top,W+40,bot-top);
-    // Plattenfugen auf dem Gehweg
-    ctx.strokeStyle='rgba(26,26,46,.07)'; ctx.lineWidth=2;
-    const gs=Math.floor(top/40)*40;
-    for(let y=gs;y<bot;y+=40){ ctx.beginPath(); ctx.moveTo(-20,y); ctx.lineTo(ROAD_L,y); ctx.moveTo(W-ROAD_R,y); ctx.lineTo(W+20,y); ctx.stroke(); }
-    // Bordstein-Kanten (Glanz + Schatten)
-    ctx.fillStyle='#eef1f5'; ctx.fillRect(ROAD_L-6,top,4,bot-top); ctx.fillRect(W-ROAD_R+2,top,4,bot-top);
+    // Default-Untergrund (falls eine Lücke entsteht)
+    ctx.fillStyle='#cfd4da'; ctx.fillRect(-20,top,W+40,bot-top);
+    ctx.fillStyle='#5e626b'; ctx.fillRect(ROAD_L,top,W-ROAD_L-ROAD_R,bot-top);
+    // pro sichtbarer Zone das Viertel-Theme zeichnen
+    for(const z of zones){
+      const y0=Math.max(z.y0,top), y1=Math.min(z.y1,bot); if(y1<=y0) continue;
+      ctx.fillStyle=z.side||'#d7dce2'; ctx.fillRect(-20,y0,W+40,y1-y0);
+      ctx.fillStyle=z.road||'#5e626b'; ctx.fillRect(ROAD_L,y0,W-ROAD_L-ROAD_R,y1-y0);
+      drawDeco(z,y0,y1);
+      if(z.lane){ ctx.fillStyle='#FFD23F'; const s=Math.ceil(y0/46)*46; for(let y=s;y<y1-24;y+=46){ rr(W/2-4,y,8,24,3); ctx.fill(); } }
+    }
+    // Bordstein-Kanten über alles
+    ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fillRect(ROAD_L-6,top,4,bot-top); ctx.fillRect(W-ROAD_R+2,top,4,bot-top);
     ctx.fillStyle='rgba(26,26,46,.22)'; ctx.fillRect(ROAD_L-2,top,3,bot-top); ctx.fillRect(W-ROAD_R-1,top,3,bot-top);
-    // Asphalt mit sanftem Verlauf zur Mitte
-    const rg=ctx.createLinearGradient(ROAD_L,0,W-ROAD_R,0);
-    rg.addColorStop(0,'#54585f'); rg.addColorStop(0.5,'#686c75'); rg.addColorStop(1,'#54585f');
-    ctx.fillStyle=rg; ctx.fillRect(ROAD_L,top,W-ROAD_L-ROAD_R,bot-top);
-    // Mittellinie
-    ctx.fillStyle='#FFD23F';
-    const start=Math.floor(top/46)*46;
-    for(let y=start;y<bot;y+=46){ rr(W/2-4,y,8,24,3); ctx.fill(); }
+  }
+  function drawDeco(z,y0,y1){
+    const d=z.deco; if(!d) return;
+    const step=28, sy=Math.floor(y0/step)*step;
+    for(let y=sy;y<y1;y+=step){ for(let gx=-10;gx<W+10;gx+=step){
+      const h=((gx*374761393)^(y*668265263))>>>0, r=(h%1000)/1000; if(r>0.62) continue;
+      const px=gx+(h%step), py=y+((h>>4)%step); if(py<y0||py>=y1) continue;
+      const onRoad = px>ROAD_L+2 && px<W-ROAD_R-2;
+      if(d==='grass'){ ctx.strokeStyle=onRoad?'rgba(40,140,50,.45)':'rgba(30,110,40,.6)'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(px,py+3); ctx.lineTo(px-2,py-3); ctx.moveTo(px,py+3); ctx.lineTo(px+2,py-3); ctx.stroke(); }
+      else if(d==='cobble'){ if(!onRoad) continue; ctx.fillStyle='rgba(255,255,255,.10)'; rr(px,py,9,6,2); ctx.fill(); ctx.strokeStyle='rgba(26,26,46,.10)'; ctx.lineWidth=1; ctx.stroke(); }
+      else if(d==='rubble'){ ctx.fillStyle=onRoad?'rgba(40,40,46,.18)':'rgba(120,90,50,.3)'; ctx.beginPath(); ctx.arc(px,py,2.4,0,6.283); ctx.fill(); }
+      else if(d==='tile'){ if(!onRoad) continue; ctx.strokeStyle='rgba(255,255,255,.10)'; ctx.lineWidth=1.5; ctx.strokeRect(px,py,12,12); }
+      else if(d==='straw'){ ctx.strokeStyle='rgba(200,170,80,.5)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px-3,py); ctx.lineTo(px+3,py-2); ctx.stroke(); }
+      else if(d==='petals'){ ctx.fillStyle=(h&1)?'rgba(255,158,196,.7)':'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(px,py,2.2,0,6.283); ctx.fill(); }
+    } }
+  }
+  function drawObstacle(o){
+    if(o.y<camY-50||o.y>camY+H+70) return;
+    const y=o.y, L=ROAD_L, R=W-ROAD_R, g0=o.gapX, g1=o.gapX+o.gapW;
+    ctx.lineJoin='round';
+    if(o.type==='river'){
+      const h=32; ctx.fillStyle='#3A86FF'; ctx.fillRect(L,y-h/2,R-L,h);
+      ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=2;
+      for(let i=0;i<2;i++){ ctx.beginPath(); for(let xx=L;xx<=R;xx+=12) ctx.lineTo(xx,y-7+i*11+Math.sin((xx+performance.now()/220)/16)*2.5); ctx.stroke(); }
+      ctx.fillStyle='#9c6b3f'; ctx.strokeStyle=INK; ctx.lineWidth=2; rr(g0-2,y-h/2-3,o.gapW+4,h+6,3); fs();
+      ctx.strokeStyle='rgba(26,26,46,.45)'; ctx.lineWidth=2; for(let px=g0+4;px<g1;px+=9){ ctx.beginPath(); ctx.moveTo(px,y-h/2-2); ctx.lineTo(px,y+h/2+2); ctx.stroke(); }
+      return;
+    }
+    barrierSeg(o,L,g0,y); barrierSeg(o,g1,R,y);
+    // offener Durchgang markieren
+    ctx.fillStyle='rgba(46,204,64,.25)'; ctx.fillRect(g0,y-13,o.gapW,26);
+  }
+  function barrierSeg(o,x0,x1,y){
+    if(x1-x0<4) return;
+    ctx.strokeStyle=INK; ctx.lineWidth=2;
+    if(o.type==='fence'){
+      ctx.fillStyle='#FF7A45'; rr(x0,y-9,x1-x0,18,2); fs();
+      ctx.fillStyle='#FFF6E5'; for(let px=x0+3;px<x1-7;px+=18){ rr(px,y-9,8,18,1); ctx.fill(); }
+    } else if(o.type==='stall'){
+      ctx.fillStyle='#8C5A2B'; rr(x0,y-1,x1-x0,12,2); fs();
+      for(let px=x0;px<x1-2;px+=12){ ctx.fillStyle=(Math.floor(px/12)%2)?'#E63946':'#FFF6E5'; rr(px,y-17,Math.min(12,x1-px),8,2); fs(); }
+    } else if(o.type==='tables'){
+      for(let px=x0+10;px<x1;px+=28){ ctx.fillStyle='#7c8a8f'; rr(px-2,y-2,4,12,1); fs(); ctx.fillStyle='#cdb89a'; ctx.beginPath(); ctx.arc(px,y-4,7,0,6.283); fs(); }
+    } else if(o.type==='cage'){
+      ctx.fillStyle='rgba(120,120,130,.22)'; rr(x0,y-14,x1-x0,28,2); ctx.fill();
+      ctx.strokeStyle='#5a626c'; ctx.lineWidth=3; for(let px=x0+4;px<x1;px+=10){ ctx.beginPath(); ctx.moveTo(px,y-14); ctx.lineTo(px,y+14); ctx.stroke(); }
+      ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x0,y-14); ctx.lineTo(x1,y-14); ctx.moveTo(x0,y+14); ctx.lineTo(x1,y+14); ctx.stroke();
+    } else if(o.type==='cake'){
+      ctx.fillStyle='#FFF6E5'; rr(x0,y-6,x1-x0,18,3); fs();
+      ctx.fillStyle='#FF9EC4'; for(let px=x0+7;px<x1;px+=15){ ctx.beginPath(); ctx.arc(px,y-6,4,0,6.283); ctx.fill(); }
+    } else { ctx.fillStyle='#8a8f99'; rr(x0,y-9,x1-x0,18,2); fs(); }
   }
   function drawBuilding(x,w,s){
     if(s.y1<camY-20||s.y0>camY+H+20) return;
@@ -1893,6 +1970,7 @@
     ctx.translate(0,-camY);
 
     drawStreetBase(); drawZones(); drawLamps();
+    for(const o of obstacles) drawObstacle(o);
 
     for(const c of coins){ if(c.y<camY-40||c.y>camY+H+40) continue; drawCoin(c.x,c.y); }
     for(const it of items){ if(it.y<camY-40||it.y>camY+H+40) continue; drawItem(it); }
