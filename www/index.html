@@ -416,17 +416,19 @@
     champagne:{label:'Die Sektdusche explodiert!',kind:'water',boom:'KORK-KNALL!',vis:'water',fall:false}
   };
   const ZONE_TYPES=[
-    {id:'baustelle',name:'Baustelle',bld:'#E6A817',density:0.4,events:['anvil','piano','safe','brick','beam','barrels','scaffold','paint'],
+    {id:'stadt',name:'Innenstadt',bld:'#5C8AA6',density:1.0,weight:4.5,events:['anvil','brick','beam','cart','fountain','pigeons','dogs','paint'],
+      road:'#5e626b',side:'#d7dce2',deco:null,lane:true, obs:{type:'fence',label:'Du bist in eine Absperrung gekracht!',kind:'fall'}},
+    {id:'baustelle',name:'Baustelle',bld:'#E6A817',density:0.4,weight:2.4,events:['anvil','piano','safe','brick','beam','barrels','scaffold','paint'],
       road:'#6b675f',side:'#b9a17a',deco:'rubble',lane:true, obs:{type:'fence',label:'Du bist in den Bauzaun gekracht!',kind:'fall'}},
-    {id:'markt',name:'Marktplatz',bld:'#FF7A45',density:1.3,events:['pot','fruit','fountain','cart','icecream','paint'],
+    {id:'markt',name:'Marktplatz',bld:'#FF7A45',density:1.3,weight:1.0,events:['pot','fruit','fountain','cart','icecream','paint'],
       road:'#9d8a6e',side:'#c7b48b',deco:'cobble',lane:false, obs:{type:'stall',label:'Du bist in einen Marktstand gerast!',kind:'fall'}},
-    {id:'cafe',name:'Stra\u00dfencaf\u00e9',bld:'#19C3C3',density:1.0,events:['cake','coffee','waiter','grill','sausage'],
+    {id:'cafe',name:'Stra\u00dfencaf\u00e9',bld:'#19C3C3',density:1.0,weight:1.6,events:['cake','coffee','waiter','grill','sausage'],
       road:'#7c8a8f',side:'#cdbBa0',deco:'tile',lane:true, obs:{type:'tables',label:'Du bist in die Caf\u00e9-St\u00fchle gest\u00fcrzt!',kind:'fall'}},
-    {id:'park',name:'Stadtpark',bld:'#2ECC40',density:0.8,events:['hydrant','pigeons','ducks','bees','swans'],
+    {id:'park',name:'Stadtpark',bld:'#2ECC40',density:0.8,weight:0.9,events:['hydrant','pigeons','ducks','bees','swans'],
       road:'#8ed07a',side:'#4fae46',deco:'grass',lane:false, obs:{type:'river',label:'Du bist in den Fluss gefallen!',kind:'accident'}},
-    {id:'zoo',name:'Tierhandlung',bld:'#C77DFF',density:0.7,events:['dogs','pigeons','cow','rhino','parrot'],
+    {id:'zoo',name:'Tierhandlung',bld:'#C77DFF',density:0.7,weight:0.7,events:['dogs','pigeons','cow','rhino','parrot'],
       road:'#9a917a',side:'#b6a987',deco:'straw',lane:false, obs:{type:'cage',label:'Du bist gegen ein Gehege gelaufen!',kind:'animal'}},
-    {id:'hochzeit',name:'Hochzeit',bld:'#FF5DA2',density:1.2,events:['cake','arch','pigeons','champagne'],
+    {id:'hochzeit',name:'Hochzeit',bld:'#FF5DA2',density:1.2,weight:0.6,events:['cake','arch','pigeons','champagne'],
       road:'#c25b7e',side:'#ff9ec4',deco:'petals',lane:false, obs:{type:'cake',label:'Du hast die Hochzeitstorte umgeworfen!',kind:'fall'}}
   ];
   // Sonder-Events: seltene "Stehenbleiben"-Gro\u00dfereignisse ...
@@ -905,9 +907,15 @@
     return segs;
   }
   let lastZoneTypeId=null;
+  const ZONE_WEIGHT=ZONE_TYPES.reduce((a,t)=>a+(t.weight||1),0);
+  function weightedZone(){
+    let r=Math.random()*ZONE_WEIGHT, acc=0;
+    for(const z of ZONE_TYPES){ acc+=(z.weight||1); if(r<=acc) return z; }
+    return ZONE_TYPES[0];
+  }
   function chooseZoneType(){
-    let t=pick(ZONE_TYPES);
-    if(t.id===lastZoneTypeId) t=pick(ZONE_TYPES);
+    let t=weightedZone();
+    if(t.id===lastZoneTypeId) t=weightedZone(); // direkte Wiederholung etwas reduzieren
     lastZoneTypeId=t.id; return t;
   }
   function spawnZoneCrowd(z){
