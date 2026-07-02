@@ -1484,19 +1484,52 @@
     else if(it.type==='calm'){ ctx.strokeStyle='#fff'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(x,y+2,6,Math.PI*0.15,Math.PI*0.85); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x,y-9); ctx.quadraticCurveTo(x+6,y-3,x,y+2); ctx.quadraticCurveTo(x-6,y-3,x,y-9); ctx.closePath(); ctx.fillStyle='#fff'; ctx.fill(); }
   }
+  // freundliches Gesicht (weisse Augen, Pupillen, Glanz, Lächeln); Teufelchen guckt böse
+  function drawFace(g,skin,hx,hy,r){
+    const ex=r*0.38, ey=hy-r*0.05, er=r*0.27;
+    g.lineWidth=Math.max(1.2,r*0.14); g.strokeStyle=INK;
+    g.fillStyle='#fff';
+    g.beginPath(); g.arc(hx-ex,ey,er,0,6.283); g.fill(); g.stroke();
+    g.beginPath(); g.arc(hx+ex,ey,er,0,6.283); g.fill(); g.stroke();
+    g.fillStyle=INK;
+    g.beginPath(); g.arc(hx-ex+er*0.25,ey+er*0.12,er*0.5,0,6.283); g.arc(hx+ex+er*0.25,ey+er*0.12,er*0.5,0,6.283); g.fill();
+    g.fillStyle='#fff';
+    g.beginPath(); g.arc(hx-ex,ey-er*0.32,er*0.22,0,6.283); g.arc(hx+ex,ey-er*0.32,er*0.22,0,6.283); g.fill();
+    g.fillStyle='rgba(255,120,120,.38)';  // Wangen
+    g.beginPath(); g.arc(hx-r*0.74,hy+r*0.34,r*0.2,0,6.283); g.arc(hx+r*0.74,hy+r*0.34,r*0.2,0,6.283); g.fill();
+    g.strokeStyle=INK; g.lineWidth=Math.max(1.3,r*0.15);
+    if(skin&&skin.acc==='horns'){  // fieses Grinsen + Brauen
+      g.beginPath(); g.arc(hx,hy+r*0.28,r*0.34,0.15*Math.PI,0.85*Math.PI); g.stroke();
+      g.beginPath(); g.moveTo(hx-ex-er,ey-er*1.7); g.lineTo(hx-ex+er*0.7,ey-er*0.9);
+      g.moveTo(hx+ex+er,ey-er*1.7); g.lineTo(hx+ex-er*0.7,ey-er*0.9); g.stroke();
+    } else {
+      g.beginPath(); g.arc(hx,hy+r*0.3,r*0.3,0.12*Math.PI,0.88*Math.PI); g.stroke();
+    }
+  }
   function drawSkinPreview(cnv,skin){
     const c=cnv.getContext('2d'); const x=27,y=36;
     c.clearRect(0,0,54,54); c.lineWidth=3; c.strokeStyle=INK; c.lineJoin='round';
     const body=skin.rainbow?rainbowHex(performance.now()/300):skin.body;
     const glow=skin.glow||(skin.rainbow?body:null);
     if(glow){ const gl=c.createRadialGradient(x,y-2,2,x,y-2,26); gl.addColorStop(0,hexA(glow,0.55)); gl.addColorStop(1,hexA(glow,0)); c.fillStyle=gl; c.beginPath(); c.arc(x,y-2,26,0,6.283); c.fill(); }
-    c.fillStyle=body; rrC(c,x-11,y-6,22,22,8); c.fill(); c.stroke();
+    // Schuhe
+    c.fillStyle=shade(body,-46); rrC(c,x-9,y+13,7,6,2.5); c.fill(); c.stroke(); rrC(c,x+2,y+13,7,6,2.5); c.fill(); c.stroke();
+    // Ärmchen
+    c.fillStyle=shade(body,-10);
+    c.beginPath(); c.arc(x-12,y+5,3.4,0,6.283); c.fill(); c.stroke();
+    c.beginPath(); c.arc(x+12,y+5,3.4,0,6.283); c.fill(); c.stroke();
+    // Körper mit Verlauf
+    const bg=c.createLinearGradient(0,y-6,0,y+16);
+    bg.addColorStop(0,shade(body,34)); bg.addColorStop(1,shade(body,-20));
+    c.fillStyle=bg; rrC(c,x-11,y-6,22,22,8); c.fill(); c.stroke();
     if(skin.pat) drawBodyPattern(c,skin,x,y-6,22,22);
     c.beginPath(); c.arc(x,y-15,9,0,6.283); c.fillStyle='#FFE0B2'; c.fill(); c.stroke();
-    c.fillStyle=INK; c.beginPath(); c.arc(x-3,y-16,1.6,0,6.283); c.arc(x+3,y-16,1.6,0,6.283); c.fill();
+    drawFace(c,skin,x,y-15,9);
+    c.lineWidth=3; c.strokeStyle=INK;
     if(skin.acc){ drawAcc(c,skin.acc,x,y-15,9,skin.cap); }
     else { c.fillStyle=skin.cap; c.beginPath(); c.arc(x,y-20,9,Math.PI,0); c.fill(); c.stroke();
-      c.beginPath(); c.moveTo(x-9,y-20); c.lineTo(x+11,y-20); c.stroke(); }
+      c.beginPath(); c.moveTo(x-9,y-20); c.lineTo(x+11,y-20); c.stroke();
+      c.fillStyle=shade(skin.cap,40); c.lineWidth=2; c.beginPath(); c.arc(x,y-28.5,2,0,6.283); c.fill(); c.stroke(); }
   }
   // zeichnet Accessoires (Zylinder, Krone, Brille, …) auf einen Kopf an (hx,hy) mit Radius r
   function drawAcc(g,acc,hx,hy,r,cap){
@@ -1567,16 +1600,29 @@
     if(glow){ const gl=ctx.createRadialGradient(x,y+b,3,x,y+b,32); const pul=0.4+0.18*Math.sin(performance.now()/180);
       gl.addColorStop(0,hexA(glow,pul)); gl.addColorStop(1,hexA(glow,0)); ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(x,y+b,32,0,6.283); ctx.fill(); }
     ctx.lineWidth=3.5; ctx.strokeStyle=INK; ctx.lineJoin='round';
+    if(isPlayer){
+      const st=player.moving?Math.sin(bob*2)*3:0;
+      // Schuhe (trippeln beim Laufen)
+      ctx.fillStyle=shade(body,-46); ctx.lineWidth=3;
+      rr(x-10,y+14+b+st,8,7,3); fs(); rr(x+2,y+14+b-st,8,7,3); fs();
+      // Ärmchen schwingen gegenläufig
+      ctx.fillStyle=shade(body,-10);
+      ctx.beginPath(); ctx.arc(x-14,y+4+b-st*0.8,4,0,6.283); fs();
+      ctx.beginPath(); ctx.arc(x+14,y+4+b+st*0.8,4,0,6.283); fs();
+      ctx.lineWidth=3.5;
+    }
     const bg=ctx.createLinearGradient(0,y-6+b,0,y+20+b);
     bg.addColorStop(0,shade(body,34)); bg.addColorStop(1,shade(body,-20));
     ctx.fillStyle=bg; rr(x-12,y-6+b,24,26,9); fs();
     if(isPlayer && curSkin.pat) drawBodyPattern(ctx,curSkin,x,y-6+b,24,26);
     ctx.beginPath(); ctx.arc(x,y-16+b,11,0,6.283); ctx.fillStyle='#FFE0B2'; fs();
     ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(x-3.5,y-19+b,3,0,6.283); ctx.fill();
-    ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-17+b,2,0,6.283); ctx.arc(x+4,y-17+b,2,0,6.283); ctx.fill();
+    if(isPlayer){ drawFace(ctx,curSkin,x,y-16+b,11); ctx.lineWidth=3.5; ctx.strokeStyle=INK; }
+    else { ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-17+b,2,0,6.283); ctx.arc(x+4,y-17+b,2,0,6.283); ctx.fill(); }
     if(isPlayer){ if(curSkin.acc){ drawAcc(ctx,curSkin.acc,x,y-16+b,11,curSkin.cap); }
       else { ctx.fillStyle=curSkin.cap; ctx.beginPath(); ctx.arc(x,y-22+b,11,Math.PI,0); fs();
-        ctx.beginPath(); ctx.moveTo(x-11,y-22+b); ctx.lineTo(x+13,y-22+b); ctx.stroke(); } }
+        ctx.beginPath(); ctx.moveTo(x-11,y-22+b); ctx.lineTo(x+13,y-22+b); ctx.stroke();
+        ctx.fillStyle=shade(curSkin.cap,40); ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(x,y-32.5+b,2.4,0,6.283); fs(); ctx.lineWidth=3.5; } }
     else if(hat){ ctx.fillStyle=hat; ctx.beginPath(); ctx.arc(x,y-21+b,10,Math.PI,0); fs();
       ctx.beginPath(); ctx.moveTo(x-10,y-21+b); ctx.lineTo(x+12,y-21+b); ctx.stroke(); }
     if(pointing){ const hx=x+Math.cos(ang)*22, hy=(y-2+b)+Math.sin(ang)*16;
