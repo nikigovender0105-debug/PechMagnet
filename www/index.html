@@ -64,11 +64,52 @@
   .btn.shopB{ background:var(--gold); color:var(--ink); }
   .btn.achB{ background:var(--teal); color:var(--ink); }
   .btn.onlB{ background:var(--pink); }
-  .meRow{ display:flex; align-items:center; gap:10px; background:#fff; border:3px solid var(--ink); border-radius:14px;
-    padding:5px 12px; margin-top:12px; box-shadow:3px 3px 0 var(--ink); }
-  .meRow canvas{ width:46px; height:46px; }
-  .meRow .meLbl{ font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--purple); text-align:left; }
-  .meRow .meName{ font-size:16px; font-weight:700; color:var(--ink); text-align:left; line-height:1; }
+  /* ---- Survivor.io-Lobby ---- */
+  #menu.lobby{ justify-content:flex-end; gap:10px; padding:12px;
+    background:linear-gradient(rgba(14,14,26,.20), rgba(14,14,26,.30) 55%, rgba(14,14,26,.62)); }
+  .topbar{ position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; z-index:2; }
+  .plate{ display:flex; align-items:center; gap:6px; background:rgba(18,18,38,.92); border:3px solid var(--ink);
+    border-radius:14px; padding:4px 10px; color:var(--cream); font-weight:700; box-shadow:0 3px 0 rgba(0,0,0,.4); }
+  .nameplate{ padding:3px 10px 3px 4px; pointer-events:auto; }
+  .nameplate canvas{ width:38px; height:38px; }
+  .nameplate #nameInput{ width:104px; background:transparent; border:none; outline:none; color:var(--cream);
+    box-shadow:none; border-radius:0; padding:0; font-family:inherit; font-weight:700; font-size:14px;
+    pointer-events:auto; -webkit-user-select:text; user-select:text; }
+  .nameplate #nameInput::placeholder{ color:rgba(255,246,229,.5); }
+  .mplate{ pointer-events:auto; cursor:pointer; font-family:inherit; font-size:15px; }
+  .plates{ display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+  .plate.cur{ font-size:14px; } .plate.cur b{ color:var(--gold); font-size:16px; }
+  .hero{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; margin-bottom:auto; margin-top:84px; }
+  .hero .logo{ font-size:40px; margin-bottom:8px; }
+  #meSkin{ width:150px; height:150px; filter:drop-shadow(0 10px 8px rgba(10,10,20,.35)); animation:heroFloat 2.4s ease-in-out infinite; }
+  @keyframes heroFloat{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+  .heroShadow{ width:96px; height:20px; margin-top:-10px; border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(10,10,20,.42), transparent 70%); animation:shadowPulse 2.4s ease-in-out infinite; }
+  @keyframes shadowPulse{ 0%,100%{transform:scaleX(1);} 50%{transform:scaleX(.82);} }
+  #meSkinName{ margin-top:2px; font-size:15px; }
+  .chapterCard{ position:relative; z-index:1; width:100%; max-width:360px; background:rgba(18,18,38,.92);
+    border:3px solid var(--ink); border-radius:16px; padding:10px 12px; box-shadow:0 4px 0 rgba(0,0,0,.4); }
+  .chTitle{ font-size:15px; font-weight:700; color:var(--gold); letter-spacing:1px; }
+  .chapterCard .boardTitle{ margin-top:6px; color:var(--teal); }
+  .chapterCard .board{ max-height:96px; overflow-y:auto; touch-action:pan-y; pointer-events:auto; }
+  .battleBtn{ position:relative; z-index:1; pointer-events:auto; cursor:pointer; width:100%; max-width:340px;
+    font-family:inherit; font-weight:700; font-size:26px; color:#fff; letter-spacing:1px;
+    background:linear-gradient(#84e35b, #2ECC40 45%, #1ca233); border:4px solid var(--ink); border-radius:20px;
+    padding:14px 20px; box-shadow:0 6px 0 var(--ink), 0 10px 14px rgba(0,0,0,.35); text-shadow:0 2px 0 rgba(0,0,0,.3);
+    animation:btnPulse 1s ease-in-out infinite alternate; overflow:hidden; }
+  .battleBtn::before{ content:''; position:absolute; left:8px; right:8px; top:5px; height:10px; border-radius:8px;
+    background:rgba(255,255,255,.4); }
+  .battleBtn:active{ transform:translateY(5px); box-shadow:0 1px 0 var(--ink); }
+  .navbar{ position:relative; z-index:1; display:flex; width:calc(100% + 24px); margin:2px -12px -12px;
+    background:rgba(14,14,30,.96); border-top:3px solid var(--ink);
+    padding:6px 8px calc(8px + env(safe-area-inset-bottom)); gap:8px; }
+  .navb{ pointer-events:auto; cursor:pointer; flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+    font-family:inherit; font-weight:700; font-size:22px; color:var(--cream);
+    background:rgba(124,92,255,.16); border:2.5px solid var(--ink); border-radius:13px; padding:7px 4px 5px; }
+  .navb span{ font-size:11px; letter-spacing:1px; opacity:.9; }
+  .navb:active{ background:rgba(124,92,255,.4); transform:translateY(2px); }
+  #game:has(#menu:not(.hidden)) #muteBtn{ display:none; }
+  #game:has(#menu:not(.hidden)) #hud{ display:none; }
   .lead{ color:var(--ink); font-size:15px; font-weight:500; line-height:1.45; }
   .lead b{ color:var(--danger); } .lead .safe{ color:#1ca233; }
   .btn{ pointer-events:auto; cursor:pointer; font-family:inherit; font-weight:700; font-size:20px; color:var(--cream);
@@ -206,36 +247,34 @@
   </div>
   <div id="vignette"></div>
 
-  <div id="menu" class="screen">
-    <div class="card">
-      <h1 class="logo"><span class="logoMag">&#129522;</span> PECH<small>MAGNET</small></h1>
-      <p class="lead">Du bist an allem schuld &ndash; immer, &uuml;berall.<br>
-      Lauf so weit wie m&ouml;glich die <b>endlose Stra&szlig;e</b> hoch, ohne dass die Menge dich schnappt.</p>
-      <div class="row-stats">
-        <div class="stat"><div class="k">&#127942; HIGHSCORE</div><div class="v" id="hsMenu">0</div></div>
-        <div class="stat"><div class="k">&#129689; M&Uuml;NZEN</div><div class="v" id="coinsMenu">0</div></div>
-      </div>
-      <div class="meRow">
-        <canvas id="meSkin" width="54" height="54"></canvas>
-        <div>
-          <div class="meLbl">DEIN PECHVOGEL</div>
-          <div class="meName" id="meSkinName">Klassiker</div>
-        </div>
-      </div>
-      <div class="boardWrap">
-        <div class="boardTitle">BESTENLISTE</div>
-        <div id="boardMenu" class="board"></div>
-      </div>
-      <div class="nameRow">
-        <span class="nameLbl">NAME</span>
+  <div id="menu" class="screen lobby">
+    <div class="topbar">
+      <div class="plate nameplate">
+        <canvas id="meAvatar" width="44" height="44"></canvas>
         <input id="nameInput" maxlength="20" placeholder="Dein Name" autocomplete="off" />
       </div>
+      <div class="plates">
+        <div class="plate cur">&#127942; <b id="hsMenu">0</b></div>
+        <div class="plate cur">&#129689; <b id="coinsMenu">0</b></div>
+        <button class="plate cur mplate" id="muteBtn2">&#128266;</button>
+      </div>
     </div>
-    <div class="btnrow">
-      <button class="btn go big" id="startBtn">&#9654; LOS GEHT'S</button>
-      <button class="btn shopB" id="shopBtn">&#128722; SHOP</button>
-      <button class="btn achB" id="achBtn">&#127942; ERFOLGE</button>
-      <button class="btn onlB" id="onlineBtn">&#127758; ONLINE</button>
+    <div class="hero">
+      <h1 class="logo"><span class="logoMag">&#129522;</span> PECH<small>MAGNET</small></h1>
+      <canvas id="meSkin" width="150" height="150"></canvas>
+      <div class="heroShadow"></div>
+      <div class="plate" id="meSkinName">Klassiker</div>
+    </div>
+    <div class="chapterCard">
+      <div class="chTitle">&#127961;&#65039; KAPITEL 1 &middot; ENDLOSE STRASSE</div>
+      <div class="boardTitle">BESTENLISTE</div>
+      <div id="boardMenu" class="board"></div>
+    </div>
+    <button class="battleBtn" id="startBtn">&#9876;&#65039; LOS GEHT'S</button>
+    <div class="navbar">
+      <button class="navb" id="shopBtn">&#128722;<span>SHOP</span></button>
+      <button class="navb" id="achBtn">&#127942;<span>ERFOLGE</span></button>
+      <button class="navb" id="onlineBtn">&#127758;<span>ONLINE</span></button>
     </div>
   </div>
 
@@ -3114,12 +3153,19 @@
   document.getElementById('miniBtn').onclick=()=>miniClick();
   document.getElementById('minigame').addEventListener('pointerdown',e=>{ if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
 
-  const muteBtn=document.getElementById('muteBtn');
-  function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted); }
-  muteBtn.onclick=()=>{ save.muted=!save.muted; persist(); refreshMute(); if(!save.muted){ SND.ensure(); SND.play('click'); } };
+  const muteBtn=document.getElementById('muteBtn'), muteBtn2=document.getElementById('muteBtn2');
+  function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted);
+    if(muteBtn2) muteBtn2.textContent=save.muted?'🔇':'🔊'; }
+  function toggleMute(){ save.muted=!save.muted; persist(); refreshMute(); if(!save.muted){ SND.ensure(); SND.play('click'); } }
+  muteBtn.onclick=toggleMute; if(muteBtn2) muteBtn2.onclick=toggleMute;
 
   function updateMenuSkin(){
-    const cv=document.getElementById('meSkin'); if(cv) drawSkinPreview(cv,curSkin);
+    for(const id of ['meSkin','meAvatar']){
+      const cv=document.getElementById(id); if(!cv) continue;
+      const c=cv.getContext('2d');
+      c.setTransform(cv.width/54,0,0,cv.height/54,0,0);   // Vorschau hochskaliert, bleibt gestochen scharf
+      drawSkinPreview(cv,curSkin);
+    }
     const nm=document.getElementById('meSkinName'); if(nm) nm.textContent=curSkin.name;
   }
   loadSave(); applySkin(); refreshMute(); SND.setTrack('menu');
