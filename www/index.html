@@ -47,8 +47,28 @@
   .card{ background:var(--cream); border:4px solid var(--ink); border-radius:22px; box-shadow:8px 8px 0 var(--ink);
     padding:22px 20px; width:100%; max-width:360px; }
   h1.logo{ font-size:46px; font-weight:700; line-height:.95; color:var(--gold); -webkit-text-stroke:4px var(--ink);
-    paint-order:stroke fill; transform:rotate(-3deg); margin-bottom:4px; }
+    paint-order:stroke fill; transform:rotate(-3deg); margin-bottom:4px; animation:logoWob 2.8s ease-in-out infinite;
+    filter:drop-shadow(0 5px 0 rgba(26,26,46,.28)); }
+  @keyframes logoWob{ 0%,100%{transform:rotate(-3.5deg) scale(1);} 50%{transform:rotate(-1deg) scale(1.035);} }
   .logo small{ display:block; font-size:18px; color:var(--purple); -webkit-text-stroke:2px var(--ink); transform:rotate(2deg); }
+  .logoMag{ display:inline-block; -webkit-text-stroke:0; filter:none; font-size:38px;
+    animation:magSwing 1.7s ease-in-out infinite alternate; transform-origin:50% 0; }
+  @keyframes magSwing{ from{transform:rotate(-14deg);} to{transform:rotate(10deg);} }
+  #menu::before{ content:''; position:absolute; inset:-90px; pointer-events:none; z-index:0;
+    background:repeating-linear-gradient(-35deg, rgba(255,210,63,.07) 0 26px, rgba(124,92,255,.07) 26px 52px);
+    animation:stripeMove 4.5s linear infinite; }
+  @keyframes stripeMove{ from{transform:translateY(0);} to{transform:translateY(63.5px);} }
+  #menu .card, #menu .btnrow{ position:relative; z-index:1; }
+  .btn.big{ font-size:23px; padding:14px 28px; animation:btnPulse 1s ease-in-out infinite alternate; }
+  @keyframes btnPulse{ from{transform:scale(1);} to{transform:scale(1.045);} }
+  .btn.shopB{ background:var(--gold); color:var(--ink); }
+  .btn.achB{ background:var(--teal); color:var(--ink); }
+  .btn.onlB{ background:var(--pink); }
+  .meRow{ display:flex; align-items:center; gap:10px; background:#fff; border:3px solid var(--ink); border-radius:14px;
+    padding:5px 12px; margin-top:12px; box-shadow:3px 3px 0 var(--ink); }
+  .meRow canvas{ width:46px; height:46px; }
+  .meRow .meLbl{ font-size:10px; font-weight:700; letter-spacing:1.5px; color:var(--purple); text-align:left; }
+  .meRow .meName{ font-size:16px; font-weight:700; color:var(--ink); text-align:left; line-height:1; }
   .lead{ color:var(--ink); font-size:15px; font-weight:500; line-height:1.45; }
   .lead b{ color:var(--danger); } .lead .safe{ color:#1ca233; }
   .btn{ pointer-events:auto; cursor:pointer; font-family:inherit; font-weight:700; font-size:20px; color:var(--cream);
@@ -188,12 +208,19 @@
 
   <div id="menu" class="screen">
     <div class="card">
-      <h1 class="logo">PECH<small>MAGNET</small></h1>
+      <h1 class="logo"><span class="logoMag">&#129522;</span> PECH<small>MAGNET</small></h1>
       <p class="lead">Du bist an allem schuld &ndash; immer, &uuml;berall.<br>
       Lauf so weit wie m&ouml;glich die <b>endlose Stra&szlig;e</b> hoch, ohne dass die Menge dich schnappt.</p>
       <div class="row-stats">
-        <div class="stat"><div class="k">HIGHSCORE</div><div class="v" id="hsMenu">0</div></div>
-        <div class="stat"><div class="k">M&Uuml;NZEN</div><div class="v" id="coinsMenu">0</div></div>
+        <div class="stat"><div class="k">&#127942; HIGHSCORE</div><div class="v" id="hsMenu">0</div></div>
+        <div class="stat"><div class="k">&#129689; M&Uuml;NZEN</div><div class="v" id="coinsMenu">0</div></div>
+      </div>
+      <div class="meRow">
+        <canvas id="meSkin" width="54" height="54"></canvas>
+        <div>
+          <div class="meLbl">DEIN PECHVOGEL</div>
+          <div class="meName" id="meSkinName">Klassiker</div>
+        </div>
       </div>
       <div class="boardWrap">
         <div class="boardTitle">BESTENLISTE</div>
@@ -205,10 +232,10 @@
       </div>
     </div>
     <div class="btnrow">
-      <button class="btn go" id="startBtn">LOS GEHT'S</button>
-      <button class="btn" id="shopBtn">SHOP</button>
-      <button class="btn" id="achBtn">ERFOLGE</button>
-      <button class="btn" id="onlineBtn">ONLINE</button>
+      <button class="btn go big" id="startBtn">&#9654; LOS GEHT'S</button>
+      <button class="btn shopB" id="shopBtn">&#128722; SHOP</button>
+      <button class="btn achB" id="achBtn">&#127942; ERFOLGE</button>
+      <button class="btn onlB" id="onlineBtn">&#127758; ONLINE</button>
     </div>
   </div>
 
@@ -3061,6 +3088,10 @@
 
   let lastT=performance.now();
   function loop(now){ let dt=(now-lastT)/1000; lastT=now; if(dt>0.05) dt=0.05;
+    // Attract-Mode: im Menü zieht die Stadt langsam vorbei
+    if(state===ST.MENU && zones.length && !reduceMotion){
+      camY-=dt*26; generateUpTo(camY-H*1.2); cullBehind(camY+H+600);
+    }
     advanceAmbient(dt); update(dt); updateCaught(dt); updateMini(dt); updateDeath(dt); render(); setAmbientHUD(); requestAnimationFrame(loop); }
 
   function show(id){ document.getElementById(id).classList.remove('hidden'); }
@@ -3069,9 +3100,9 @@
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
   document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); firstRound=false; score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
-  document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
+  document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
-  document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); show('menu'); };
+  document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAchievements(); hide('menu'); show('achievements'); };
   document.getElementById('achBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('achievements'); show('menu'); };
   document.getElementById('onlineBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('menu'); show('online'); renderOnline(); };
@@ -3087,9 +3118,15 @@
   function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted); }
   muteBtn.onclick=()=>{ save.muted=!save.muted; persist(); refreshMute(); if(!save.muted){ SND.ensure(); SND.play('click'); } };
 
+  function updateMenuSkin(){
+    const cv=document.getElementById('meSkin'); if(cv) drawSkinPreview(cv,curSkin);
+    const nm=document.getElementById('meSkinName'); if(nm) nm.textContent=curSkin.name;
+  }
   loadSave(); applySkin(); refreshMute(); SND.setTrack('menu');
   highscore=save.scores.length?save.scores[0].score:0;
   updateHUD(); updateCoinUI(); renderBoard(document.getElementById('boardMenu'),null);
+  resetWorld(); setBanner('hide'); youHint=0;  // Stadt als lebendige Menü-Kulisse
+  updateMenuSkin();
   requestAnimationFrame(loop);
 })();
 </script>
