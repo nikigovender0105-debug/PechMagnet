@@ -935,9 +935,13 @@
     const n=3+((Math.random()*3)|0);
     for(let i=0;i<n;i++){ coins.push({x:rand(ROAD_L+22,W-ROAD_R-22), y:rand(z.y0+60,z.y1-60)}); }
   }
+  // Geld ist im Pool doppelt gewichtet, damit Geldsäcke öfter auftauchen
+  const ITEM_POOL=['shield','boost','magnet','hint','coins','coins','calm'];
   function spawnZoneItems(z){
     // pro Zone ~55% Chance auf ein Power-up
-    if(Math.random()<0.55){ items.push({x:rand(ROAD_L+24,W-ROAD_R-24), y:rand(z.y0+70,z.y1-70), type:pick(ITEM_KEYS), bob:rand(0,6.28)}); }
+    if(Math.random()<0.55){ items.push({x:rand(ROAD_L+24,W-ROAD_R-24), y:rand(z.y0+70,z.y1-70), type:pick(ITEM_POOL), bob:rand(0,6.28)}); }
+    // zusätzlich ~30% Chance auf einen extra Geldsack
+    if(Math.random()<0.30){ items.push({x:rand(ROAD_L+24,W-ROAD_R-24), y:rand(z.y0+70,z.y1-70), type:'coins', bob:rand(0,6.28)}); }
   }
   function addZoneAbove(){
     const t=chooseZoneType();
