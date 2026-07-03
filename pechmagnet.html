@@ -598,6 +598,19 @@
     {id:'teufel',name:'Teufelchen',price:150,body:'#E63946',cap:'#1A1A2E',acc:'horns',pat:'bolt',patCol:'#1A1A2E'},
     {id:'koenig',name:'Der König',price:190,body:'#7C5CFF',cap:'#FFD23F',acc:'crown',glow:'#FFD23F',pat:'belt',patCol:'#FFD23F'},
     {id:'zauberer',name:'Zauberer',price:220,body:'#3A0CA3',cap:'#7C5CFF',acc:'wizard',glow:'#7C5CFF',pat:'star',patCol:'#FFD23F'},
+    {id:'feuer',name:'Feuerball',price:45,body:'#FF4500',cap:'#FFD23F',pat:'bolt',patCol:'#FFD23F'},
+    {id:'eis',name:'Eiswürfel',price:45,body:'#9BE7FF',cap:'#FFF6E5',pat:'spots',patCol:'#FFF6E5'},
+    {id:'lavendel',name:'Lavendel',price:60,body:'#B388FF',cap:'#FFF6E5',pat:'scarf',patCol:'#FFF6E5'},
+    {id:'waldgeist',name:'Waldgeist',price:70,body:'#2D6A4F',cap:'#8B5A2B',pat:'overall',patCol:'#8B5A2B'},
+    {id:'winter',name:'Wintermütze',price:80,body:'#3A86FF',cap:'#E63946',acc:'beanie',pat:'stripes',patCol:'#FFF6E5'},
+    {id:'dj',name:'DJ Pech',price:95,body:'#2b2b45',cap:'#19C3C3',acc:'headphones',pat:'bolt',patCol:'#19C3C3'},
+    {id:'koch',name:'Chefkoch',price:110,body:'#FFF6E5',cap:'#FFF6E5',acc:'chef',pat:'scarf',patCol:'#E63946'},
+    {id:'cowboy',name:'Cowboy',price:130,body:'#C8956A',cap:'#8B5A2B',acc:'cowboy',pat:'belt',patCol:'#8B5A2B'},
+    {id:'alien',name:'Außerirdisch',price:150,body:'#7CFF8E',cap:'#B388FF',acc:'antenna',glow:'#7CFF8E',pat:'spots',patCol:'#5C8AA6'},
+    {id:'vampir',name:'Vampir',price:180,body:'#6A040F',cap:'#1A1A2E',glow:'#E63946',pat:'bowtie',patCol:'#E63946'},
+    {id:'prinzessin',name:'Prinzessin',price:220,body:'#FF9EC4',cap:'#FFD23F',acc:'crown',glow:'#FF9EC4',pat:'heart',patCol:'#FFF6E5'},
+    {id:'astronaut',name:'Astronaut',price:260,body:'#EFEFF6',cap:'#FF7A45',acc:'space',pat:'belt',patCol:'#FF7A45'},
+    {id:'diamant',name:'Diamant',price:400,body:'#BFE3FF',cap:'#FFF6E5',glow:'#BFE3FF',pat:'star',patCol:'#FFF6E5'},
     {id:'star',name:'Rampenlicht',unlock:'survive_special',body:'#FFD23F',cap:'#FF3B30',glow:'#FFD23F',pat:'star',patCol:'#FF3B30'},
     {id:'goldhut',name:'Goldzylinder',unlock:'district_10',body:'#E6A817',cap:'#FFD23F',acc:'tophat',glow:'#FFD23F',pat:'bowtie',patCol:'#1A1A2E'},
     {id:'legend',name:'Pech-Legende',unlock:'all_specials',body:'#12122a',cap:'#FFD23F',glow:'#FFD23F',pat:'star',patCol:'#FFD23F'}
@@ -1603,6 +1616,39 @@
       g.fillStyle='#FFD23F'; g.beginPath(); g.arc(hx,hy-r*2.0,r*0.24,0,6.283); g.fill(); g.stroke();
       g.strokeStyle='#fff'; g.lineWidth=Math.max(1.5,r*0.14);
       g.beginPath(); g.moveTo(hx-r*0.42,hy-r*1.08); g.lineTo(hx+r*0.18,hy-r*1.32); g.stroke();
+    } else if(acc==='headphones'){
+      g.strokeStyle=INK; g.lineWidth=Math.max(2,r*0.24);
+      g.beginPath(); g.arc(hx,hy-r*0.1,r*1.05,Math.PI*1.05,Math.PI*1.95); g.stroke();
+      g.fillStyle=cap;
+      rrC(g,hx-r*1.3,hy-r*0.45,r*0.52,r*0.85,r*0.2); g.fill(); g.stroke();
+      rrC(g,hx+r*0.78,hy-r*0.45,r*0.52,r*0.85,r*0.2); g.fill(); g.stroke();
+    } else if(acc==='beanie'){
+      g.fillStyle=cap;
+      g.beginPath(); g.arc(hx,hy-r*0.5,r*1.02,Math.PI,0); g.fill(); g.stroke();
+      rrC(g,hx-r*1.05,hy-r*0.62,r*2.1,r*0.44,r*0.2); g.fill(); g.stroke();
+      g.fillStyle='#FFF6E5'; g.beginPath(); g.arc(hx,hy-r*1.6,r*0.32,0,6.283); g.fill(); g.stroke();
+    } else if(acc==='cowboy'){
+      g.fillStyle=cap;
+      g.beginPath(); g.ellipse(hx,hy-r*0.55,r*1.5,r*0.42,0,0,6.283); g.fill(); g.stroke();
+      rrC(g,hx-r*0.7,hy-r*1.5,r*1.4,r*1.05,r*0.3); g.fill(); g.stroke();
+      g.fillStyle=shade(cap,-34); g.fillRect(hx-r*0.7,hy-r*0.78,r*1.4,r*0.24);
+    } else if(acc==='chef'){
+      g.fillStyle='#FFF6E5';
+      g.beginPath(); g.arc(hx-r*0.55,hy-r*1.25,r*0.42,0,6.283); g.fill(); g.stroke();
+      g.beginPath(); g.arc(hx+r*0.55,hy-r*1.25,r*0.42,0,6.283); g.fill(); g.stroke();
+      g.beginPath(); g.arc(hx,hy-r*1.5,r*0.5,0,6.283); g.fill(); g.stroke();
+      rrC(g,hx-r*0.78,hy-r*1.3,r*1.56,r*0.85,r*0.15); g.fill(); g.stroke();
+    } else if(acc==='antenna'){
+      g.strokeStyle=INK; g.lineWidth=Math.max(2,r*0.2);
+      for(const s of [-1,1]){
+        g.beginPath(); g.moveTo(hx+s*r*0.4,hy-r*0.75); g.quadraticCurveTo(hx+s*r*0.75,hy-r*1.3,hx+s*r*0.55,hy-r*1.6); g.stroke();
+        g.fillStyle=cap; g.beginPath(); g.arc(hx+s*r*0.55,hy-r*1.75,r*0.24,0,6.283); g.fill(); g.stroke();
+      }
+    } else if(acc==='space'){
+      g.fillStyle='rgba(191,227,255,.35)'; g.strokeStyle=INK; g.lineWidth=Math.max(2,r*0.2);
+      g.beginPath(); g.arc(hx,hy-r*0.15,r*1.35,0,6.283); g.fill(); g.stroke();
+      g.fillStyle='rgba(255,255,255,.55)'; g.beginPath(); g.arc(hx-r*0.6,hy-r*0.8,r*0.28,0,6.283); g.fill();
+      g.fillStyle=cap; rrC(g,hx-r*0.9,hy+r*1.0,r*1.8,r*0.4,r*0.18); g.fill(); g.stroke();
     }
   }
   function drawEmblem(g,type,cx,cy,r){
