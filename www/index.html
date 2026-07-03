@@ -250,7 +250,7 @@
   <div id="menu" class="screen lobby">
     <div class="topbar">
       <div class="plate nameplate">
-        <canvas id="meAvatar" width="44" height="44"></canvas>
+        <canvas id="meAvatar" width="114" height="114"></canvas>
         <input id="nameInput" maxlength="20" placeholder="Dein Name" autocomplete="off" />
       </div>
       <div class="plates">
@@ -261,7 +261,7 @@
     </div>
     <div class="hero">
       <h1 class="logo"><span class="logoMag">&#129522;</span> PECH<small>MAGNET</small></h1>
-      <canvas id="meSkin" width="150" height="150"></canvas>
+      <canvas id="meSkin" width="450" height="450"></canvas>
       <div class="heroShadow"></div>
       <div class="plate" id="meSkinName">Klassiker</div>
     </div>
@@ -412,7 +412,7 @@
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function resize(){
     const r=game.getBoundingClientRect(); W=r.width; H=r.height;
-    DPR=Math.min(window.devicePixelRatio||1,2);
+    DPR=Math.min(window.devicePixelRatio||1,3);
     cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
     ctx.setTransform(DPR,0,0,DPR,0,0);
   }
@@ -1466,7 +1466,8 @@
     for(const sk of SKINS){
       const owned=save.owned.indexOf(sk.id)>=0, sel=save.selected===sk.id;
       const card=document.createElement('div'); card.className='skin'+(sel?' sel':'');
-      const cnv=document.createElement('canvas'); cnv.width=54; cnv.height=54; card.appendChild(cnv);
+      const pvr=Math.min(window.devicePixelRatio||1,3);
+      const cnv=document.createElement('canvas'); cnv.width=Math.round(54*pvr); cnv.height=Math.round(54*pvr); card.appendChild(cnv);
       const nm=document.createElement('div'); nm.className='sname'; nm.textContent=sk.name; card.appendChild(nm);
       const btn=document.createElement('button'); btn.className='sbtn';
       if(sel){ btn.textContent='Ausgew\u00e4hlt'; btn.classList.add('sel'); }
@@ -1682,6 +1683,7 @@
   }
   function drawSkinPreview(cnv,skin){
     const c=cnv.getContext('2d'); const x=27,y=36;
+    c.setTransform(cnv.width/54,0,0,cnv.height/54,0,0);   // zeichnet in 54er-Koordinaten, skaliert scharf auf die Canvas-Größe
     c.clearRect(0,0,54,54); c.lineWidth=3; c.strokeStyle=INK; c.lineJoin='round';
     const body=skin.rainbow?rainbowHex(performance.now()/300):skin.body;
     const glow=skin.glow||(skin.rainbow?body:null);
@@ -3161,10 +3163,7 @@
 
   function updateMenuSkin(){
     for(const id of ['meSkin','meAvatar']){
-      const cv=document.getElementById(id); if(!cv) continue;
-      const c=cv.getContext('2d');
-      c.setTransform(cv.width/54,0,0,cv.height/54,0,0);   // Vorschau hochskaliert, bleibt gestochen scharf
-      drawSkinPreview(cv,curSkin);
+      const cv=document.getElementById(id); if(cv) drawSkinPreview(cv,curSkin);
     }
     const nm=document.getElementById('meSkinName'); if(nm) nm.textContent=curSkin.name;
   }
