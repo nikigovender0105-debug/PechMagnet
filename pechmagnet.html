@@ -1218,7 +1218,16 @@
       let hw=null;
       for(const w of cands){ const lw=w.toLowerCase();
         if(!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(lw)>=0)){ hw=w; break; } }
-      if(hw){ hintEl.innerHTML='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+hw+'\u2018</b> \u2026\u201c'; hintEl.style.display=''; }
+      if(hw){
+        let disp;
+        if(streetsCleared>=5){ // sp\u00e4t: nur Anfangsbuchstabe + L\u00e4nge
+          disp='\u201a'+hw[0]+'\u2026\u2018 ('+hw.length+' Buchstaben)';
+        } else {               // maskiert: nur Anfang und Ende sichtbar
+          disp='\u201a'+hw.slice(0,2)+'\u2022'.repeat(Math.max(1,hw.length-3))+hw.slice(-1)+'\u2018';
+        }
+        hintEl.innerHTML='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>'+disp+'</b> \u2026\u201c';
+        hintEl.style.display='';
+      }
       else hintEl.style.display='none';
     }
     caughtWasSpecial=specialMode;
