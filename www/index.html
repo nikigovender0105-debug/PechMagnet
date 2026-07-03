@@ -354,7 +354,7 @@
       <h2>ERWISCHT!</h2>
       <div class="sub" id="caughtSub">Die Menge br&uuml;llt. Sag irgendwas Glaubhaftes!</div>
       <div class="tactics">
-        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>kostet &#189; der Zeit</small></button>
+        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>&#189; Zeit weg, Rest 2&times; schneller</small></button>
         <button class="tbtn" id="bribeBtn">&#128176; Bestechen<small id="bribeCost">25 M&uuml;nzen</small></button>
       </div>
       <div id="crowdHint" class="crowdHint"></div>
@@ -642,7 +642,7 @@
   const UP_COSTS=[300,750,3000,8000,18000];
   function upCost(lvl){ return UP_COSTS[lvl]!=null?UP_COSTS[lvl]:UP_COSTS[UP_COSTS.length-1]; }
   let shake=0, youHint=0, firstRound=true;
-  let rageTimer=0, rageMax=4.6, excuseSet=[], reactTimer=0, stareStill=0;
+  let rageTimer=0, rageMax=4.6, rageDrain=1, excuseSet=[], reactTimer=0, stareStill=0;
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
   const SPECIAL_DUR=2.1;
   // Death-Animation, Minigame & Speed-Buff
@@ -1193,7 +1193,7 @@
 
   function getCaught(){
     state=ST.CAUGHT; SND.play('caught');
-    rageMax=Math.max(3.0,4.6-streetsCleared*0.12)*5; rageTimer=rageMax;
+    rageMax=Math.max(3.0,4.6-streetsCleared*0.12)*5; rageTimer=rageMax; rageDrain=1;
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
     const kind=(currentEvent&&EXCUSES[currentEvent.kind])?currentEvent.kind:'fall';
     const pool=EXCUSES[kind];
@@ -1240,7 +1240,8 @@
       const lb=document.getElementById('listenBtn');
       lb.disabled=!pendingHint;
       lb.onclick=()=>{ if(!pendingHint) return;
-        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit
+        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit …
+        rageDrain=2;                                                                   // … und danach tickt sie doppelt so schnell
         hintEl.innerHTML=pendingHint; hintEl.style.display='';
         lb.disabled=true; SND.play('click');
       };
@@ -1688,7 +1689,7 @@
   }
   function updateCaught(dt){
     if(state!==ST.CAUGHT) return;
-    rageTimer-=dt;
+    rageTimer-=dt*rageDrain;
     document.getElementById('rageFill').style.width=clamp(rageTimer/rageMax,0,1)*100+'%';
     if(rageTimer<=0) endGame('Die Wut der Menge kochte \u00fcber.');
   }
