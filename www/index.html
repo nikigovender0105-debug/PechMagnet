@@ -605,16 +605,16 @@
 
   // ---------- achievements ----------
   const ACHIEVEMENTS=[
-    {id:'first_special',name:'Im Rampenlicht',desc:'Erlebe dein erstes Special-Event.',icon:'🌟'},
-    {id:'survive_special',name:'Cool geblieben',desc:'Überstehe ein Special-Event mit der richtigen Ausrede.',icon:'😎',skin:'star'},
-    {id:'specials_3',name:'Chaos-Sammler',desc:'Erlebe 3 verschiedene Special-Typen.',icon:'🎲'},
-    {id:'specials_6',name:'Magnet für Ärger',desc:'Erlebe 6 verschiedene Special-Typen.',icon:'🧲'},
-    {id:'all_specials',name:'Pech-Legende',desc:'Erlebe alle Special-Typen – das gesamte Chaos.',icon:'👑',skin:'legend'},
-    {id:'district_5',name:'Stadtbummler',desc:'Erreiche Viertel 5 in einem Lauf.',icon:'🏙️'},
-    {id:'district_10',name:'Pech-Marathon',desc:'Erreiche Viertel 10 in einem Lauf.',icon:'🏃',skin:'goldhut'},
-    {id:'score_1000',name:'Punktejäger',desc:'Knacke 1000 Punkte in einem Lauf.',icon:'💯'},
-    {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'🪙'},
-    {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'😰'}
+    {id:'first_special',name:'Im Rampenlicht',desc:'Erlebe dein erstes Special-Event.',icon:'🌟',coins:50},
+    {id:'survive_special',name:'Cool geblieben',desc:'Überstehe ein Special-Event mit der richtigen Ausrede.',icon:'😎',skin:'star',coins:100},
+    {id:'specials_3',name:'Chaos-Sammler',desc:'Erlebe 3 verschiedene Special-Typen.',icon:'🎲',coins:75},
+    {id:'specials_6',name:'Magnet für Ärger',desc:'Erlebe 6 verschiedene Special-Typen.',icon:'🧲',coins:150},
+    {id:'all_specials',name:'Pech-Legende',desc:'Erlebe alle Special-Typen – das gesamte Chaos.',icon:'👑',skin:'legend',coins:500},
+    {id:'district_5',name:'Stadtbummler',desc:'Erreiche Viertel 5 in einem Lauf.',icon:'🏙️',coins:75},
+    {id:'district_10',name:'Pech-Marathon',desc:'Erreiche Viertel 10 in einem Lauf.',icon:'🏃',skin:'goldhut',coins:200},
+    {id:'score_1000',name:'Punktejäger',desc:'Knacke 1000 Punkte in einem Lauf.',icon:'💯',coins:100},
+    {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'🪙',coins:50},
+    {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'😰',coins:75}
   ];
 
   // ---------- Special-Event-Katalog (Event + Achievement + Belohnungs-Skin + Death-Stil) ----------
@@ -677,7 +677,7 @@
       if(!EVENTS[d.key] && d.label){ EVENTS[d.key]={label:d.label,kind:d.kind,boom:d.boom,vis:d.vis,fall:false,special:true,snd:d.snd,subText:d.subText}; }
       const ev=EVENTS[d.key]; if(ev){ ev.death=d.death; if(d.mob) ev.mob=d.mob; if(d.mini) ev.mini=d.mini; ev.aKey=d.key; }
       if(SPECIAL.indexOf(d.key)<0) SPECIAL.push(d.key);
-      if(d.ach && !ACHIEVEMENTS.some(a=>a.id==='sp_'+d.key)) ACHIEVEMENTS.push({id:'sp_'+d.key,name:d.ach.name,desc:d.ach.desc,icon:d.ach.icon,skin:'sk_'+d.key});
+      if(d.ach && !ACHIEVEMENTS.some(a=>a.id==='sp_'+d.key)) ACHIEVEMENTS.push({id:'sp_'+d.key,name:d.ach.name,desc:d.ach.desc,icon:d.ach.icon,skin:'sk_'+d.key,coins:100});
       if(d.skin && !SKINS.some(s=>s.id==='sk_'+d.key)) SKINS.push(Object.assign({id:'sk_'+d.key,unlock:'sp_'+d.key},d.skin));
     }
   }
@@ -690,6 +690,7 @@
     save.achievements[id]=true;
     const a=ACHIEVEMENTS.find(x=>x.id===id);
     if(a&&a.skin&&save.owned.indexOf(a.skin)<0) save.owned.push(a.skin);
+    if(a&&a.coins){ save.coins+=a.coins; updateCoinUI(); }   // Münz-Belohnung
     persist();
     if(a){ achQueue.push(a); pumpAchToast(); }
   }
@@ -709,7 +710,10 @@
     if(!t){ achShowing=false; return; }
     document.getElementById('achToastIcon').textContent=a.icon;
     document.getElementById('achToastName').textContent=a.name;
-    document.getElementById('achToastDesc').textContent=a.skin?('Skin freigeschaltet: '+(SKINS.find(s=>s.id===a.skin)||{}).name):a.desc;
+    const rw=[];
+    if(a.coins) rw.push('+'+a.coins+' Münzen');
+    if(a.skin) rw.push('Skin: '+((SKINS.find(s=>s.id===a.skin)||{}).name||''));
+    document.getElementById('achToastDesc').textContent=rw.length?('Belohnung: '+rw.join(' · ')):a.desc;
     t.classList.remove('hidden');
     requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
     SND.play('achieve');
@@ -1295,8 +1299,11 @@
       const got=!!(save.achievements&&save.achievements[a.id]);
       const row=document.createElement('div'); row.className='ach'+(got?'':' locked');
       const sk=a.skin?(SKINS.find(s=>s.id===a.skin)||{}).name:'';
+      const rw=[];
+      if(a.coins) rw.push(a.coins+' 🪙');
+      if(sk) rw.push('Skin „'+sk+'“');
       row.innerHTML='<div class="aico">'+a.icon+'</div><div class="ainfo"><div class="aname">'+a.name+'</div>'
-        +'<div class="adesc">'+a.desc+(sk?(' <b>Belohnung: Skin „'+sk+'“</b>'):'')+'</div></div>'
+        +'<div class="adesc">'+a.desc+(rw.length?(' <b>Belohnung: '+rw.join(' + ')+'</b>'):'')+'</div></div>'
         +'<div class="astat">'+(got?'✅':'🔒')+'</div>';
       grid.appendChild(row);
     }
