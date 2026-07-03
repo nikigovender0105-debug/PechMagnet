@@ -767,27 +767,52 @@
   // ---------- sound (Web Audio, synthesized, offline) ----------
   const SND=(function(){
     let ctx=null, master=null, musicGain=null, muted=false, musicTimer=null, nextTime=0, step=0, trk=null;
+    // 64-Schritt-Kompositionen: Game = Am-F-C-G / Am-F-Dm-E, Menu = Cmaj7-Am7-Fmaj7-G7 (Lo-Fi-Swing)
     const TRACKS={
-      game:{ tempo:0.16, melVol:0.18, bassVol:0.2, melType:'triangle', bassType:'square', detune:7,
-        drums:true, hatVol:0.04, padVol:0.045, padHold:3.7, harmType:'sine', harmVol:0.05,
-        mel:[523.25,0,659.25,587.33,523.25,0,392.00,0,440.00,0,523.25,587.33,659.25,0,587.33,523.25,587.33,0,440.00,523.25,392.00,0,329.63,0,440.00,0,587.33,523.25,440.00,0,392.00,0],
-        bass:[130.81,0,0,0,98.00,0,0,0,110.00,0,0,0,87.31,0,0,0,87.31,0,0,0,130.81,0,0,0,98.00,0,0,0,98.00,0,0,0],
-        pad:[261.63,0,0,0,196.00,0,0,0,220.00,0,0,0,174.61,0,0,0,174.61,0,0,0,261.63,0,0,0,196.00,0,0,0,196.00,0,0,0],
-        harm:[0,0,0,0,0,0,0,0,329.63,0,0,0,261.63,0,0,0,349.23,0,0,0,392.00,0,0,0,293.66,0,0,0,293.66,0,0,0] },
-      menu:{ tempo:0.34, melVol:0.10, bassVol:0.075, melType:'sine', bassType:'sine', detune:6,
-        padVol:0.055, padHold:7.5, harmVol:0.05, harmType:'triangle',
-        mel:[523.25,0,659.25,0,587.33,0,0,0,493.88,0,587.33,0,392.00,0,0,0,523.25,0,659.25,0,440.00,0,0,0,523.25,0,440.00,0,349.23,0,392.00,0],
-        bass:[130.81,0,0,0,0,0,0,0,98.00,0,0,0,0,0,0,0,110.00,0,0,0,0,0,0,0,87.31,0,0,0,0,0,0,0],
-        pad:[329.63,0,0,0,0,0,0,0,246.94,0,0,0,0,0,0,0,261.63,0,0,0,0,0,0,0,220.00,0,0,0,0,0,0,0],
-        harm:[261.63,0,329.63,0,392.00,0,493.88,0,196.00,0,246.94,0,293.66,0,246.94,0,220.00,0,261.63,0,329.63,0,392.00,0,174.61,0,220.00,0,261.63,0,329.63,0] },
-      special:{ tempo:0.115, melVol:0.17, bassVol:0.24, melType:'sawtooth', bassType:'square', detune:10,
-        drums:true, hatVol:0.05, padVol:0.05, padHold:7.5,
+      game:{ tempo:0.15, melVol:0.16, bassVol:0.18, melType:'triangle', bassType:'square', detune:7,
+        drums:true, snare:true, swing:0.08, hatVol:0.04, padVol:0.045, padHold:3.7, harmType:'sine', harmVol:0.05, echo:0.3, harmEcho:0.5,
+        mel:[440,0,523.25,659.25,880,0,783.99,659.25, 698.46,0,659.25,587.33,523.25,0,587.33,659.25,
+             523.25,0,659.25,783.99,1046.50,0,783.99,659.25, 587.33,659.25,587.33,493.88,392,0,493.88,587.33,
+             440,0,523.25,659.25,880,0,1046.50,880, 698.46,0,880,698.46,659.25,0,587.33,523.25,
+             587.33,0,698.46,587.33,523.25,0,493.88,440, 493.88,0,440,493.88,659.25,659.25,0,0],
+        bass:[110,0,110,0,110,220,0,110, 87.31,0,87.31,0,87.31,174.61,0,87.31,
+              130.81,0,130.81,0,130.81,261.63,0,130.81, 98,0,98,0,98,196,0,98,
+              110,0,110,0,110,220,0,110, 87.31,0,87.31,0,87.31,174.61,0,87.31,
+              73.42,0,73.42,0,73.42,146.83,0,73.42, 82.41,0,82.41,0,82.41,164.81,0,82.41],
+        pad:[220,0,0,0,0,0,0,0, 174.61,0,0,0,0,0,0,0, 261.63,0,0,0,0,0,0,0, 196,0,0,0,0,0,0,0,
+             220,0,0,0,0,0,0,0, 174.61,0,0,0,0,0,0,0, 146.83,0,0,0,0,0,0,0, 164.81,0,0,0,0,0,0,0],
+        harm:[0,0,329.63,0,0,261.63,0,0, 0,0,349.23,0,0,261.63,0,0, 0,0,392,0,0,329.63,0,0, 0,0,392,0,0,293.66,0,0,
+              0,0,329.63,0,0,261.63,0,0, 0,0,349.23,0,0,261.63,0,0, 0,0,349.23,0,0,293.66,0,0, 0,0,415.30,0,0,329.63,0,0] },
+      menu:{ tempo:0.3, melVol:0.09, bassVol:0.07, melType:'sine', bassType:'sine', detune:5,
+        swing:0.32, brush:true, padVol:0.05, padHold:7.5, harmVol:0.035, harmType:'triangle', echo:0.45, harmEcho:0.35,
+        mel:[523.25,0,659.25,0,783.99,0,659.25,0, 440,0,523.25,0,659.25,0,523.25,0,
+             349.23,0,440,0,523.25,0,659.25,0, 587.33,0,493.88,0,392,0,493.88,0,
+             783.99,0,659.25,0,523.25,0,493.88,0, 440,0,659.25,0,880,0,659.25,0,
+             698.46,0,659.25,0,523.25,0,440,0, 493.88,0,587.33,0,523.25,0,0,0],
+        bass:[130.81,0,0,0,0,0,0,0, 110,0,0,0,0,0,0,0, 87.31,0,0,0,0,0,0,0, 98,0,0,0,0,0,0,0,
+              130.81,0,0,0,0,0,0,0, 110,0,0,0,0,0,0,0, 87.31,0,0,0,0,0,0,0, 98,0,0,0,0,0,0,0],
+        pad:[261.63,0,0,0,0,0,0,0, 220,0,0,0,0,0,0,0, 174.61,0,0,0,0,0,0,0, 196,0,0,0,0,0,0,0,
+             261.63,0,0,0,0,0,0,0, 220,0,0,0,0,0,0,0, 174.61,0,0,0,0,0,0,0, 196,0,0,0,0,0,0,0],
+        harm:[0,329.63,0,392,0,493.88,0,392, 0,261.63,0,329.63,0,392,0,329.63,
+              0,261.63,0,349.23,0,440,0,349.23, 0,293.66,0,392,0,493.88,0,392,
+              0,329.63,0,392,0,493.88,0,392, 0,261.63,0,329.63,0,392,0,329.63,
+              0,261.63,0,349.23,0,440,0,349.23, 0,293.66,0,392,0,493.88,0,0] },
+      special:{ tempo:0.115, melVol:0.17, bassVol:0.22, melType:'sawtooth', bassType:'square', detune:10,
+        drums:true, snare:true, snareVol:0.11, hatVol:0.05, padVol:0.05, padHold:7.5, echo:0.2,
         mel:[440.00,0,523.25,440.00,659.25,0,523.25,440.00,415.30,0,523.25,415.30,659.25,0,587.33,523.25,440.00,0,523.25,440.00,698.46,0,659.25,587.33,523.25,0,493.88,0,440.00,0,415.30,0],
         bass:[110.00,0,110.00,0,110.00,0,110.00,0,103.83,0,103.83,0,103.83,0,103.83,0,87.31,0,87.31,0,87.31,0,87.31,0,98.00,0,98.00,0,98.00,0,98.00,0],
         pad:[220.00,0,0,0,0,0,0,0,207.65,0,0,0,0,0,0,0,174.61,0,0,0,0,0,0,0,196.00,0,0,0,0,0,0,0] }
     };
+    let echoBus=null;
     function ensure(){
-      if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.5; master.connect(ctx.destination); musicGain=ctx.createGain(); musicGain.gain.value=muted?0:0.7; musicGain.connect(master); }catch(e){ ctx=null; } }
+      if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.5; master.connect(ctx.destination); musicGain=ctx.createGain(); musicGain.gain.value=muted?0:0.7; musicGain.connect(master);
+        // Echo-Bus: gedämpftes Feedback-Delay für Melodie & Arpeggien
+        echoBus=ctx.createGain(); echoBus.gain.value=0.55;
+        const dly=ctx.createDelay(0.7); dly.delayTime.value=0.26;
+        const fb=ctx.createGain(); fb.gain.value=0.32;
+        const damp=ctx.createBiquadFilter(); damp.type='lowpass'; damp.frequency.value=2200;
+        echoBus.connect(dly); dly.connect(damp); damp.connect(fb); fb.connect(dly); damp.connect(musicGain);
+      }catch(e){ ctx=null; } }
       if(ctx && ctx.state==='suspended'){ try{ ctx.resume(); }catch(e){} }
       if(ctx && !muted) startMusic();
     }
@@ -812,12 +837,21 @@
       const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=cut||1200;
       src.connect(f); f.connect(g); g.connect(master); src.start(t0);
     }
-    function mnote(freq,dur,vol,type,t0,detune){
+    function mnote(freq,dur,vol,type,t0,detune,echoAmt){
       const g=ctx.createGain();
       g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
       g.connect(musicGain);
+      if(echoAmt&&echoBus){ const e=ctx.createGain(); e.gain.value=echoAmt; g.connect(e); e.connect(echoBus); }
       const o=ctx.createOscillator(); o.type=type; o.frequency.value=freq; o.connect(g); o.start(t0); o.stop(t0+dur+0.04);
       if(detune){ const o2=ctx.createOscillator(); o2.type=type; o2.frequency.value=freq; o2.detune.value=detune; o2.connect(g); o2.start(t0); o2.stop(t0+dur+0.04); }
+    }
+    function msnare(t0,vol){
+      const n=Math.floor(ctx.sampleRate*0.1), buf=ctx.createBuffer(1,n,ctx.sampleRate), d=buf.getChannelData(0);
+      for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+      const src=ctx.createBufferSource(); src.buffer=buf;
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1900; f.Q.value=0.8;
+      const g=ctx.createGain(); g.gain.value=vol||0.09;
+      src.connect(f); f.connect(g); g.connect(musicGain); src.start(t0); src.stop(t0+0.11);
     }
     function mkick(t0){
       const o=ctx.createOscillator(), g=ctx.createGain();
@@ -837,12 +871,20 @@
       if(!ctx||!trk) return;
       const T=trk.tempo;
       while(nextTime<ctx.currentTime+0.12){
+        // Offbeats leicht verzögern = Shuffle/Swing-Groove
+        const sw=(step%2===1)?T*(trk.swing||0):0, tt=nextTime+sw;
         const m=trk.mel[step%trk.mel.length], b=trk.bass[step%trk.bass.length];
-        if(m) mnote(m,T*0.9,trk.melVol,trk.melType,nextTime,trk.detune||0);
+        if(m) mnote(m,T*0.9,trk.melVol,trk.melType,tt,trk.detune||0,trk.echo||0);
         if(b) mnote(b,T*3.6,trk.bassVol,trk.bassType,nextTime);
         if(trk.pad){ const p=trk.pad[step%trk.pad.length]; if(p) mnote(p,T*(trk.padHold||4),trk.padVol||0.05,'sine',nextTime,6); }
-        if(trk.harm){ const h=trk.harm[step%trk.harm.length]; if(h) mnote(h,T*1.4,trk.harmVol||(trk.melVol*0.5),trk.harmType||'sine',nextTime); }
-        if(trk.drums){ if(step%4===0) mkick(nextTime); if(step%2===1) mhat(nextTime,trk.hatVol||0.04); if(step%8===4) mhat(nextTime,(trk.hatVol||0.04)*1.7); }
+        if(trk.harm){ const h=trk.harm[step%trk.harm.length]; if(h) mnote(h,T*1.4,trk.harmVol||(trk.melVol*0.5),trk.harmType||'sine',tt,0,trk.harmEcho||0); }
+        if(trk.drums){
+          if(step%4===0) mkick(nextTime);
+          if(trk.snare&&step%8===4) msnare(nextTime,trk.snareVol||0.09);
+          if(step%2===1) mhat(tt,trk.hatVol||0.04);
+          if(step%16===14) mhat(nextTime,(trk.hatVol||0.04)*2.1);   // offene Hi-Hat als Übergang
+        }
+        if(trk.brush&&step%2===1) mhat(tt,0.018);                    // sanfte Besen-Hats im Menü
         nextTime+=T; step++;
       }
     }
