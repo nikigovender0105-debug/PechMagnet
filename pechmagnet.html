@@ -292,7 +292,7 @@
   <div id="minigame" class="screen hidden">
     <div class="card">
       <h2 id="miniTitle" style="font-size:26px;color:var(--danger);">ARMDR&Uuml;CKEN!</h2>
-      <p class="lead" style="font-size:13px;margin-bottom:8px;">Spam-klicke so schnell du kannst, um den Bodybuilder wegzudr&uuml;cken!</p>
+      <p class="lead" id="miniDesc" style="font-size:13px;margin-bottom:8px;">Spam-klicke so schnell du kannst, um den Bodybuilder wegzudr&uuml;cken!</p>
       <div id="miniBarWrap"><div id="miniBar"></div><div id="miniMid"></div></div>
       <div id="miniTime">6.0s</div>
       <button class="btn go" id="miniBtn" style="width:100%;font-size:24px;">DR&Uuml;CKEN!</button>
@@ -684,7 +684,20 @@
     {key:'demon', death:'spook',
       label:'Ein Dämon steigt aus dem Asphalt!',kind:'spooky',boom:'RAAAH!',vis:'demon',snd:'spooky',
       subText:'Der Boden reißt auf und ein Dämon klettert heraus.',
-      ach:{name:'Höllisch',desc:'Triff den Dämon.',icon:'😈'}, skin:{name:'Dämon',body:'#E63946',cap:'#1A1A2E',acc:'horns',glow:'#FF3B30',pat:'bolt',patCol:'#1A1A2E'}}
+      ach:{name:'Höllisch',desc:'Triff den Dämon.',icon:'😈'}, skin:{name:'Dämon',body:'#E63946',cap:'#1A1A2E',acc:'horns',glow:'#FF3B30',pat:'bolt',patCol:'#1A1A2E'}},
+    // --- Minigame-Specials wie der Bodybuilder ---
+    {key:'sprinter',mini:'race',death:'wasted',
+      label:'Ein Sprinter fordert dich zum Wettrennen!',kind:'sport',boom:'ZISCH!',vis:'sprinter',snd:'sting',
+      subText:'Ein Sprinter dehnt sich neben dir: „Bis zur Laterne. Jetzt.“',
+      ach:{name:'Zielfoto',desc:'Gewinne das Wettrennen gegen den Sprinter.',icon:'🏁'}, skin:{name:'Sprinter',body:'#19C3C3',cap:'#FF3B30',pat:'vstripes',patCol:'#FFF6E5'}},
+    {key:'oma',mini:'tug',death:'ko',
+      label:'Eine Kraft-Oma fordert dich zum Tauziehen!',kind:'sport',boom:'HAU-RUCK!',vis:'oma',snd:'sting',
+      subText:'Eine Oma spuckt in die Hände und hebt das Seil auf.',
+      ach:{name:'Hau-Ruck',desc:'Gewinne das Tauziehen gegen die Oma.',icon:'🧓'}, skin:{name:'Kraft-Oma',body:'#B5838D',cap:'#EFEFF6',acc:'glasses',pat:'scarf',patCol:'#EFEFF6'}},
+    {key:'sheriff',mini:'duel',death:'jail',
+      label:'Der Sheriff fordert dich zum Blick-Duell!',kind:'crime',boom:'PENG!',vis:'sheriff',snd:'siren',
+      subText:'High Noon: Der Sheriff starrt dich an. Keiner blinzelt.',
+      ach:{name:'Schneller Finger',desc:'Gewinne das Duell gegen den Sheriff.',icon:'🤠'}, skin:{name:'Sheriff',body:'#8B5A2B',cap:'#C8956A',acc:'cowboy',pat:'star',patCol:'#FFD23F'}}
   ];
   function setupSpecials(){
     for(const d of SPECIAL_DEFS){
@@ -1148,42 +1161,89 @@
     show('reaction'); state=ST.REACT; reactTimer=1.5;
     endAlarm(); chaosTimer=Math.max(2.5,diff().chaosInterval*0.6); updateHUD();
   }
-  // ----- Bodybuilder-Armdrück-Minigame -----
+  // ----- Minigames (Armdrücken, Wettrennen, Tauziehen, Blick-Duell) -----
+  const MINI_DEFS={
+    armwrestle:{ mode:'spam', title:'ARMDRÜCKEN!', desc:'Spam-klicke so schnell du kannst, um den Bodybuilder wegzudrücken!', btn:'DRÜCKEN!',
+      start:0.42, time:6.0, decay:0.40, gain:0.052,
+      winT:'BUFF! 💪', winX:'Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.',
+      loseMsg:'Der Bodybuilder hat dich plattgemacht.' },
+    race:{ mode:'spam', title:'WETTRENNEN!', desc:'Tippe so schnell du kannst und erreiche das Ziel vor dem Sprinter!', btn:'RENNEN!',
+      start:0.35, time:5.5, decay:0.34, gain:0.048,
+      winT:'ZIELFOTO! 🏁', winX:'Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.',
+      loseMsg:'Der Sprinter hat dich stehen lassen.' },
+    tug:{ mode:'spam', title:'TAUZIEHEN!', desc:'Zieh! Aber Vorsicht: Die Oma reißt immer wieder kräftig am Seil!', btn:'ZIEHEN!',
+      start:0.5, time:6.5, decay:0.30, gain:0.05, yank:true,
+      winT:'HAU-RUCK! 💪', winX:'Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.',
+      loseMsg:'Die Oma hat dich quer über die Straße geschleift.' },
+    duel:{ mode:'duel', title:'BLICK-DUELL!', desc:'Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.', btn:'WARTEN…',
+      winT:'BLITZSCHNELL! ⚡', winX:'Du warst schneller als der Sheriff! Er tippt anerkennend an den Hut. +40s Speed-Boost.',
+      loseMsg:'Der Sheriff war schneller als dein Schatten.',
+      earlyMsg:'Zu früh gezuckt – der Sheriff grinst und legt dir Handschellen an.' }
+  };
   function startMinigame(){
     state=ST.MINI;
-    mini={prog:0.42,time:6.0,decay:0.40+streetsCleared*0.012,clicks:0};
+    const def=MINI_DEFS[(currentEvent&&currentEvent.mini)||'armwrestle']||MINI_DEFS.armwrestle;
+    if(def.mode==='duel'){
+      mini={def:def,mode:'duel',phase:'wait',t:0,wait:rand(1.4,3.2),react:Math.max(0.3,0.6-streetsCleared*0.012),prog:1};
+    } else {
+      mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:def.decay+streetsCleared*0.012,gain:def.gain,
+        yankT:def.yank?rand(0.7,1.3):0,clicks:0};
+    }
+    document.getElementById('miniTitle').textContent=def.title;
+    document.getElementById('miniDesc').textContent=def.desc;
+    document.getElementById('miniBtn').textContent=def.btn;
+    const bar=document.getElementById('miniBar');
+    if(bar) bar.style.background=def.mode==='duel'?'var(--danger)':'linear-gradient(90deg,var(--safe),var(--gold))';
+    document.getElementById('miniMid').style.display=def.mode==='duel'?'none':'';
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
     updateMiniUI(); show('minigame');
   }
   function updateMini(dt){
     if(state!==ST.MINI) return;
+    if(mini.mode==='duel'){
+      mini.t+=dt;
+      if(mini.phase==='wait'&&mini.t>=mini.wait){
+        mini.phase='go'; mini.t=0;
+        document.getElementById('miniBtn').textContent='JETZT! TIPPEN!';
+        const bar=document.getElementById('miniBar'); if(bar) bar.style.background='var(--safe)';
+        SND.play('alarm');
+      } else if(mini.phase==='go'&&mini.t>=mini.react){ return miniLose(); }
+      const t=document.getElementById('miniTime'); if(t) t.textContent=mini.phase==='wait'?'…':'ZIEH!';
+      return;
+    }
     mini.time-=dt; mini.prog-=mini.decay*dt;
+    if(mini.def.yank&&mini.prog<1){ mini.yankT-=dt;
+      if(mini.yankT<=0){ mini.prog-=rand(0.05,0.11); mini.yankT=rand(0.7,1.4); } }
     if(mini.prog>=1){ mini.prog=1; updateMiniUI(); return miniWin(); }
     if(mini.prog<=0||mini.time<=0){ mini.prog=Math.max(0,mini.prog); updateMiniUI(); return miniLose(); }
     updateMiniUI();
   }
   function miniClick(){
     if(state!==ST.MINI) return;
-    mini.clicks++; mini.prog=clamp(mini.prog+0.052,0,1); SND.play('click');
+    if(mini.mode==='duel'){
+      if(mini.phase==='wait') return miniLose(mini.def.earlyMsg);
+      return miniWin();
+    }
+    mini.clicks++; mini.prog=clamp(mini.prog+mini.gain,0,1); SND.play('click');
     if(mini.prog>=1) miniWin();
   }
   function updateMiniUI(){
     const b=document.getElementById('miniBar'); if(b) b.style.width=Math.round(mini.prog*100)+'%';
-    const t=document.getElementById('miniTime'); if(t) t.textContent=Math.max(0,mini.time).toFixed(1)+'s';
+    const t=document.getElementById('miniTime'); if(t&&mini.mode!=='duel') t.textContent=Math.max(0,mini.time).toFixed(1)+'s';
   }
   function miniWin(){
     if(state!==ST.MINI) return; hide('minigame'); SND.play('correct');
     unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey);
     score+=200+streetsCleared*5; speedBuff=SPEED_BUFF_DUR; updateBuffHUD();
-    document.getElementById('reactTitle').textContent='BUFF! 💪';
-    document.getElementById('reactText').textContent='Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.';
+    document.getElementById('reactTitle').textContent=mini.def.winT;
+    document.getElementById('reactText').textContent=mini.def.winX;
     show('reaction'); state=ST.REACT; reactTimer=1.9;
     caughtWasSpecial=false; bumpCD=1.2; SND.setTrack('game');
     endAlarm(); chaosTimer=Math.max(2.5,diff().chaosInterval*0.6); updateHUD();
   }
-  function miniLose(){
+  function miniLose(msg){
     if(state!==ST.MINI) return; hide('minigame');
-    caughtWasSpecial=true; endGame('Der Bodybuilder hat dich plattgemacht.');
+    caughtWasSpecial=true; endGame(msg||mini.def.loseMsg);
   }
   function updateBuffHUD(){ const el=document.getElementById('buffChip'); if(!el) return;
     el.classList.toggle('hidden',!(speedBuff>0)); if(speedBuff>0) el.textContent='⚡ '+Math.ceil(speedBuff)+'s'; }
@@ -2017,6 +2077,43 @@
       ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-4,y-18,1.7,0,6.283); ctx.arc(x+4,y-18,1.7,0,6.283); ctx.fill();
       ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-6,y-12); ctx.lineTo(x+6,y-12); ctx.stroke(); // Mund grimmig
       ctx.fillStyle='#2b2b33'; rr(x-12,y+12,24,8,3); fs(); // Tanktop-Saum
+    } else if(vis==='sprinter'){
+      ctx.strokeStyle='rgba(26,26,46,.35)'; ctx.lineWidth=2.5; ctx.lineCap='round'; // Tempo-Linien
+      for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(x-30,y-8+i*7); ctx.lineTo(x-17,y-8+i*7); ctx.stroke(); }
+      ctx.lineCap='butt'; ctx.strokeStyle=INK; ctx.lineWidth=5;                     // Beine im Lauf
+      ctx.beginPath(); ctx.moveTo(x-2,y+8); ctx.lineTo(x-12,y+19); ctx.moveTo(x+2,y+8); ctx.lineTo(x+12,y+15); ctx.stroke();
+      ctx.lineWidth=3.2;
+      ctx.fillStyle='#19C3C3'; rr(x-11,y-8,22,20,8); fs();                          // Trikot
+      ctx.fillStyle='#FFF6E5'; rr(x-11,y-2,22,4,2); ctx.fill();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x+3,y-17,9,0,6.283); fs();  // Kopf (nach vorn gelehnt)
+      ctx.fillStyle='#FF3B30'; rr(x-6,y-23,18,5,2); fs();                           // Stirnband
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x+7,y-17,1.7,0,6.283); ctx.fill();
+    } else if(vis==='oma'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#B5838D';                                                       // Kleid mit Rock
+      ctx.beginPath(); ctx.moveTo(x-11,y-6); ctx.lineTo(x+11,y-6); ctx.lineTo(x+16,y+18); ctx.lineTo(x-16,y+18); ctx.closePath(); fs();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x-17,y-2,5.5,0,6.283); fs(); // Muskel-Arm
+      ctx.beginPath(); ctx.arc(x,y-16,9,0,6.283); fs();                              // Kopf
+      ctx.fillStyle='#EFEFF6'; ctx.beginPath(); ctx.arc(x,y-20,9.5,Math.PI,0); fs(); // graues Haar
+      ctx.beginPath(); ctx.arc(x,y-27,4.5,0,6.283); fs();                            // Dutt
+      ctx.strokeStyle=INK; ctx.lineWidth=1.8;                                        // Brille
+      ctx.beginPath(); ctx.arc(x-3.5,y-16,2.6,0,6.283); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x+3.5,y-16,2.6,0,6.283); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x-1,y-16); ctx.lineTo(x+1,y-16); ctx.stroke();
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-3.5,y-16,1.1,0,6.283); ctx.arc(x+3.5,y-16,1.1,0,6.283); ctx.fill();
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2;
+      ctx.fillStyle='#E63946'; rr(x+10,y+3,11,9,2); fs();                            // Handtasche
+      ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x+15.5,y+3,4,Math.PI,0); ctx.stroke();
+      ctx.lineWidth=3.2;
+    } else if(vis==='sheriff'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#8B5A2B'; rr(x-12,y-6,24,24,8); fs();                           // Weste
+      ctx.fillStyle='#FFD23F'; drawEmblem(ctx,'star',x-5,y+3,5);                     // Sheriffstern
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,9,0,6.283); fs();     // Kopf
+      ctx.fillStyle=INK; ctx.fillRect(x-6.5,y-17.5,4,1.8); ctx.fillRect(x+2.5,y-17.5,4,1.8); // zusammengekniffene Augen
+      ctx.fillStyle='#E63946';                                                       // Halstuch
+      ctx.beginPath(); ctx.moveTo(x-8,y-8); ctx.lineTo(x+8,y-8); ctx.lineTo(x,y-1); ctx.closePath(); fs();
+      drawAcc(ctx,'cowboy',x,y-16,9,'#C8956A');                                      // Cowboyhut
     } else if(vis==='shark'){
       ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
       ctx.fillStyle='#7895a6'; ctx.beginPath(); ctx.moveTo(x-24,y); ctx.quadraticCurveTo(x-6,y-16,x+16,y-8);
@@ -2104,7 +2201,7 @@
         const f=Math.sin(t*22+i)*4; ctx.beginPath(); ctx.moveTo(bx-7,by); ctx.quadraticCurveTo(bx,by-5+f,bx+7,by); ctx.stroke(); }
     }
   }
-  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost','tornado','dino','robot','zombie','bodybuilder','shark','clown','ninja','bear','dragon','pirate','reaper','tank','demon'];
+  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost','tornado','dino','robot','zombie','bodybuilder','shark','clown','ninja','bear','dragon','pirate','reaper','tank','demon','sprinter','oma','sheriff'];
   function drawBurst(b){
     const solid=SOLIDS.indexOf(b.vis)>=0;
     const seed=(((b.x*131)|0)^((b.y*197)|0))>>>0;
@@ -2724,6 +2821,29 @@
       for(const a2 of [0,1.5708,3.1416,4.7124]){
         ctx.beginPath(); ctx.moveTo(W/2+Math.cos(a2)*zr*0.4,H*0.46+Math.sin(a2)*zr*0.4);
         ctx.lineTo(W/2+Math.cos(a2)*(zr+16),H*0.46+Math.sin(a2)*(zr+16)); ctx.stroke(); }
+    } else if(key==='sprinter'){
+      ctx.lineCap='round';                                                          // Tempo-Streifen
+      for(let i=0;i<8;i++){ const q=(t*1.4+i*0.125)%1, yy=90+((i*97)%(H-180));
+        ctx.strokeStyle='rgba(255,255,255,'+(0.35*(1-q))+')'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(q*W-70,yy); ctx.lineTo(q*W+40,yy); ctx.stroke(); }
+      ctx.lineCap='butt';
+      for(let i=0;i<Math.ceil(W/20);i++) for(let j=0;j<2;j++){                      // Ziel-Flagge
+        ctx.fillStyle=((i+j)%2)?'#FFF6E5':'#1A1A2E'; ctx.fillRect(i*20,64+j*12,20,12); }
+    } else if(key==='oma'){
+      for(let i=0;i<9;i++){ const q=(t*0.4+i*0.111)%1, bx=(i*173)%W+Math.sin(t*2+i)*24, by=q*H; // Wollknäuel-Regen
+        ctx.fillStyle=['#FF9EC4','#B388FF','#19C3C3'][i%3]; ctx.strokeStyle='rgba(26,26,46,.6)'; ctx.lineWidth=1.6;
+        ctx.beginPath(); ctx.arc(bx,by,7,0,6.283); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(bx,by,4,0.5,3.6); ctx.stroke(); }
+    } else if(key==='sheriff'){
+      const sg2=ctx.createRadialGradient(W/2,70,10,W/2,70,240);                     // High-Noon-Sonne
+      sg2.addColorStop(0,'rgba(255,220,120,.5)'); sg2.addColorStop(1,'rgba(255,220,120,0)');
+      ctx.fillStyle=sg2; ctx.fillRect(0,0,W,H*0.6);
+      const tx=((t*60)%(W+140))-70;                                                 // rollender Steppenläufer
+      ctx.strokeStyle='rgba(140,90,43,.8)'; ctx.lineWidth=2;
+      ctx.save(); ctx.translate(tx,H*0.8); ctx.rotate(t*4);
+      ctx.beginPath(); ctx.arc(0,0,14,0,6.283); ctx.stroke();
+      for(let i=0;i<3;i++){ ctx.beginPath(); ctx.ellipse(0,0,14,5,i*1.05,0,6.283); ctx.stroke(); }
+      ctx.restore();
     } else if(key==='demon'){
       ctx.strokeStyle='rgba(255,80,30,'+(0.5+0.3*Math.sin(t*7))+')'; ctx.lineWidth=3; // glühende Bodenrisse
       for(let i=0;i<5;i++){ let px2=W*(0.12+0.19*i), py2=H;
