@@ -94,11 +94,12 @@
   .chapterCard .board{ max-height:96px; overflow-y:auto; touch-action:pan-y; pointer-events:auto; }
   .battleBtn{ position:relative; z-index:1; pointer-events:auto; cursor:pointer; width:100%; max-width:340px;
     font-family:inherit; font-weight:700; font-size:26px; color:#fff; letter-spacing:1px;
+    -webkit-text-stroke:2.5px var(--ink); paint-order:stroke fill;
     background:linear-gradient(#84e35b, #2ECC40 45%, #1ca233); border:4px solid var(--ink); border-radius:20px;
-    padding:14px 20px; box-shadow:0 6px 0 var(--ink), 0 10px 14px rgba(0,0,0,.35); text-shadow:0 2px 0 rgba(0,0,0,.3);
+    padding:14px 20px; box-shadow:0 6px 0 var(--ink), 0 10px 14px rgba(0,0,0,.35); text-shadow:0 3px 0 rgba(10,10,20,.45);
     animation:btnPulse 1s ease-in-out infinite alternate; overflow:hidden; }
-  .battleBtn::before{ content:''; position:absolute; left:8px; right:8px; top:5px; height:10px; border-radius:8px;
-    background:rgba(255,255,255,.4); }
+  .battleBtn::before{ content:''; position:absolute; left:8px; right:8px; top:4px; height:9px; border-radius:8px;
+    background:rgba(255,255,255,.28); }
   .battleBtn:active{ transform:translateY(5px); box-shadow:0 1px 0 var(--ink); }
   .navbar{ position:relative; z-index:1; display:flex; width:calc(100% + 24px); margin:2px -12px -12px;
     background:rgba(14,14,30,.96); border-top:3px solid var(--ink);
@@ -270,7 +271,7 @@
       <div class="boardTitle">BESTENLISTE</div>
       <div id="boardMenu" class="board"></div>
     </div>
-    <button class="battleBtn" id="startBtn">&#9876;&#65039; LOS GEHT'S</button>
+    <button class="battleBtn" id="startBtn">&#9654; LOS GEHT'S</button>
     <div class="navbar">
       <button class="navb" id="shopBtn">&#128722;<span>SHOP</span></button>
       <button class="navb" id="achBtn">&#127942;<span>ERFOLGE</span></button>
