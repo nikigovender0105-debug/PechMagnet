@@ -6,7 +6,7 @@
 <title>Pech-Magnet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
   :root{
     --ink:#1A1A2E; --cream:#FFF6E5; --gold:#FFB300; --danger:#FF3B30;
@@ -133,6 +133,14 @@
   .chapterCard{ position:relative; z-index:1; width:100%; max-width:360px; background:rgba(18,18,38,.92);
     border:3px solid var(--ink); border-radius:16px; padding:10px 12px; box-shadow:0 4px 0 rgba(0,0,0,.4); flex-shrink:0; }
   .chTitle{ font-size:15px; font-weight:700; color:var(--gold); letter-spacing:1px; }
+  .qrow{ position:relative; display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.07);
+    border-radius:9px; padding:4px 9px; margin-top:5px; overflow:hidden; }
+  .qrow .qfill{ position:absolute; left:0; top:0; bottom:0; background:rgba(255,210,63,.13); border-radius:9px; }
+  .qrow .qi{ font-size:15px; position:relative; }
+  .qrow .qt{ flex:1; text-align:left; font-size:11.5px; font-weight:600; color:var(--cream); position:relative; }
+  .qrow .qp{ font-size:11px; font-weight:700; color:var(--gold); position:relative; white-space:nowrap; }
+  .qrow.done .qp{ color:var(--safe); }
+  .qrow.done{ opacity:.8; }
   .chapterCard .boardTitle{ margin-top:6px; color:var(--teal); }
   .chapterCard .board{ max-height:clamp(44px,10vh,96px); overflow-y:auto; touch-action:pan-y; pointer-events:auto; }
   .battleBtn{ position:relative; z-index:1; pointer-events:auto; cursor:pointer; width:100%; flex-shrink:0;
@@ -320,6 +328,8 @@
     </div>
     <div class="chapterCard">
       <div class="chTitle">&#127961;&#65039; KAPITEL 1 &middot; ENDLOSE STRASSE</div>
+      <div class="boardTitle" style="color:var(--gold);">&#128197; TAGES-QUESTS</div>
+      <div id="questList"></div>
       <div class="boardTitle">BESTENLISTE</div>
       <div id="boardMenu" class="board"></div>
     </div>
@@ -878,6 +888,62 @@
     persist();
     if(a){ achQueue.push(a); pumpAchToast(); }
   }
+  // ---------- Tages-Quests ----------
+  const QUEST_REWARD=200;
+  const QUESTS=[
+    {id:'q_coins',   icon:'🪙', txt:'Sammle {n} Münzen',                    targets:[20,30,45]},
+    {id:'q_district',icon:'🏙️', txt:'Erreiche Viertel {n} in einem Lauf',   targets:[3,4,6],  max:true},
+    {id:'q_score',   icon:'💯', txt:'Erziele {n} Punkte in einem Lauf',     targets:[500,800,1200], max:true},
+    {id:'q_excuse',  icon:'🗣️', txt:'Rede dich {n}× richtig heraus',        targets:[2,3,5]},
+    {id:'q_items',   icon:'⚡', txt:'Sammle {n} Power-ups',                 targets:[3,5,8]},
+    {id:'q_mini',    icon:'💪', txt:'Gewinne {n} Minigame(s)',              targets:[1,1,2]},
+    {id:'q_special', icon:'🌟', txt:'Überstehe {n} Special-Event(s)',       targets:[1,2,2]},
+    {id:'q_runs',    icon:'🏃', txt:'Spiele {n} Läufe',                     targets:[2,3,4]}
+  ];
+  function questTemplate(id){ return QUESTS.find(t=>t.id===id); }
+  function questText(q){ const t=questTemplate(q.q); return t?t.txt.replace('{n}',q.target):''; }
+  function ensureDaily(){
+    const d=new Date(), key=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    if(save.daily&&save.daily.date===key&&Array.isArray(save.daily.quests)) return;
+    let h=0; for(const c of key) h=((h*31+c.charCodeAt(0))>>>0);
+    const nxt=()=>{ h=(Math.imul(h,1103515245)+12345)>>>0; return h; };
+    const idx=[]; let guard=0;
+    while(idx.length<3&&guard++<200){ const i=nxt()%QUESTS.length; if(idx.indexOf(i)<0) idx.push(i); }
+    while(idx.length<3) idx.push(idx.length);   // Notfall-Auffüllung
+    save.daily={date:key,quests:idx.map(i=>(
+      {q:QUESTS[i].id,target:QUESTS[i].targets[nxt()%3],prog:0,done:false}))};
+    persist();
+  }
+  function questProg(id,amt,isMax){
+    if(!save.daily||!save.daily.quests) return;
+    let changed=false;
+    for(const q of save.daily.quests){
+      if(q.q!==id||q.done) continue;
+      const np=isMax?Math.max(q.prog,amt):(q.prog+amt);
+      if(np===q.prog) continue;
+      q.prog=np; changed=true;
+      if(q.prog>=q.target){
+        q.prog=q.target; q.done=true;
+        save.coins+=QUEST_REWARD; updateCoinUI();
+        achQueue.push({icon:'📅',lbl:'TAGES-QUEST GESCHAFFT',name:questText(q),desc:'+'+QUEST_REWARD+' Münzen'});
+        pumpAchToast(); SND.play('achieve');
+      }
+    }
+    if(changed){ persist(); renderQuests(); }
+  }
+  function renderQuests(){
+    ensureDaily();
+    const list=document.getElementById('questList'); if(!list) return;
+    list.innerHTML='';
+    for(const q of save.daily.quests){
+      const t=questTemplate(q.q); if(!t) continue;
+      const row=document.createElement('div'); row.className='qrow'+(q.done?' done':'');
+      row.innerHTML='<div class="qfill" style="width:'+Math.round(clamp(q.prog/q.target,0,1)*100)+'%"></div>'
+        +'<span class="qi">'+t.icon+'</span><span class="qt">'+questText(q)+'</span>'
+        +'<span class="qp">'+(q.done?'✓ +'+QUEST_REWARD:(Math.min(q.prog,q.target)+'/'+q.target))+'</span>';
+      list.appendChild(row);
+    }
+  }
   function noteSpecialSeen(key){
     if(!save.specialsSeen) save.specialsSeen=[];
     if(save.specialsSeen.indexOf(key)<0){ save.specialsSeen.push(key); persist(); }
@@ -893,6 +959,7 @@
     const t=document.getElementById('achToast');
     if(!t){ achShowing=false; return; }
     document.getElementById('achToastIcon').textContent=a.icon;
+    const lblEl=t.querySelector('.atLbl'); if(lblEl) lblEl.textContent=a.lbl||'ERFOLG FREIGESCHALTET';
     document.getElementById('achToastName').textContent=a.name;
     const rw=[];
     if(a.coins) rw.push('+'+a.coins+' Münzen');
@@ -908,7 +975,7 @@
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0 };
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, daily:null };
   function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
@@ -1315,9 +1382,10 @@
   function escapeCatch(bribed){
     SND.play(bribed?'coin':'correct');
     if(!bribed){
-      if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); }
+      if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); questProg('q_special',1); }
       else score+=40+streetsCleared*5;
       excusesRun++; if(excusesRun>=5) unlockAch('excuse_5');
+      questProg('q_excuse',1); questProg('q_score',score,true);
     } else unlockAch('bribe_1');
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
@@ -1402,6 +1470,7 @@
     if(state!==ST.MINI) return; hide('minigame'); SND.play('correct');
     unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey);
     unlockAch('mini_win_1');
+    questProg('q_mini',1); questProg('q_special',1);
     const mk=currentEvent&&currentEvent.mini;
     if(mk){ if(!save.minisWon) save.minisWon={};
       if(!save.minisWon[mk]){ save.minisWon[mk]=true; persist(); }
@@ -1427,11 +1496,12 @@
   function applyItem(it){
     const def=ITEMS[it.type]; SND.play('powerup');
     itemsRun++; if(itemsRun>=5) unlockAch('items_run_5');
+    questProg('q_items',1);
     if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,upVal('shield')); }
     else if(it.type==='boost'){ speedBuff=Math.max(speedBuff,upVal('boost')); updateBuffHUD(); }
     else if(it.type==='magnet'){ magnetTime=Math.max(magnetTime,upVal('magnet')); updateMagnetHUD(); }
     else if(it.type==='hint'){ hintCharges+=upVal('hint'); updateHintHUD(); }
-    else if(it.type==='coins'){ coinsRun+=upVal('coins'); updateHUD(); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); }
+    else if(it.type==='coins'){ coinsRun+=upVal('coins'); updateHUD(); questProg('q_coins',upVal('coins')); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); }
     else if(it.type==='calm'){ suspicion=0; if(phase==='alarm') endAlarm(); setSusBar(); }
     addPickFx(it.x,it.y-18,def.name,def.col);
   }
@@ -1442,6 +1512,7 @@
     if(streetsCleared>=15) unlockAch('district_15');
     if(streetsCleared>=20) unlockAch('district_20');
     if(streetsCleared>=5&&caughtRun===0) unlockAch('no_excuse_5');
+    questProg('q_district',streetsCleared,true); questProg('q_score',score,true);
     updateHUD();
   }
   function confrontNPC(n){
@@ -1478,6 +1549,7 @@
     const earned=coinsRun+streetsCleared*2;
     save.coins+=earned;
     save.deaths=(save.deaths||0)+1; if(save.deaths>=5) unlockAch('death_5');
+    questProg('q_runs',1); questProg('q_score',score,true); questProg('q_district',streetsCleared,true);
     const entry={score:score,streets:streetsCleared};
     save.scores.push(entry); save.scores.sort((a,b)=>b.score-a.score); if(save.scores.length>20) save.scores.length=20;
     highscore=save.scores.length?save.scores[0].score:score;
@@ -1695,7 +1767,7 @@
         if(dl<150){ const s=260*dt; c.x+=dx/dl*s; c.y+=dy/dl*s; } } }
     const grab=magnetTime>0?22:12;
     for(const c of coins){ if(Math.abs(c.y-player.y)>30+grab) continue;
-      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun++; SND.play('coin'); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
+      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun++; SND.play('coin'); questProg('q_coins',1); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
     if(coins.some(c=>c.got)) coins=coins.filter(c=>!c.got);
     // Power-up-Items einsammeln
     for(const it of items){ if(Math.abs(it.y-player.y)>34) continue;
@@ -3350,7 +3422,7 @@
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
   document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); firstRound=false; score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
-  document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
+  document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderQuests(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };
@@ -3379,7 +3451,7 @@
   highscore=save.scores.length?save.scores[0].score:0;
   updateHUD(); updateCoinUI(); renderBoard(document.getElementById('boardMenu'),null);
   resetWorld(); setBanner('hide'); youHint=0;  // Stadt als lebendige Menü-Kulisse
-  updateMenuSkin(); show('menu');
+  updateMenuSkin(); renderQuests(); show('menu');
   requestAnimationFrame(loop);
 })();
 </script>
