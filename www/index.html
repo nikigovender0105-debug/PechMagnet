@@ -1224,17 +1224,21 @@
     const hintEl=document.getElementById('crowdHint');
     if(hintEl){
       hintEl.style.display='none';
+      const wordsOf=t=>t.split(/\s+/).map(w=>w.replace(/[^A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df-]/g,'')).filter(w=>w.length>=5);
       const correctTxt=excuseSet.find(e=>e.ok).t;
-      const cands=correctTxt.split(/\s+/).map(w=>w.replace(/[^A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df-]/g,''))
-        .filter(w=>w.length>=5).sort((a,b)=>b.length-a.length);
-      let hw=null;
-      for(const w of cands){ const lw=w.toLowerCase();
-        if(!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(lw)>=0)){ hw=w; break; } }
+      const cands=wordsOf(correctTxt).sort((a,b)=>b.length-a.length);
+      // L\u00e4ngen aller langen W\u00f6rter in den falschen Antworten
+      const wrongLens=new Set();
+      excuseSet.forEach(e=>{ if(!e.ok) wordsOf(e.t).forEach(w=>wrongLens.add(w.length)); });
       let pendingHint=null;
+      // nur die Buchstaben-Anzahl verraten \u2013 Wortl\u00e4nge muss eindeutig sein
+      const hw=cands.find(w=>!wrongLens.has(w.length));
       if(hw){
-        // immer nur der Anfangsbuchstabe + Anzahl der Buchstaben
-        const disp='\u201a'+hw[0]+'\u2026\u2018 ('+hw.length+' Buchstaben)';
-        pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>'+disp+'</b> \u2026\u201c';
+        pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit einem Wort mit <b>'+hw.length+' Buchstaben</b> \u2026\u201c';
+      } else {
+        // Fallback: eindeutiges Wort, dann Anfangsbuchstabe + L\u00e4nge
+        const fw=cands.find(w=>!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(w.toLowerCase())>=0));
+        if(fw) pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+fw[0]+'\u2026\u2018 ('+fw.length+' Buchstaben)</b> \u2026\u201c';
       }
       const lb=document.getElementById('listenBtn');
       lb.disabled=!pendingHint;
