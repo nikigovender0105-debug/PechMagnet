@@ -1232,9 +1232,8 @@
         if(!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(lw)>=0)){ hw=w; break; } }
       let pendingHint=null;
       if(hw){
-        const disp=streetsCleared>=5
-          ? '\u201a'+hw[0]+'\u2026\u2018 ('+hw.length+' Buchstaben)'                                  // sp\u00e4t: nur Anfangsbuchstabe + L\u00e4nge
-          : '\u201a'+hw.slice(0,2)+'\u2022'.repeat(Math.max(1,hw.length-3))+hw.slice(-1)+'\u2018';    // maskiert
+        // immer nur der Anfangsbuchstabe + Anzahl der Buchstaben
+        const disp='\u201a'+hw[0]+'\u2026\u2018 ('+hw.length+' Buchstaben)';
         pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>'+disp+'</b> \u2026\u201c';
       }
       const lb=document.getElementById('listenBtn');
