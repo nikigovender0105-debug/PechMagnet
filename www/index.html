@@ -2131,11 +2131,30 @@
       ctx.beginPath(); ctx.moveTo(x+13,y-5); ctx.lineTo(x+8,y-1); ctx.stroke();
       ctx.strokeStyle=INK; ctx.lineWidth=3.2;
     } else if(vis==='rhino'){
-      ctx.strokeStyle=INK; ctx.lineWidth=4; for(const dx of [-16,-6,6,14]){ ctx.beginPath(); ctx.moveTo(x+dx,y+10); ctx.lineTo(x+dx,y+18); ctx.stroke(); }
-      ctx.lineWidth=3.2; ctx.fillStyle='#9aa0a6'; rr(x-24,y-10,42,22,11); fs();
-      ctx.beginPath(); ctx.arc(x+20,y,11,0,6.283); fs();
-      ctx.fillStyle='#FFF6E5'; ctx.beginPath(); ctx.moveTo(x+30,y-1); ctx.lineTo(x+40,y-8); ctx.lineTo(x+31,y+4); ctx.closePath(); fs();
-      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x+19,y-3,2,0,6.283); ctx.fill();
+      ctx.strokeStyle=INK; ctx.lineJoin='round';
+      ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x-23,y-4); ctx.quadraticCurveTo(x-31,y,x-29,y+8); ctx.stroke(); // Schwanz
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-29,y+9,2.4,0,6.283); ctx.fill();
+      ctx.lineWidth=3; ctx.fillStyle='#8a9097';                                     // Beine
+      for(const dx of [-17,-7,5,13]){ rr(x+dx-3.5,y+7,7,11,2.5); fs(); }
+      ctx.fillStyle='#d6dade'; for(const dx of [-17,-7,5,13]){ rr(x+dx-3,y+14.5,6,3.5,1.5); ctx.fill(); } // Zehen
+      const rg=ctx.createLinearGradient(0,y-12,0,y+12);                             // Körper mit Verlauf
+      rg.addColorStop(0,'#aab1b8'); rg.addColorStop(1,'#848b92');
+      ctx.lineWidth=3.2; ctx.fillStyle=rg; rr(x-24,y-11,42,23,11); fs();
+      ctx.strokeStyle='rgba(26,26,46,.25)'; ctx.lineWidth=1.6;                      // Hautfalten
+      ctx.beginPath(); ctx.moveTo(x-14,y-9); ctx.quadraticCurveTo(x-12,y,x-14,y+9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x-4,y-10); ctx.quadraticCurveTo(x-2,y,x-4,y+10); ctx.stroke();
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2;
+      ctx.fillStyle='#868d94'; ctx.beginPath(); ctx.ellipse(x+13,y-12,4.5,6,0.5,0,6.283); fs(); // Ohr
+      ctx.fillStyle='#5f666d'; ctx.beginPath(); ctx.ellipse(x+13.5,y-12,2,3,0.5,0,6.283); ctx.fill();
+      ctx.fillStyle='#9aa0a6'; ctx.beginPath(); ctx.arc(x+20,y,11.5,0,6.283); fs(); // Kopf
+      ctx.fillStyle='#FFF6E5'; ctx.lineWidth=2.6;                                   // grosses + kleines Horn
+      ctx.beginPath(); ctx.moveTo(x+29,y-2); ctx.lineTo(x+42,y-13); ctx.lineTo(x+31,y+4); ctx.closePath(); fs();
+      ctx.beginPath(); ctx.moveTo(x+24,y-6); ctx.lineTo(x+28,y-14); ctx.lineTo(x+30,y-4); ctx.closePath(); fs();
+      ctx.fillStyle='#fff'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(x+17,y-4,3,0,6.283); fs(); // Auge
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x+18,y-3.6,1.5,0,6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+27,y+4,1.4,0,6.283); ctx.fill();                   // Nüster
+      ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x+23,y+7,4,0.3,Math.PI*0.75); ctx.stroke(); // Maul
+      ctx.lineWidth=3.2;
     } else if(vis==='blitz'){
       const bg4=ctx.createRadialGradient(x,y,3,x,y,32);                           // Leucht-Glow
       bg4.addColorStop(0,'rgba(255,240,150,.55)'); bg4.addColorStop(1,'rgba(255,240,150,0)');
@@ -2278,13 +2297,29 @@
       drawAcc(ctx,'cowboy',x,y-16,9,'#C8956A');                                      // Cowboyhut
     } else if(vis==='shark'){
       ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
-      ctx.fillStyle='#7895a6'; ctx.beginPath(); ctx.moveTo(x-24,y); ctx.quadraticCurveTo(x-6,y-16,x+16,y-8);
+      ctx.fillStyle='rgba(58,134,255,.30)';                                          // Wasserlache
+      ctx.beginPath(); ctx.ellipse(x,y+10,27,6,0,0,6.283); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x-22,y+8); ctx.quadraticCurveTo(x,y+13,x+24,y+8); ctx.stroke();
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2;
+      ctx.fillStyle='#5e7d93';                                                       // Schwanzflosse
+      ctx.beginPath(); ctx.moveTo(x-22,y); ctx.lineTo(x-33,y-10); ctx.lineTo(x-27,y); ctx.lineTo(x-33,y+8); ctx.closePath(); fs();
+      const sg3=ctx.createLinearGradient(0,y-14,0,y+10);                             // dunkler Rücken, heller Bauch
+      sg3.addColorStop(0,'#5e7d93'); sg3.addColorStop(0.55,'#7895a6'); sg3.addColorStop(1,'#cfdae2');
+      ctx.fillStyle=sg3; ctx.beginPath(); ctx.moveTo(x-24,y); ctx.quadraticCurveTo(x-6,y-16,x+16,y-8);
       ctx.quadraticCurveTo(x+30,y-4,x+30,y); ctx.quadraticCurveTo(x+30,y+4,x+16,y+8);
       ctx.quadraticCurveTo(x-6,y+16,x-24,y); ctx.closePath(); fs();
-      ctx.beginPath(); ctx.moveTo(x-4,y-13); ctx.lineTo(x+2,y-28); ctx.lineTo(x+8,y-12); ctx.closePath(); fs(); // Flosse
-      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(x+16,y+1); ctx.lineTo(x+30,y-2); ctx.lineTo(x+28,y+5); ctx.closePath(); fs(); // Maul
-      ctx.fillStyle=INK; for(let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(x+18+i*3,y+2); ctx.lineTo(x+19.5+i*3,y-2); ctx.lineTo(x+21+i*3,y+2); ctx.closePath(); ctx.fill(); }
-      ctx.beginPath(); ctx.arc(x+6,y-4,1.8,0,6.283); ctx.fill(); // Auge
+      ctx.fillStyle='#5e7d93';                                                       // Rücken- + Seitenflosse
+      ctx.beginPath(); ctx.moveTo(x-4,y-13); ctx.lineTo(x+2,y-28); ctx.lineTo(x+8,y-12); ctx.closePath(); fs();
+      ctx.beginPath(); ctx.moveTo(x-3,y+5); ctx.lineTo(x-11,y+14); ctx.lineTo(x+4,y+8); ctx.closePath(); fs();
+      ctx.strokeStyle='rgba(26,26,46,.45)'; ctx.lineWidth=1.8;                       // Kiemen
+      for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(x+2+i*3.5,y-6); ctx.quadraticCurveTo(x+4.5+i*3.5,y-1,x+2+i*3.5,y+3); ctx.stroke(); }
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2;
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(x+15,y+1); ctx.lineTo(x+30,y-2); ctx.lineTo(x+28,y+6); ctx.closePath(); fs(); // Maul
+      ctx.fillStyle=INK; for(let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(x+17+i*3,y+2.5); ctx.lineTo(x+18.5+i*3,y-1); ctx.lineTo(x+20+i*3,y+2.5); ctx.closePath(); ctx.fill(); }
+      ctx.fillStyle='#fff'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(x+7,y-4,2.8,0,6.283); fs(); // Auge
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x+7.8,y-3.8,1.4,0,6.283); ctx.fill();
+      ctx.lineWidth=3.2;
     } else if(vis==='clown'){
       ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
       ctx.fillStyle='#FF5DA2'; rr(x-12,y-6,24,24,9); fs();
