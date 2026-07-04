@@ -76,9 +76,28 @@
   .logoMag{ display:inline-block; -webkit-text-stroke:0; filter:none; font-size:38px;
     animation:magSwing 1.7s ease-in-out infinite alternate; transform-origin:50% 0; }
   @keyframes magSwing{ from{transform:rotate(-14deg);} to{transform:rotate(10deg);} }
-  #menu::before{ content:''; position:absolute; inset:-90px; pointer-events:none; z-index:0;
+  #menu::before, #shop::before, #skins::before, #achievements::before{
+    content:''; position:absolute; inset:-90px; pointer-events:none; z-index:0;
     background:repeating-linear-gradient(-35deg, rgba(255,210,63,.07) 0 26px, rgba(124,92,255,.07) 26px 52px);
     animation:stripeMove 4.5s linear infinite; }
+  /* ---- Untermenüs im Lobby-Look ---- */
+  #shop, #skins, #achievements{ background:linear-gradient(rgba(14,14,26,.55), rgba(14,14,26,.72)); }
+  #shop .card, #skins .card, #achievements .card{
+    position:relative; z-index:1; background:rgba(16,16,34,.94); border-color:var(--ink);
+    box-shadow:0 5px 0 rgba(0,0,0,.45); color:var(--cream); }
+  .mtitle{ font-size:24px; color:var(--gold); letter-spacing:1.5px; margin-bottom:4px; }
+  #shop .shopSecTitle{ color:var(--teal); }
+  #shop .pwr, #skins .skin, #achievements .ach{
+    background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); box-shadow:none; }
+  #shop .pwr .pname, #skins .skin .sname, #achievements .ach .aname{ color:var(--cream); }
+  #shop .pwr .pdesc, #achievements .ach .adesc{ color:var(--cream); opacity:.72; }
+  #achievements .ach .adesc b{ color:var(--gold); }
+  #achievements .lead{ color:var(--cream); opacity:.8; }
+  #skins .skin.sel{ background:rgba(255,210,63,.14); border-color:var(--gold); }
+  #shop .upBar .ud{ background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); }
+  #shop .upBar .ud.on{ background:var(--gold); border-color:var(--gold); }
+  #shop .stat, #skins .stat{ background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.14); }
+  #shop .stat .k, #skins .stat .k{ color:var(--cream); opacity:.75; }
   @keyframes stripeMove{ from{transform:translateY(0);} to{transform:translateY(63.5px);} }
   #menu .card, #menu .btnrow{ position:relative; z-index:1; }
   .btn.big{ font-size:23px; padding:14px 28px; animation:btnPulse 1s ease-in-out infinite alternate; }
@@ -134,7 +153,8 @@
   .navb span{ font-size:11px; letter-spacing:1px; opacity:.9; }
   .navb:active{ background:rgba(124,92,255,.4); transform:translateY(2px); }
   #game:has(#menu:not(.hidden)) #muteBtn{ display:none; }
-  #game:has(#menu:not(.hidden)) #hud{ display:none; }
+  #game:has(#menu:not(.hidden)) #hud, #game:has(#shop:not(.hidden)) #hud,
+  #game:has(#skins:not(.hidden)) #hud, #game:has(#achievements:not(.hidden)) #hud{ display:none; }
   .lead{ color:var(--ink); font-size:15px; font-weight:500; line-height:1.45; }
   .lead b{ color:var(--danger); } .lead .safe{ color:#1ca233; }
   .btn{ pointer-events:auto; cursor:pointer; font-family:inherit; font-weight:700; font-size:20px; color:var(--cream);
@@ -313,7 +333,7 @@
 
   <div id="shop" class="screen hidden">
     <div class="card">
-      <h2 style="font-size:26px;color:var(--purple);margin-bottom:4px;">SHOP</h2>
+      <h2 class="mtitle">&#128722; SHOP</h2>
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsShop">0</div></div></div>
       <div class="shopSecTitle">POWER-UPS</div>
       <div id="powerups"></div>
@@ -325,7 +345,7 @@
 
   <div id="skins" class="screen hidden">
     <div class="card">
-      <h2 style="font-size:26px;color:var(--purple);margin-bottom:4px;">SKINS</h2>
+      <h2 class="mtitle">&#128085; SKINS</h2>
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsSkins">0</div></div></div>
       <div id="skinGrid" class="skinGrid"></div>
     </div>
@@ -334,7 +354,7 @@
 
   <div id="achievements" class="screen hidden">
     <div class="card">
-      <h2 style="font-size:26px;color:var(--purple);margin-bottom:4px;">ERFOLGE</h2>
+      <h2 class="mtitle">&#127942; ERFOLGE</h2>
       <p class="lead" style="font-size:12.5px;margin-bottom:6px;">Meistere die seltenen Special-Events und schalte exklusive Skins frei.</p>
       <div id="achList"></div>
     </div>
