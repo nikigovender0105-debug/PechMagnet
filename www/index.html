@@ -181,7 +181,7 @@
   @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
-  #shop .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
+  #shop .card, #skins .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
   .shopSecTitle{ font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--purple); margin:14px 0 6px; text-align:left; }
   .pwr{ display:flex; align-items:center; gap:10px; background:#fff; border:3px solid var(--ink); border-radius:14px; padding:10px; box-shadow:3px 3px 0 var(--ink); }
   .pwr .pico{ font-size:30px; line-height:1; }
@@ -284,6 +284,7 @@
     <button class="battleBtn" id="startBtn">&#9654; LOS GEHT'S</button>
     <div class="navbar">
       <button class="navb" id="shopBtn">&#128722;<span>SHOP</span></button>
+      <button class="navb" id="skinsBtn">&#128085;<span>SKINS</span></button>
       <button class="navb" id="achBtn">&#127942;<span>ERFOLGE</span></button>
     </div>
   </div>
@@ -296,10 +297,17 @@
       <div id="powerups"></div>
       <div class="shopSecTitle">ITEM-UPGRADES</div>
       <div id="upgrades"></div>
-      <div class="shopSecTitle">SKINS</div>
-      <div id="skinGrid" class="skinGrid"></div>
     </div>
     <button class="btn go" id="shopBack">ZUR&Uuml;CK</button>
+  </div>
+
+  <div id="skins" class="screen hidden">
+    <div class="card">
+      <h2 style="font-size:26px;color:var(--purple);margin-bottom:4px;">SKINS</h2>
+      <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsSkins">0</div></div></div>
+      <div id="skinGrid" class="skinGrid"></div>
+    </div>
+    <button class="btn go" id="skinsBack">ZUR&Uuml;CK</button>
   </div>
 
   <div id="achievements" class="screen hidden">
@@ -1425,6 +1433,7 @@
 
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
   function updateCoinUI(){ const m=document.getElementById('coinsMenu'); if(m) m.textContent=save.coins; const s=document.getElementById('coinsShop'); if(s) s.textContent=save.coins;
+    const k=document.getElementById('coinsSkins'); if(k) k.textContent=save.coins;
     if(save.coins>=1000) unlockAch('rich_1000'); if(save.coins>=5000) unlockAch('rich_5000'); }
   function renderBoard(el,latest){
     if(!el) return;
@@ -1472,6 +1481,9 @@
       row.appendChild(btn); pw.appendChild(row);
     }
     renderUpgrades();
+  }
+  function renderSkins(){
+    const cs=document.getElementById('coinsSkins'); if(cs) cs.textContent=save.coins;
     const grid=document.getElementById('skinGrid'); grid.innerHTML='';
     for(const sk of SKINS){
       const owned=save.owned.indexOf(sk.id)>=0, sel=save.selected===sk.id;
@@ -1481,9 +1493,9 @@
       const nm=document.createElement('div'); nm.className='sname'; nm.textContent=sk.name; card.appendChild(nm);
       const btn=document.createElement('button'); btn.className='sbtn';
       if(sel){ btn.textContent='Ausgew\u00e4hlt'; btn.classList.add('sel'); }
-      else if(owned){ btn.textContent='Ausw\u00e4hlen'; btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderShop(); }; }
+      else if(owned){ btn.textContent='Ausw\u00e4hlen'; btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderSkins(); }; }
       else if(sk.unlock){ btn.textContent='\ud83d\udd12 Erfolg'; btn.classList.add('cant'); nm.textContent=sk.name+' \ud83d\udd12'; }
-      else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderShop(); updateCoinUI();
+      else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI();
         unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }; }
       else { btn.textContent=sk.price+' M\u00fcnzen'; btn.classList.add('cant'); }
       card.appendChild(btn); grid.appendChild(card); drawSkinPreview(cnv,sk);
@@ -3195,6 +3207,8 @@
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
+  document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };
+  document.getElementById('skinsBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('skins'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAchievements(); hide('menu'); show('achievements'); };
   document.getElementById('achBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('achievements'); show('menu'); };
   const nameInput=document.getElementById('nameInput');
