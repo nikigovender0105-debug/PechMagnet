@@ -1122,7 +1122,8 @@
     const n=Math.max(1,Math.round(BASE_DENSITY*z.density));
     for(let i=0;i<n;i++){
       const x=rand(playMinX(),playMaxX()), y=rand(z.y0+50,z.y1-50);
-      npcs.push({x,y,color:pick(PALETTE),hat:Math.random()<0.38?pick(PALETTE):null,wx:x,wy:y,wt:rand(0.5,2.5),bob:rand(0,6.28),point:false,ang:Math.PI/2,
+      npcs.push({x,y,color:pick(PALETTE),hat:Math.random()<0.38?pick(PALETTE):null,brolly:Math.random()<0.45?pick(PALETTE):null,
+        wx:x,wy:y,wt:rand(0.5,2.5),bob:rand(0,6.28),point:false,ang:Math.PI/2,
         look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
     }
   }
@@ -1893,7 +1894,7 @@
     else if(p==='star'||p==='heart'||p==='bolt'){ g.fillStyle=acc; drawEmblem(g,p,cx,T+bh*0.42,bw*0.26); }
     g.restore();
   }
-  function person(x,y,color,ang,pointing,bob,isPlayer,hat,mv){
+  function person(x,y,color,ang,pointing,bob,isPlayer,hat,mv,brolly){
     const t=performance.now();
     let body=color, glow=null;
     if(isPlayer){ if(curSkin.rainbow) body=rainbowHex(t/300); glow=curSkin.glow||(curSkin.rainbow?body:null); }
@@ -1952,6 +1953,26 @@
     if(pointing){ const hx=x+Math.cos(ang)*22, hy=(y-2+b)+Math.sin(ang)*16;
       ctx.lineWidth=5; ctx.strokeStyle=INK; ctx.beginPath(); ctx.moveTo(x,y-2+b); ctx.lineTo(hx,hy); ctx.stroke();
       ctx.fillStyle=color; ctx.beginPath(); ctx.arc(hx,hy,4,0,6.283); fs(); }
+    // Regenschirm: klappt bei einsetzendem Regen sanft auf
+    if(brolly&&weatherType==='rain'){
+      const open=clamp((weatherIntensity-0.15)/0.35,0,1);
+      if(open>0.05){
+        ctx.save(); ctx.translate(x+9,y+4+b); ctx.rotate(0.14+0.05*Math.sin(bob));
+        ctx.scale(open,open);
+        ctx.strokeStyle=INK; ctx.lineWidth=2.4;                      // Schaft
+        ctx.beginPath(); ctx.moveTo(0,2); ctx.lineTo(0,-33); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,-46); ctx.lineTo(0,-51); ctx.stroke(); // Spitze
+        ctx.fillStyle=brolly; ctx.lineWidth=2.6; ctx.lineJoin='round';
+        ctx.beginPath(); ctx.arc(0,-30,17,Math.PI,0);                // Kuppel mit Wellenkante
+        for(let i=3;i>=0;i--){ ctx.quadraticCurveTo(-17+(i+0.5)*8.5,-26,-17+i*8.5,-30); }
+        ctx.closePath(); fs();
+        ctx.strokeStyle='rgba(26,26,46,.4)'; ctx.lineWidth=1.4;      // Nähte
+        ctx.beginPath(); ctx.moveTo(0,-47); ctx.lineTo(-8.5,-29); ctx.moveTo(0,-47); ctx.lineTo(8.5,-29); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.25)';                       // Glanz
+        ctx.beginPath(); ctx.arc(-6,-36,7,Math.PI*1.1,Math.PI*1.7); ctx.arc(-6,-36,3,Math.PI*1.7,Math.PI*1.1,true); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
     ctx.restore();
   }
   function spikeWord(x,y,txt,col){
@@ -2720,7 +2741,7 @@
       ctx.lineCap='butt';
     }
     const ents=[];
-    for(const n of npcs){ if(n.y<camY-50||n.y>camY+H+50) continue; ents.push({y:n.y,d:()=>person(n.x,n.y,n.color,n.ang,n.point,n.bob,false,n.hat,n.mv)}); }
+    for(const n of npcs){ if(n.y<camY-50||n.y>camY+H+50) continue; ents.push({y:n.y,d:()=>person(n.x,n.y,n.color,n.ang,n.point,n.bob,false,n.hat,n.mv,n.brolly)}); }
     ents.push({y:player.y,d:()=>person(player.x,player.y,curSkin.body,Math.PI/2,false,player.bob,true)});
     ents.sort((a,b)=>a.y-b.y);
     for(const e of ents) e.d();
