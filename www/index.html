@@ -889,16 +889,68 @@
     if(a){ achQueue.push(a); pumpAchToast(); }
   }
   // ---------- Tages-Quests ----------
+  // m = Metrik (mehrere Quests können dieselbe Metrik mit anderen Zielen nutzen), max = Bestwert statt Summe
   const QUEST_REWARD=200;
   const QUESTS=[
-    {id:'q_coins',   icon:'🪙', txt:'Sammle {n} Münzen',                    targets:[20,30,45]},
-    {id:'q_district',icon:'🏙️', txt:'Erreiche Viertel {n} in einem Lauf',   targets:[3,4,6],  max:true},
-    {id:'q_score',   icon:'💯', txt:'Erziele {n} Punkte in einem Lauf',     targets:[500,800,1200], max:true},
-    {id:'q_excuse',  icon:'🗣️', txt:'Rede dich {n}× richtig heraus',        targets:[2,3,5]},
-    {id:'q_items',   icon:'⚡', txt:'Sammle {n} Power-ups',                 targets:[3,5,8]},
-    {id:'q_mini',    icon:'💪', txt:'Gewinne {n} Minigame(s)',              targets:[1,1,2]},
-    {id:'q_special', icon:'🌟', txt:'Überstehe {n} Special-Event(s)',       targets:[1,2,2]},
-    {id:'q_runs',    icon:'🏃', txt:'Spiele {n} Läufe',                     targets:[2,3,4]}
+    {id:'q_coins',   icon:'🪙', txt:'Sammle {n} Münzen',                  targets:[20,30,45],  m:'coins'},
+    {id:'q_district',icon:'🏙️', txt:'Erreiche Viertel {n} in einem Lauf', targets:[3,4,6],     m:'district', max:true},
+    {id:'q_score',   icon:'💯', txt:'Erziele {n} Punkte in einem Lauf',   targets:[500,800,1200], m:'score', max:true},
+    {id:'q_excuse',  icon:'🗣️', txt:'Rede dich {n}× richtig heraus',      targets:[2,3,5],     m:'excuse'},
+    {id:'q_items',   icon:'⚡', txt:'Sammle {n} Power-ups',               targets:[3,5,8],     m:'items'},
+    {id:'q_mini',    icon:'💪', txt:'Gewinne {n} Minigame(s)',            targets:[1,1,2],     m:'mini'},
+    {id:'q_special', icon:'🌟', txt:'Überstehe {n} Special-Event(s)',     targets:[1,2,2],     m:'special'},
+    {id:'q_runs',    icon:'🏃', txt:'Spiele {n} Läufe',                   targets:[2,3,4],     m:'runs'},
+    // --- erweiterte Ziele ---
+    {id:'q_coins2',  icon:'💰', txt:'Sammle {n} Münzen',                  targets:[60,80,120], m:'coins'},
+    {id:'q_coins3',  icon:'🏦', txt:'Sammle {n} Münzen',                  targets:[150,200,250], m:'coins'},
+    {id:'q_coinsrun',icon:'🤑', txt:'Sammle {n} Münzen in einem Lauf',    targets:[10,15,20],  m:'coins_run', max:true},
+    {id:'q_coinsrun2',icon:'💎', txt:'Sammle {n} Münzen in einem Lauf',   targets:[25,30,35],  m:'coins_run', max:true},
+    {id:'q_district2',icon:'🌆', txt:'Erreiche Viertel {n} in einem Lauf',targets:[8,10,12],   m:'district', max:true},
+    {id:'q_district3',icon:'🚀', txt:'Erreiche Viertel {n} in einem Lauf',targets:[15,18,20],  m:'district', max:true},
+    {id:'q_disttotal',icon:'🗺️', txt:'Durchquere insgesamt {n} Viertel',  targets:[6,10,15],   m:'district_total'},
+    {id:'q_score2',  icon:'🎯', txt:'Erziele {n} Punkte in einem Lauf',   targets:[2000,3000,4500], m:'score', max:true},
+    {id:'q_scoretotal',icon:'📈', txt:'Erziele insgesamt {n} Punkte',     targets:[3000,5000,8000], m:'score_total'},
+    {id:'q_excuse2', icon:'🎭', txt:'Rede dich {n}× richtig heraus',      targets:[6,8,10],    m:'excuse'},
+    {id:'q_excuse3', icon:'🎤', txt:'Rede dich {n}× richtig heraus',      targets:[12,15,20],  m:'excuse'},
+    {id:'q_excuserun',icon:'😅', txt:'{n} richtige Ausreden in einem Lauf', targets:[2,3,4],   m:'excuse_run', max:true},
+    {id:'q_items2',  icon:'🧲', txt:'Sammle {n} Power-ups',               targets:[10,12,15],  m:'items'},
+    {id:'q_itemsrun',icon:'🧹', txt:'Sammle {n} Power-ups in einem Lauf', targets:[3,4,5],     m:'items_run', max:true},
+    {id:'q_runs2',   icon:'👟', txt:'Spiele {n} Läufe',                   targets:[5,6,8],     m:'runs'},
+    {id:'q_runs3',   icon:'🔁', txt:'Spiele {n} Läufe',                   targets:[10,12,15],  m:'runs'},
+    {id:'q_mini2',   icon:'🥇', txt:'Gewinne {n} Minigames',              targets:[2,3,3],     m:'mini'},
+    {id:'q_mini3',   icon:'👾', txt:'Gewinne {n} Minigames',              targets:[4,5,6],     m:'mini'},
+    {id:'q_special2',icon:'✨', txt:'Überstehe {n} Special-Events',       targets:[3,3,4],     m:'special'},
+    {id:'q_special3',icon:'🌠', txt:'Überstehe {n} Special-Events',       targets:[5,6,8],     m:'special'},
+    {id:'q_bribe',   icon:'🤝', txt:'Besteche die Menge {n}×',            targets:[1,2,3],     m:'bribe'},
+    {id:'q_listen',  icon:'👂', txt:'Belausche die Menge {n}×',           targets:[1,2,3],     m:'listen'},
+    {id:'q_nearmiss',icon:'😰', txt:'Überlebe {n}× über 90% Verdacht',    targets:[1,1,2],     m:'nearmiss'},
+    {id:'q_alarm',   icon:'🚨', txt:'Überstehe {n} Alarme',               targets:[3,5,8],     m:'alarm'},
+    {id:'q_alarm2',  icon:'📢', txt:'Überstehe {n} Alarme',               targets:[10,12,15],  m:'alarm'},
+    {id:'q_shield',  icon:'🛡️', txt:'Sammle {n} Schild-Item(s)',          targets:[1,2,3],     m:'it_shield'},
+    {id:'q_boost',   icon:'💨', txt:'Sammle {n} Speed-Item(s)',           targets:[1,2,3],     m:'it_boost'},
+    {id:'q_magnet',  icon:'🧲', txt:'Sammle {n} Magnet-Item(s)',          targets:[1,2,3],     m:'it_magnet'},
+    {id:'q_hint',    icon:'🔍', txt:'Sammle {n} Spicker',                 targets:[1,2,2],     m:'it_hint'},
+    {id:'q_calm',    icon:'🧘', txt:'Sammle {n} Ruhe-Item(s)',            targets:[1,2,2],     m:'it_calm'},
+    {id:'q_moneybag',icon:'💵', txt:'Sammle {n} Geldsack/-säcke',         targets:[1,2,3],     m:'it_coins'},
+    {id:'q_arm',     icon:'💪', txt:'Gewinne {n}× Armdrücken',            targets:[1,1,2],     m:'mini_armwrestle'},
+    {id:'q_race',    icon:'🏁', txt:'Gewinne {n}× das Wettrennen',        targets:[1,1,2],     m:'mini_race'},
+    {id:'q_tug',     icon:'🧓', txt:'Gewinne {n}× das Tauziehen',         targets:[1,1,2],     m:'mini_tug'},
+    {id:'q_duel',    icon:'🤠', txt:'Gewinne {n}× das Blick-Duell',       targets:[1,1,2],     m:'mini_duel'},
+    {id:'q_crime',   icon:'🚓', txt:'Überstehe {n} Verbrecher-Special(s)',targets:[1,1,2],     m:'spk_crime'},
+    {id:'q_spooky',  icon:'👻', txt:'Überstehe {n} Grusel-Special(s)',    targets:[1,1,2],     m:'spk_spooky'},
+    {id:'q_animal',  icon:'🐾', txt:'Überstehe {n} Tier-Special(s)',      targets:[1,1,2],     m:'spk_animal'},
+    {id:'q_alien',   icon:'🛸', txt:'Überstehe {n} Alien-Special(s)',     targets:[1,1,1],     m:'spk_alien'},
+    {id:'q_tech',    icon:'🤖', txt:'Überstehe {n} Technik-Special(s)',   targets:[1,1,1],     m:'spk_tech'},
+    {id:'q_media',   icon:'🎥', txt:'Überstehe {n} Medien-Special(s)',    targets:[1,1,1],     m:'spk_media'},
+    {id:'q_sport',   icon:'🏋️', txt:'Überstehe {n} Sport-Special(s)',     targets:[1,1,2],     m:'spk_sport'},
+    {id:'q_nature',  icon:'🌪️', txt:'Überstehe {n} Natur-Special(s)',     targets:[1,1,1],     m:'spk_nature'},
+    {id:'q_accident',icon:'🚗', txt:'Überstehe {n} Unfall-Special(s)',    targets:[1,1,1],     m:'spk_accident'},
+    {id:'q_rain',    icon:'🌧️', txt:'Erlebe {n}× Regen im Lauf',          targets:[1,1,2],     m:'wx_rain'},
+    {id:'q_snow',    icon:'❄️', txt:'Erlebe {n}× Schnee im Lauf',         targets:[1,1,2],     m:'wx_snow'},
+    {id:'q_fog',     icon:'🌫️', txt:'Erlebe {n}× Nebel im Lauf',          targets:[1,1,2],     m:'wx_fog'},
+    {id:'q_spend',   icon:'🛒', txt:'Gib {n} Münzen im Shop aus',         targets:[50,100,200],m:'spend'},
+    {id:'q_skinbuy', icon:'👕', txt:'Kaufe {n} Skin(s)',                  targets:[1,1,2],     m:'skins_buy'},
+    {id:'q_upgbuy',  icon:'🔧', txt:'Kaufe {n} Item-Upgrade(s)',          targets:[1,1,2],     m:'upg_buy'}
   ];
   function questTemplate(id){ return QUESTS.find(t=>t.id===id); }
   function questText(q){ const t=questTemplate(q.q); return t?t.txt.replace('{n}',q.target):''; }
@@ -914,12 +966,13 @@
       {q:QUESTS[i].id,target:QUESTS[i].targets[nxt()%3],prog:0,done:false}))};
     persist();
   }
-  function questProg(id,amt,isMax){
+  function questProg(metric,amt){
     if(!save.daily||!save.daily.quests) return;
     let changed=false;
     for(const q of save.daily.quests){
-      if(q.q!==id||q.done) continue;
-      const np=isMax?Math.max(q.prog,amt):(q.prog+amt);
+      if(q.done) continue;
+      const t=questTemplate(q.q); if(!t||t.m!==metric) continue;
+      const np=t.max?Math.max(q.prog,amt):(q.prog+amt);
       if(np===q.prog) continue;
       q.prog=np; changed=true;
       if(q.prog>=q.target){
@@ -1300,7 +1353,7 @@
     specialBanner=currentEvent.boom||'AUFGEFLOGEN!';
     setBanner('hide');
   }
-  function endAlarm(){ phase='calm'; currentEvent=null; for(const n of npcs) n.point=false; if(nearMiss){ unlockAch('close_call'); nearMiss=false; } chaosTimer=rand(diff().chaosInterval*0.7,diff().chaosInterval); setBanner('calm'); }
+  function endAlarm(){ if(phase==='alarm') questProg('alarm',1); phase='calm'; currentEvent=null; for(const n of npcs) n.point=false; if(nearMiss){ unlockAch('close_call'); questProg('nearmiss',1); nearMiss=false; } chaosTimer=rand(diff().chaosInterval*0.7,diff().chaosInterval); setBanner('calm'); }
 
   function getCaught(){
     state=ST.CAUGHT; SND.play('caught'); caughtRun++;
@@ -1357,7 +1410,7 @@
         rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit …
         rageDrain=2;                                                                   // … und danach tickt sie doppelt so schnell
         hintEl.innerHTML=pendingHint; hintEl.style.display='';
-        lb.disabled=true; SND.play('click'); unlockAch('listen_1');
+        lb.disabled=true; SND.play('click'); unlockAch('listen_1'); questProg('listen',1);
       };
       const bribeCost=25+streetsCleared*5;
       document.getElementById('bribeCost').textContent=bribeCost+' M\u00fcnzen';
@@ -1382,11 +1435,11 @@
   function escapeCatch(bribed){
     SND.play(bribed?'coin':'correct');
     if(!bribed){
-      if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); questProg('q_special',1); }
+      if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); questProg('special',1); if(currentEvent&&currentEvent.kind) questProg('spk_'+currentEvent.kind,1); }
       else score+=40+streetsCleared*5;
       excusesRun++; if(excusesRun>=5) unlockAch('excuse_5');
-      questProg('q_excuse',1); questProg('q_score',score,true);
-    } else unlockAch('bribe_1');
+      questProg('excuse',1); questProg('excuse_run',excusesRun); questProg('score',score);
+    } else { unlockAch('bribe_1'); questProg('bribe',1); }
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
     SND.setTrack('game');
@@ -1470,7 +1523,8 @@
     if(state!==ST.MINI) return; hide('minigame'); SND.play('correct');
     unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey);
     unlockAch('mini_win_1');
-    questProg('q_mini',1); questProg('q_special',1);
+    questProg('mini',1); questProg('special',1);
+    if(currentEvent){ if(currentEvent.mini) questProg('mini_'+currentEvent.mini,1); if(currentEvent.kind) questProg('spk_'+currentEvent.kind,1); }
     const mk=currentEvent&&currentEvent.mini;
     if(mk){ if(!save.minisWon) save.minisWon={};
       if(!save.minisWon[mk]){ save.minisWon[mk]=true; persist(); }
@@ -1496,12 +1550,12 @@
   function applyItem(it){
     const def=ITEMS[it.type]; SND.play('powerup');
     itemsRun++; if(itemsRun>=5) unlockAch('items_run_5');
-    questProg('q_items',1);
+    questProg('items',1); questProg('items_run',itemsRun); questProg('it_'+it.type,1);
     if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,upVal('shield')); }
     else if(it.type==='boost'){ speedBuff=Math.max(speedBuff,upVal('boost')); updateBuffHUD(); }
     else if(it.type==='magnet'){ magnetTime=Math.max(magnetTime,upVal('magnet')); updateMagnetHUD(); }
     else if(it.type==='hint'){ hintCharges+=upVal('hint'); updateHintHUD(); }
-    else if(it.type==='coins'){ coinsRun+=upVal('coins'); updateHUD(); questProg('q_coins',upVal('coins')); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); }
+    else if(it.type==='coins'){ coinsRun+=upVal('coins'); updateHUD(); questProg('coins',upVal('coins')); questProg('coins_run',coinsRun); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); }
     else if(it.type==='calm'){ suspicion=0; if(phase==='alarm') endAlarm(); setSusBar(); }
     addPickFx(it.x,it.y-18,def.name,def.col);
   }
@@ -1512,7 +1566,7 @@
     if(streetsCleared>=15) unlockAch('district_15');
     if(streetsCleared>=20) unlockAch('district_20');
     if(streetsCleared>=5&&caughtRun===0) unlockAch('no_excuse_5');
-    questProg('q_district',streetsCleared,true); questProg('q_score',score,true);
+    questProg('district',streetsCleared); questProg('score',score); questProg('district_total',1);
     updateHUD();
   }
   function confrontNPC(n){
@@ -1549,7 +1603,7 @@
     const earned=coinsRun+streetsCleared*2;
     save.coins+=earned;
     save.deaths=(save.deaths||0)+1; if(save.deaths>=5) unlockAch('death_5');
-    questProg('q_runs',1); questProg('q_score',score,true); questProg('q_district',streetsCleared,true);
+    questProg('runs',1); questProg('score',score); questProg('score_total',score); questProg('district',streetsCleared);
     const entry={score:score,streets:streetsCleared};
     save.scores.push(entry); save.scores.sort((a,b)=>b.score-a.score); if(save.scores.length>20) save.scores.length=20;
     highscore=save.scores.length?save.scores[0].score:score;
@@ -1592,7 +1646,7 @@
       const btn=document.createElement('button'); btn.className='pbtn';
       if(maxed){ btn.textContent='MAX'; btn.classList.add('cant'); }
       else { const cost=upCost(lvl);
-        if(save.coins>=cost){ btn.textContent=cost+' 🪙'; btn.onclick=()=>{ if(save.coins<cost) return; save.coins-=cost; save.upgrades[u.key]=lvl+1; persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup');
+        if(save.coins>=cost){ btn.textContent=cost+' 🪙'; btn.onclick=()=>{ if(save.coins<cost) return; save.coins-=cost; save.upgrades[u.key]=lvl+1; persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup'); questProg('spend',cost); questProg('upg_buy',1);
           unlockAch('upgrade_1'); if(lvl+1>=u.max) unlockAch('upgrade_max'); }; }
         else { btn.textContent=cost+' 🪙'; btn.classList.add('cant'); } }
       row.appendChild(btn); wrap.appendChild(row);
@@ -1611,7 +1665,7 @@
       row.appendChild(info);
       const btn=document.createElement('button'); btn.className='pbtn';
       if(save.coins>=SPECIAL_PRICE){ btn.textContent=SPECIAL_PRICE+' Münzen';
-        btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return; save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI(); SND.play('correct'); }; }
+        btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return; save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI(); SND.play('correct'); questProg('spend',SPECIAL_PRICE); }; }
       else { btn.textContent=SPECIAL_PRICE+' Münzen'; btn.classList.add('cant'); }
       row.appendChild(btn); pw.appendChild(row);
     }
@@ -1635,7 +1689,7 @@
       if(sel){ btn.textContent='Ausgew\u00e4hlt'; btn.classList.add('sel'); }
       else if(owned){ btn.textContent='Ausw\u00e4hlen'; btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderSkins(); }; }
       else if(sk.unlock){ btn.textContent='\ud83d\udd12 Erfolg'; btn.classList.add('cant'); nm.textContent=sk.name+' \ud83d\udd12'; }
-      else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI();
+      else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI(); questProg('spend',sk.price); questProg('skins_buy',1);
         unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }; }
       else { btn.textContent=sk.price+' M\u00fcnzen'; btn.classList.add('cant'); }
       card.appendChild(btn); grid.appendChild(card); drawSkinPreview(cnv,sk);
@@ -1767,7 +1821,7 @@
         if(dl<150){ const s=260*dt; c.x+=dx/dl*s; c.y+=dy/dl*s; } } }
     const grab=magnetTime>0?22:12;
     for(const c of coins){ if(Math.abs(c.y-player.y)>30+grab) continue;
-      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun++; SND.play('coin'); questProg('q_coins',1); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
+      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun++; SND.play('coin'); questProg('coins',1); questProg('coins_run',coinsRun); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
     if(coins.some(c=>c.got)) coins=coins.filter(c=>!c.got);
     // Power-up-Items einsammeln
     for(const it of items){ if(Math.abs(it.y-player.y)>34) continue;
@@ -2978,7 +3032,7 @@
     const tgt=weatherTarget==='clear'?0:1;
     weatherIntensity+=(tgt-weatherIntensity)*clamp(dt*0.6,0,1);
     // "Wetterfest": alle drei Wetterarten in einem Lauf erleben
-    if(state===ST.PLAY&&weatherIntensity>0.5){ weatherRun[weatherType]=1;
+    if(state===ST.PLAY&&weatherIntensity>0.5){ if(!weatherRun[weatherType]){ weatherRun[weatherType]=1; questProg('wx_'+weatherType,1); }
       if(weatherRun.rain&&weatherRun.snow&&weatherRun.fog) unlockAch('weather_run'); }
     if(weatherType==='rain'||weatherType==='snow'){
       const cap=weatherIntensity>0.05?Math.round((weatherType==='rain'?100:70)*weatherIntensity):0;
