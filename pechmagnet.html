@@ -2695,6 +2695,12 @@
 
     for(const p of dust){ const a=(1-p.t/p.life)*0.4; ctx.fillStyle='rgba(120,120,130,'+a+')'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(1+p.t*1.5),0,6.283); ctx.fill(); }
 
+    // nachts trägt der Spieler einen warmen Lichtschein
+    if(gLights>0.25){
+      const pl=ctx.createRadialGradient(player.x,player.y,4,player.x,player.y,58);
+      pl.addColorStop(0,'rgba(255,225,160,'+(0.15*gLights)+')'); pl.addColorStop(1,'rgba(255,225,160,0)');
+      ctx.fillStyle=pl; ctx.beginPath(); ctx.arc(player.x,player.y,58,0,6.283); ctx.fill();
+    }
     for(const n of npcs){ if(n.y<camY-60||n.y>camY+H+60) continue; const al=(phase==='alarm'||phase==='special'); visionCone(n.x,n.y,n.look,al?'#FF3B30':n.color,al); }
 
     // Magnet-Aura: pulsierender gestrichelter Ring um den Spieler
@@ -2729,6 +2735,7 @@
 
     ctx.restore();
     drawDayOverlay();
+    drawAmbientLight();
     drawWeather();
     drawLighting();
     if(phase==='special'&&(state===ST.PLAY||state===ST.CAUGHT)) drawSpecialCinematic();
@@ -2736,9 +2743,32 @@
     drawStick();
   }
   function drawLighting(){
+    // Vignette – nachts deutlich stärker
+    const v=0.20+0.16*gLights;
     const g=ctx.createRadialGradient(W/2,H*0.42,H*0.28,W/2,H*0.5,H*0.92);
-    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(10,10,26,0.26)');
+    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(10,10,26,'+v.toFixed(3)+')');
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+  function drawAmbientLight(){
+    if(gLights<0.5){
+      // Tag/Dämmerung: warmes Sonnenlicht wandert von links (morgens) nach rechts (abends)
+      const day=1-gLights*2, p=clamp(dayClock/0.5,0,1);
+      const sx=W*(0.12+0.76*p);
+      const g=ctx.createRadialGradient(sx,H*0.06,20,sx,H*0.06,H*0.75);
+      g.addColorStop(0,'rgba(255,236,170,'+(0.12*day)+')');
+      g.addColorStop(1,'rgba(255,236,170,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    } else {
+      // Nacht: kühles Mondlicht von oben rechts
+      const m=(gLights-0.5)*2;
+      const g=ctx.createRadialGradient(W*0.72,H*0.05,16,W*0.72,H*0.05,H*0.7);
+      g.addColorStop(0,'rgba(165,190,255,'+(0.10*m)+')');
+      g.addColorStop(1,'rgba(165,190,255,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      const lg=ctx.createLinearGradient(0,0,0,H);
+      lg.addColorStop(0,'rgba(120,150,230,'+(0.05*m)+')'); lg.addColorStop(1,'rgba(120,150,230,0)');
+      ctx.fillStyle=lg; ctx.fillRect(0,0,W,H);
+    }
   }
   // ----- Tag/Nacht + Wetter -----
   const SKY_STOPS=[
@@ -2756,7 +2786,15 @@
     const f=(t-a.at)/Math.max(0.0001,b.at-a.at), L=(x,y)=>x+(y-x)*f;
     return {r:Math.round(L(a.r,b.r)),g:Math.round(L(a.g,b.g)),b:Math.round(L(a.b,b.b)),a:L(a.a,b.a),lights:L(a.l,b.l)};
   }
-  function drawDayOverlay(){ if(gSky&&gSky.a>0.001){ ctx.fillStyle='rgba('+gSky.r+','+gSky.g+','+gSky.b+','+gSky.a+')'; ctx.fillRect(0,0,W,H); } }
+  function drawDayOverlay(){
+    if(!(gSky&&gSky.a>0.001)) return;
+    // Tönung als Verlauf: oben (Himmel) kräftiger, unten schwächer – wirkt atmosphärischer
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'rgba('+gSky.r+','+gSky.g+','+gSky.b+','+Math.min(0.85,gSky.a*1.3).toFixed(3)+')');
+    g.addColorStop(0.55,'rgba('+gSky.r+','+gSky.g+','+gSky.b+','+gSky.a.toFixed(3)+')');
+    g.addColorStop(1,'rgba('+gSky.r+','+gSky.g+','+gSky.b+','+(gSky.a*0.55).toFixed(3)+')');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
   function drawLamps(){
     const lit=gLights>0.04;
     const start=Math.floor((camY-120)/172)*172;
@@ -2764,9 +2802,15 @@
       for(const dir of [1,-1]){
         const lx=dir>0?ROAD_L+5:W-ROAD_R-5, hx=lx+dir*9, hy=y-9;
         if(lit){
-          const g=ctx.createRadialGradient(hx,hy,2,hx,hy,48);
-          g.addColorStop(0,'rgba(255,220,130,'+(0.55*gLights)+')'); g.addColorStop(1,'rgba(255,220,130,0)');
-          ctx.fillStyle=g; ctx.beginPath(); ctx.arc(hx,hy,48,0,6.283); ctx.fill();
+          const flick=0.9+0.1*Math.sin(performance.now()/95+lx*3.7+y);   // leichtes Flackern
+          const g=ctx.createRadialGradient(hx,hy,2,hx,hy,50);
+          g.addColorStop(0,'rgba(255,220,130,'+(0.55*gLights*flick)+')'); g.addColorStop(1,'rgba(255,220,130,0)');
+          ctx.fillStyle=g; ctx.beginPath(); ctx.arc(hx,hy,50,0,6.283); ctx.fill();
+          // Lichtkegel auf dem Boden
+          const p=ctx.createRadialGradient(hx,y+14,4,hx,y+14,40);
+          p.addColorStop(0,'rgba(255,215,120,'+(0.16*gLights*flick)+')'); p.addColorStop(1,'rgba(255,215,120,0)');
+          ctx.save(); ctx.translate(hx,y+14); ctx.scale(1,0.42); ctx.translate(-hx,-(y+14));
+          ctx.fillStyle=p; ctx.beginPath(); ctx.arc(hx,y+14,40,0,6.283); ctx.fill(); ctx.restore();
         }
         // Mast mit Fuss und Bogen
         ctx.fillStyle='rgba(26,26,46,.18)'; ctx.beginPath(); ctx.ellipse(lx,y+17,6.5,2.8,0,0,6.283); ctx.fill();
