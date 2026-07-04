@@ -228,6 +228,7 @@
   #miniMid{ position:absolute; top:-4px; bottom:-4px; left:50%; width:3px; background:var(--ink); transform:translateX(-50%); }
   #miniTime{ font-weight:700; font-size:20px; color:var(--ink); margin-bottom:8px; }
   #ticketChip{ background:var(--purple); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1s infinite alternate; }
+  #miniTicketChip{ background:var(--teal); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1.1s infinite alternate; }
   @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
@@ -291,6 +292,7 @@
         <div class="chip" id="scene">Stra&szlig;e</div>
         <div class="chip" id="ambientChip">&#9728;&#65039;</div>
         <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
+        <div class="chip hidden" id="miniTicketChip">&#127918; MINIGAME</div>
         <div class="chip hidden" id="buffChip">&#9889; 40s</div>
         <div class="chip hidden" id="magnetChip">&#129522; 10s</div>
         <div class="chip hidden" id="hintChip">&#128269; 1</div>
@@ -700,6 +702,8 @@
   let weatherType='clear', weatherTarget='clear', weatherIntensity=0, weatherTimer=10, wparts=[], ambientLast='';
   let wsplash=[], lightning=0, lightningT=9;
   let guaranteedActive=false, guaranteedAtStreet=0;
+  let guaranteedMini=false, guaranteedMiniAtStreet=0;
+  const MINI_KEYS=['bodybuilder','sprinter','oma','sheriff'];
   let stick={active:false,ox:0,oy:0,x:0,y:0,id:null};
 
   // ---------- skins ----------
@@ -1028,8 +1032,8 @@
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, daily:null };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, miniTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, daily:null };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.miniTokens!=='number') save.miniTokens=0; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -1289,7 +1293,7 @@
     camY=player.y-H*0.6;
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
-    guaranteedActive=false; updateTicketHUD();
+    guaranteedActive=false; guaranteedMini=false; updateTicketHUD();
     spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
@@ -1303,23 +1307,32 @@
     show('tutorial'); state=ST.MENU;
   }
   function beginPlay(){ firstRound=false; hide('tutorial'); state=ST.PLAY; SND.setTrack('game'); armGuaranteed(); lastT=performance.now(); }
-  // Spezial-Ticket: garantiert ein Special-Event innerhalb der ersten 2 Viertel dieser Runde.
+  // Tickets: garantieren ein Special- bzw. Minigame-Event innerhalb der ersten 2 Viertel dieser Runde.
   function armGuaranteed(){
-    guaranteedActive=false;
+    guaranteedActive=false; guaranteedMini=false;
     if(save.specialTokens>0){
       save.specialTokens--; persist();
       guaranteedActive=true;
       guaranteedAtStreet=streetsCleared; // löst beim ersten Ereignis aus – sicher in den ersten 2 Vierteln
     }
+    if(save.miniTokens>0){
+      save.miniTokens--; persist();
+      guaranteedMini=true;
+      guaranteedMiniAtStreet=streetsCleared;
+    }
     updateTicketHUD();
   }
-  function updateTicketHUD(){ const t=document.getElementById('ticketChip'); if(t) t.classList.toggle('hidden',!guaranteedActive); }
+  function updateTicketHUD(){
+    const t=document.getElementById('ticketChip'); if(t) t.classList.toggle('hidden',!guaranteedActive);
+    const m=document.getElementById('miniTicketChip'); if(m) m.classList.toggle('hidden',!guaranteedMini);
+  }
 
   function triggerChaos(){
     const d=diff();
     const z=currentZone(player.y);
     // Garantiertes Special aus dem Shop-Ticket einlösen, sobald das Ziel-Viertel erreicht ist.
     if(guaranteedActive && streetsCleared>=guaranteedAtStreet){ guaranteedActive=false; updateTicketHUD(); triggerSpecial(pick(SPECIAL)); return; }
+    if(guaranteedMini && streetsCleared>=guaranteedMiniAtStreet){ guaranteedMini=false; updateTicketHUD(); triggerSpecial(pick(MINI_KEYS)); return; }
     const roll=Math.random();
     // ~4.5% sehr seltenes Special-Event (direkte Befragung), ~6% seltenes Großereignis
     if(roll<0.045){ triggerSpecial(pick(SPECIAL)); return; }
@@ -1631,7 +1644,7 @@
       '<div class="'+(e===latest?'brow new':'brow')+'"><span class="brk">#'+(i+1)+'</span><span class="bsc">'+e.score+'</span><span class="bst">'+e.streets+' Viertel</span></div>'
     ).join('');
   }
-  const SPECIAL_PRICE=100;
+  const SPECIAL_PRICE=100, MINI_PRICE=100;
   function renderUpgrades(){
     const wrap=document.getElementById('upgrades'); if(!wrap) return; wrap.innerHTML='';
     if(!save.upgrades) save.upgrades={};
@@ -1668,6 +1681,18 @@
         btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return; save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI(); SND.play('correct'); questProg('spend',SPECIAL_PRICE); }; }
       else { btn.textContent=SPECIAL_PRICE+' Münzen'; btn.classList.add('cant'); }
       row.appendChild(btn); pw.appendChild(row);
+      // Minigame-Ticket: wie das Spezial-Ticket, garantiert aber ein Minigame-Duell
+      const row2=document.createElement('div'); row2.className='pwr';
+      const ico2=document.createElement('div'); ico2.className='pico'; ico2.textContent='🎮'; row2.appendChild(ico2);
+      const info2=document.createElement('div'); info2.className='pinfo';
+      info2.innerHTML='<div class="pname">Minigame-Ticket</div><div class="pdesc">Garantiert ein Minigame-Duell (Armdrücken, Wettrennen, Tauziehen oder Blick-Duell) in den ersten 2 Vierteln deiner nächsten Runde.</div>'
+        +(save.miniTokens>0?'<div class="pown">Im Vorrat: '+save.miniTokens+'</div>':'');
+      row2.appendChild(info2);
+      const btn2=document.createElement('button'); btn2.className='pbtn';
+      if(save.coins>=MINI_PRICE){ btn2.textContent=MINI_PRICE+' Münzen';
+        btn2.onclick=()=>{ if(save.coins<MINI_PRICE) return; save.coins-=MINI_PRICE; save.miniTokens++; persist(); renderShop(); updateCoinUI(); SND.play('correct'); questProg('spend',MINI_PRICE); }; }
+      else { btn2.textContent=MINI_PRICE+' Münzen'; btn2.classList.add('cant'); }
+      row2.appendChild(btn2); pw.appendChild(row2);
     }
     renderUpgrades();
   }
