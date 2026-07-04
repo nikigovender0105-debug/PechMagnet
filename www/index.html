@@ -728,6 +728,26 @@
     {id:'prinzessin',name:'Prinzessin',price:220,body:'#FF9EC4',cap:'#FFD23F',acc:'crown',glow:'#FF9EC4',pat:'heart',patCol:'#FFF6E5'},
     {id:'astronaut',name:'Astronaut',price:260,body:'#EFEFF6',cap:'#FF7A45',acc:'space',pat:'belt',patCol:'#FF7A45'},
     {id:'diamant',name:'Diamant',price:400,body:'#BFE3FF',cap:'#FFF6E5',glow:'#BFE3FF',pat:'star',patCol:'#FFF6E5'},
+    {id:'tomate',name:'Tomate',price:30,body:'#E63946',cap:'#2ECC40',pat:'spots',patCol:'#1ca233'},
+    {id:'banane',name:'Banane',price:30,body:'#FFD23F',cap:'#8B5A2B',pat:'vstripes',patCol:'#E6A817'},
+    {id:'traube',name:'Traube',price:35,body:'#7C5CFF',cap:'#2ECC40',pat:'spots',patCol:'#5A189A'},
+    {id:'panda',name:'Panda',price:55,body:'#EFEFF6',cap:'#1A1A2E',pat:'spots',patCol:'#1A1A2E'},
+    {id:'frosch',name:'Frosch',price:60,body:'#2ECC40',cap:'#1ca233',pat:'spots',patCol:'#1ca233'},
+    {id:'tiger',name:'Tiger',price:65,body:'#FF9F1C',cap:'#1A1A2E',pat:'stripes',patCol:'#1A1A2E'},
+    {id:'biene',name:'Biene',price:70,body:'#FFD23F',cap:'#1A1A2E',acc:'antenna',pat:'stripes',patCol:'#1A1A2E'},
+    {id:'pinguin',name:'Pinguin',price:75,body:'#2b2b45',cap:'#EFEFF6',pat:'tie',patCol:'#FF9F1C'},
+    {id:'zebra',name:'Zebra',price:85,body:'#EFEFF6',cap:'#1A1A2E',pat:'vstripes',patCol:'#1A1A2E'},
+    {id:'bonbon',name:'Bonbon',price:100,body:'#FF9EC4',cap:'#19C3C3',pat:'vstripes',patCol:'#FFF6E5'},
+    {id:'lava',name:'Lava',price:120,body:'#FF4500',cap:'#1A1A2E',glow:'#FF7A45',pat:'bolt',patCol:'#FFD23F'},
+    {id:'gletscher',name:'Gletscher',price:120,body:'#BFE3FF',cap:'#0077B6',glow:'#BFE3FF',pat:'stripes',patCol:'#0077B6'},
+    {id:'nacht',name:'Nachtschwärmer',price:140,body:'#12122a',cap:'#FFD23F',pat:'star',patCol:'#FFD23F'},
+    {id:'gift',name:'Giftgrün',price:140,body:'#39FF14',cap:'#5A189A',glow:'#39FF14',pat:'spots',patCol:'#5A189A'},
+    {id:'ritter',name:'Ritter',price:170,body:'#9aa0a6',cap:'#5f636b',pat:'belt',patCol:'#E63946'},
+    {id:'imker',name:'Imker',price:180,body:'#FFF6E5',cap:'#FFD23F',acc:'space',pat:'stripes',patCol:'#FFD23F'},
+    {id:'rockstar',name:'Rockstar',price:200,body:'#2b2b33',cap:'#FF1493',acc:'headphones',glow:'#FF1493',pat:'bolt',patCol:'#FF1493'},
+    {id:'nikolaus',name:'Nikolaus',price:210,body:'#E63946',cap:'#E63946',acc:'beanie',pat:'belt',patCol:'#1A1A2E'},
+    {id:'hexe',name:'Hexe',price:230,body:'#5A189A',cap:'#2ECC40',acc:'wizard',glow:'#2ECC40',pat:'spots',patCol:'#2ECC40'},
+    {id:'phantom',name:'Phantom',price:300,body:'#EFEFF6',cap:'#B388FF',glow:'#B388FF',pat:'star',patCol:'#B388FF'},
     {id:'star',name:'Rampenlicht',unlock:'survive_special',body:'#FFD23F',cap:'#FF3B30',glow:'#FFD23F',pat:'star',patCol:'#FF3B30'},
     {id:'goldhut',name:'Goldzylinder',unlock:'district_10',body:'#E6A817',cap:'#FFD23F',acc:'tophat',glow:'#FFD23F',pat:'bowtie',patCol:'#1A1A2E'},
     {id:'legend',name:'Pech-Legende',unlock:'all_specials',body:'#12122a',cap:'#FFD23F',glow:'#FFD23F',pat:'star',patCol:'#FFD23F'}
@@ -1527,7 +1547,12 @@
   function renderSkins(){
     const cs=document.getElementById('coinsSkins'); if(cs) cs.textContent=save.coins;
     const grid=document.getElementById('skinGrid'); grid.innerHTML='';
-    for(const sk of SKINS){
+    // nach Preis sortiert (günstig → teuer), Erfolgs-Skins am Ende
+    const sorted=SKINS.slice().sort((a,b)=>{
+      const ap=a.unlock?Infinity:(a.price||0), bp=b.unlock?Infinity:(b.price||0);
+      return ap===bp?0:(ap-bp);
+    });
+    for(const sk of sorted){
       const owned=save.owned.indexOf(sk.id)>=0, sel=save.selected===sk.id;
       const card=document.createElement('div'); card.className='skin'+(sel?' sel':'');
       const pvr=Math.min(window.devicePixelRatio||1,3);
