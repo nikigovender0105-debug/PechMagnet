@@ -1310,7 +1310,7 @@
   // ----- Minigames (Armdrücken, Wettrennen, Tauziehen, Blick-Duell) -----
   const MINI_DEFS={
     armwrestle:{ mode:'spam', title:'ARMDRÜCKEN!', desc:'Spam-klicke so schnell du kannst, um den Bodybuilder wegzudrücken!', btn:'DRÜCKEN!',
-      start:0.42, time:6.0, decay:0.40, gain:0.052,
+      start:0.55, time:7.5, decay:0.26, gain:0.068,
       winT:'BUFF! 💪', winX:'Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.',
       loseMsg:'Der Bodybuilder hat dich plattgemacht.' },
     race:{ mode:'spam', title:'WETTRENNEN!', desc:'Tippe so schnell du kannst und erreiche das Ziel vor dem Sprinter!', btn:'RENNEN!',
@@ -1318,7 +1318,7 @@
       winT:'ZIELFOTO! 🏁', winX:'Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.',
       loseMsg:'Der Sprinter hat dich stehen lassen.' },
     tug:{ mode:'spam', title:'TAUZIEHEN!', desc:'Zieh! Aber Vorsicht: Die Oma reißt immer wieder kräftig am Seil!', btn:'ZIEHEN!',
-      start:0.5, time:6.5, decay:0.30, gain:0.05, yank:true,
+      start:0.58, time:8.0, decay:0.19, gain:0.066, yank:true,
       winT:'HAU-RUCK! 💪', winX:'Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.',
       loseMsg:'Die Oma hat dich quer über die Straße geschleift.' },
     duel:{ mode:'duel', title:'BLICK-DUELL!', desc:'Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.', btn:'WARTEN…',
@@ -1359,7 +1359,7 @@
     }
     mini.time-=dt; mini.prog-=mini.decay*dt;
     if(mini.def.yank&&mini.prog<1){ mini.yankT-=dt;
-      if(mini.yankT<=0){ mini.prog-=rand(0.05,0.11); mini.yankT=rand(0.7,1.4); } }
+      if(mini.yankT<=0){ mini.prog-=rand(0.03,0.06); mini.yankT=rand(1.1,1.9); } }
     if(mini.prog>=1){ mini.prog=1; updateMiniUI(); return miniWin(); }
     if(mini.prog<=0||mini.time<=0){ mini.prog=Math.max(0,mini.prog); updateMiniUI(); return miniLose(); }
     updateMiniUI();
