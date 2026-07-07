@@ -226,6 +226,8 @@
   #miniBarWrap{ position:relative; height:34px; background:var(--cream); border:4px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); overflow:hidden; margin:10px 0 6px; }
   #miniBar{ height:100%; width:50%; background:linear-gradient(90deg,var(--safe),var(--gold)); transition:width .05s linear; }
   #miniMid{ position:absolute; top:-4px; bottom:-4px; left:50%; width:3px; background:var(--ink); transform:translateX(-50%); }
+  #miniZone{ position:absolute; top:0; bottom:0; left:40%; width:20%; background:rgba(46,204,64,.5);
+    border-left:2px solid var(--ink); border-right:2px solid var(--ink); display:none; }
   #miniTime{ font-weight:700; font-size:20px; color:var(--ink); margin-bottom:8px; }
   #ticketChip{ background:var(--purple); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1s infinite alternate; }
   #miniTicketChip{ background:var(--teal); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1.1s infinite alternate; }
@@ -425,7 +427,7 @@
     <div class="card">
       <h2 id="miniTitle" style="font-size:26px;color:var(--danger);">ARMDR&Uuml;CKEN!</h2>
       <p class="lead" id="miniDesc" style="font-size:13px;margin-bottom:8px;">Spam-klicke so schnell du kannst, um den Bodybuilder wegzudr&uuml;cken!</p>
-      <div id="miniBarWrap"><div id="miniBar"></div><div id="miniMid"></div></div>
+      <div id="miniBarWrap"><div id="miniBar"></div><div id="miniZone"></div><div id="miniMid"></div></div>
       <div id="miniTime">6.0s</div>
       <button class="btn go" id="miniBtn" style="width:100%;font-size:24px;">DR&Uuml;CKEN!</button>
     </div>
@@ -703,7 +705,7 @@
   let wsplash=[], lightning=0, lightningT=9;
   let guaranteedActive=false, guaranteedAtStreet=0;
   let guaranteedMini=false, guaranteedMiniAtStreet=0;
-  const MINI_KEYS=['bodybuilder','sprinter','oma','sheriff'];
+  const MINI_KEYS=['bodybuilder','sprinter','oma','sheriff','darter','balloonman','mole'];
   let stick={active:false,ox:0,oy:0,x:0,y:0,id:null};
 
   // ---------- skins ----------
@@ -790,7 +792,7 @@
     {id:'bribe_1',name:'Schmiergeld',desc:'Besteche die Menge zum ersten Mal.',icon:'🤝',coins:150},
     {id:'listen_1',name:'Lauscher',desc:'Belausche die Menge zum ersten Mal.',icon:'👂',coins:150},
     {id:'mini_win_1',name:'Straßenkämpfer',desc:'Gewinne dein erstes Minigame.',icon:'🥇',coins:200},
-    {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 4 Minigames mindestens einmal.',icon:'👾',coins:800},
+    {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 7 Minigames mindestens einmal.',icon:'👾',coins:800},
     {id:'items_run_5',name:'Staubsauger',desc:'Sammle 5 Power-ups in einem Lauf.',icon:'🧹',coins:300},
     {id:'buy_skin_1',name:'Neuer Look',desc:'Kaufe deinen ersten Skin im Shop.',icon:'🛍️',coins:150},
     {id:'skins_10',name:'Kleiderschrank',desc:'Besitze 10 Skins.',icon:'👗',coins:500},
@@ -868,7 +870,19 @@
     {key:'sheriff',mini:'duel',death:'jail',
       label:'Der Sheriff fordert dich zum Blick-Duell!',kind:'crime',boom:'PENG!',vis:'sheriff',snd:'siren',
       subText:'High Noon: Der Sheriff starrt dich an. Keiner blinzelt.',
-      ach:{name:'Schneller Finger',desc:'Gewinne das Duell gegen den Sheriff.',icon:'🤠'}, skin:{name:'Sheriff',body:'#8B5A2B',cap:'#C8956A',acc:'cowboy',pat:'star',patCol:'#FFD23F'}}
+      ach:{name:'Schneller Finger',desc:'Gewinne das Duell gegen den Sheriff.',icon:'🤠'}, skin:{name:'Sheriff',body:'#8B5A2B',cap:'#C8956A',acc:'cowboy',pat:'star',patCol:'#FFD23F'}},
+    {key:'darter',mini:'darts',death:'ko',
+      label:'Ein Dart-Profi fordert dich zum Zielwerfen!',kind:'sport',boom:'ZACK!',vis:'darter',snd:'sting',
+      subText:'Ein Dart-Profi wirbelt drei Pfeile durch die Finger und grinst.',
+      ach:{name:'Bullseye',desc:'Gewinne das Dart-Duell.',icon:'🎯'}, skin:{name:'Dart-Profi',body:'#E63946',cap:'#1A1A2E',pat:'spots',patCol:'#FFF6E5'}},
+    {key:'balloonman',mini:'balloon',death:'ko',
+      label:'Ein Ballon-Künstler fordert dich zum Wettpusten!',kind:'sport',boom:'PFFFT!',vis:'balloonman',snd:'sting',
+      subText:'Er wedelt mit einem schlaffen Ballon: „Wer traut sich mehr Puste zu?“',
+      ach:{name:'Pustekuchen',desc:'Gewinne das Wett-Aufpusten.',icon:'🎈'}, skin:{name:'Ballon-Künstler',body:'#FF9EC4',cap:'#3A86FF',acc:'party',pat:'spots',patCol:'#3A86FF'}},
+    {key:'mole',mini:'mole',death:'sweep',
+      label:'Ein frecher Maulwurf wühlt die Straße um!',kind:'animal',boom:'WÜHL!',vis:'mole',snd:'spooky',
+      subText:'Ein Maulwurf taucht auf, streckt die Zunge raus – und ist wieder weg.',
+      ach:{name:'Maulwurf-Meister',desc:'Gewinne das Maulwurf-Klopfen.',icon:'🕳️'}, skin:{name:'Buddler',body:'#8B5A2B',cap:'#5f636b',pat:'spots',patCol:'#3e2f20'}}
   ];
   function setupSpecials(){
     for(const d of SPECIAL_DEFS){
@@ -940,6 +954,9 @@
     {id:'q_race',    icon:'🏁', txt:'Gewinne {n}× das Wettrennen',        targets:[1,1,2],     m:'mini_race'},
     {id:'q_tug',     icon:'🧓', txt:'Gewinne {n}× das Tauziehen',         targets:[1,1,2],     m:'mini_tug'},
     {id:'q_duel',    icon:'🤠', txt:'Gewinne {n}× das Blick-Duell',       targets:[1,1,2],     m:'mini_duel'},
+    {id:'q_darts',   icon:'🎯', txt:'Gewinne {n}× das Dart-Duell',        targets:[1,1,2],     m:'mini_darts'},
+    {id:'q_balloon', icon:'🎈', txt:'Gewinne {n}× das Wett-Aufpusten',    targets:[1,1,2],     m:'mini_balloon'},
+    {id:'q_mole',    icon:'🕳️', txt:'Gewinne {n}× Maulwurf-Klopfen',      targets:[1,1,2],     m:'mini_mole'},
     {id:'q_crime',   icon:'🚓', txt:'Überstehe {n} Verbrecher-Special(s)',targets:[1,1,2],     m:'spk_crime'},
     {id:'q_spooky',  icon:'👻', txt:'Überstehe {n} Grusel-Special(s)',    targets:[1,1,2],     m:'spk_spooky'},
     {id:'q_animal',  icon:'🐾', txt:'Überstehe {n} Tier-Special(s)',      targets:[1,1,2],     m:'spk_animal'},
@@ -1479,13 +1496,32 @@
     duel:{ mode:'duel', title:'BLICK-DUELL!', desc:'Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.', btn:'WARTEN…',
       winT:'BLITZSCHNELL! ⚡', winX:'Du warst schneller als der Sheriff! Er tippt anerkennend an den Hut. +40s Speed-Boost.',
       loseMsg:'Der Sheriff war schneller als dein Schatten.',
-      earlyMsg:'Zu früh gezuckt – der Sheriff grinst und legt dir Handschellen an.' }
+      earlyMsg:'Zu früh gezuckt – der Sheriff grinst und legt dir Handschellen an.' },
+    darts:{ mode:'timing', title:'DART-DUELL!', desc:'Stoppe den Pfeil im grünen Feld – du brauchst 2 Treffer! Daneben kostet Zeit.', btn:'WERFEN!',
+      time:7, need:2,
+      winT:'BULLSEYE! 🎯', winX:'Zwei perfekte Treffer! Der Dart-Profi verneigt sich. +40s Speed-Boost.',
+      loseMsg:'Der Dart-Profi hat dich an die Wand gespielt.' },
+    balloon:{ mode:'hold', title:'WETT-AUFPUSTEN!', desc:'Halte gedrückt zum Aufpusten und lass im grünen Bereich los. Zu viel Puste = PLATZ!', btn:'PUSTEN (halten!)',
+      time:7,
+      winT:'PERFEKT GEPUSTET! 🎈', winX:'Dein Ballon ist makellos – der Künstler applaudiert. +40s Speed-Boost.',
+      loseMsg:'PENG! Dein Ballon ist geplatzt.' },
+    mole:{ mode:'mole', title:'MAULWURF-KLOPFEN!', desc:'Warte, bis der Maulwurf auftaucht, und tipp SOFORT – 3 Treffer nötig! Zu früh = verloren.', btn:'WARTEN…',
+      rounds:3,
+      winT:'3 TREFFER! 🕳️', winX:'Der Maulwurf zieht beleidigt von dannen. +40s Speed-Boost.',
+      loseMsg:'Der Maulwurf war schneller wieder weg.',
+      earlyMsg:'Zu früh geklopft – der Maulwurf lacht sich schlapp.' }
   };
   function startMinigame(){
     state=ST.MINI;
     const def=MINI_DEFS[(currentEvent&&currentEvent.mini)||'armwrestle']||MINI_DEFS.armwrestle;
     if(def.mode==='duel'){
       mini={def:def,mode:'duel',phase:'wait',t:0,wait:rand(1.4,3.2),react:Math.max(0.3,0.6-streetsCleared*0.012),prog:1};
+    } else if(def.mode==='timing'){
+      mini={def:def,mode:'timing',time:def.time,hits:0,need:def.need,pos:0,dir:1,speed:1.25+streetsCleared*0.03,prog:0};
+    } else if(def.mode==='hold'){
+      mini={def:def,mode:'hold',time:def.time,prog:0,holding:false};
+    } else if(def.mode==='mole'){
+      mini={def:def,mode:'mole',phase:'wait',t:0,wait:rand(0.8,2.0),win:Math.max(0.35,0.6-streetsCleared*0.01),round:1,rounds:def.rounds,prog:1};
     } else {
       mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:def.decay+streetsCleared*0.012,gain:def.gain,
         yankT:def.yank?rand(0.7,1.3):0,clicks:0};
@@ -1494,13 +1530,21 @@
     document.getElementById('miniDesc').textContent=def.desc;
     document.getElementById('miniBtn').textContent=def.btn;
     const bar=document.getElementById('miniBar');
-    if(bar) bar.style.background=def.mode==='duel'?'var(--danger)':'linear-gradient(90deg,var(--safe),var(--gold))';
-    document.getElementById('miniMid').style.display=def.mode==='duel'?'none':'';
+    if(bar) bar.style.background=(def.mode==='duel'||def.mode==='mole')?'var(--danger)'
+      :(def.mode==='hold'?'linear-gradient(90deg,#FF9EC4,var(--danger))':'linear-gradient(90deg,var(--safe),var(--gold))');
+    document.getElementById('miniMid').style.display=(def.mode==='duel'||def.mode==='mole'||def.mode==='hold')?'none':'';
+    const zone=document.getElementById('miniZone');
+    if(zone){
+      if(def.mode==='timing'){ zone.style.display='block'; zone.style.left='40%'; zone.style.width='20%'; }
+      else if(def.mode==='hold'){ zone.style.display='block'; zone.style.left='70%'; zone.style.width='25%'; }
+      else zone.style.display='none';
+    }
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
     updateMiniUI(); show('minigame');
   }
   function updateMini(dt){
     if(state!==ST.MINI) return;
+    const tEl=document.getElementById('miniTime');
     if(mini.mode==='duel'){
       mini.t+=dt;
       if(mini.phase==='wait'&&mini.t>=mini.wait){
@@ -1509,8 +1553,34 @@
         const bar=document.getElementById('miniBar'); if(bar) bar.style.background='var(--safe)';
         SND.play('alarm');
       } else if(mini.phase==='go'&&mini.t>=mini.react){ return miniLose(); }
-      const t=document.getElementById('miniTime'); if(t) t.textContent=mini.phase==='wait'?'…':'ZIEH!';
+      if(tEl) tEl.textContent=mini.phase==='wait'?'…':'ZIEH!';
       return;
+    }
+    if(mini.mode==='mole'){
+      mini.t+=dt;
+      if(mini.phase==='wait'&&mini.t>=mini.wait){
+        mini.phase='go'; mini.t=0;
+        document.getElementById('miniBtn').textContent='JETZT! KLOPFEN!';
+        const bar=document.getElementById('miniBar'); if(bar) bar.style.background='var(--safe)';
+        SND.play('alarm');
+      } else if(mini.phase==='go'&&mini.t>=mini.win){ return miniLose(); }
+      if(tEl) tEl.textContent='Treffer '+(mini.round-1)+'/'+mini.rounds;
+      return;
+    }
+    if(mini.mode==='timing'){
+      mini.time-=dt;
+      mini.pos+=mini.dir*mini.speed*dt;
+      if(mini.pos>1){ mini.pos=1; mini.dir=-1; } if(mini.pos<0){ mini.pos=0; mini.dir=1; }
+      if(mini.time<=0) return miniLose();
+      updateMiniUI(); return;
+    }
+    if(mini.mode==='hold'){
+      mini.time-=dt;
+      if(mini.holding){ mini.prog=Math.min(1,mini.prog+0.5*dt);
+        if(mini.prog>=1){ SND.play('crash'); return miniLose(); } }   // geplatzt
+      if(mini.time<=0){ if(mini.prog>=0.7&&mini.prog<=0.95) return miniWin();
+        return miniLose('Die Zeit ist um – dein Ballon blieb schlaff.'); }
+      updateMiniUI(); return;
     }
     mini.time-=dt; mini.prog-=mini.decay*dt;
     if(mini.def.yank&&mini.prog<1){ mini.yankT-=dt;
@@ -1519,18 +1589,49 @@
     if(mini.prog<=0||mini.time<=0){ mini.prog=Math.max(0,mini.prog); updateMiniUI(); return miniLose(); }
     updateMiniUI();
   }
+  function holdRelease(){
+    if(state!==ST.MINI||mini.mode!=='hold') return;
+    if(mini.prog>=0.7&&mini.prog<=0.95) return miniWin();
+    if(mini.prog>0.95){ SND.play('crash'); return miniLose(); }
+    // zu wenig Puste: weitermachen
+  }
   function miniClick(){
     if(state!==ST.MINI) return;
     if(mini.mode==='duel'){
       if(mini.phase==='wait') return miniLose(mini.def.earlyMsg);
       return miniWin();
     }
+    if(mini.mode==='mole'){
+      if(mini.phase==='wait') return miniLose(mini.def.earlyMsg);
+      // Treffer!
+      mini.round++; SND.play('coin');
+      if(mini.round>mini.rounds) return miniWin();
+      mini.phase='wait'; mini.t=0; mini.wait=rand(0.7,1.8); mini.win=Math.max(0.32,mini.win-0.06);
+      document.getElementById('miniBtn').textContent=mini.def.btn;
+      const bar=document.getElementById('miniBar'); if(bar) bar.style.background='var(--danger)';
+      return;
+    }
+    if(mini.mode==='timing'){
+      if(mini.pos>=0.4&&mini.pos<=0.6){
+        mini.hits++; SND.play('coin'); mini.speed+=0.55;
+        if(mini.hits>=mini.need) return miniWin();
+      } else { SND.play('wrong'); mini.time-=0.9; }
+      return;
+    }
+    if(mini.mode==='hold') return;   // läuft über Halten/Loslassen
     mini.clicks++; mini.prog=clamp(mini.prog+mini.gain,0,1); SND.play('click');
     if(mini.prog>=1) miniWin();
   }
   function updateMiniUI(){
-    const b=document.getElementById('miniBar'); if(b) b.style.width=Math.round(mini.prog*100)+'%';
-    const t=document.getElementById('miniTime'); if(t&&mini.mode!=='duel') t.textContent=Math.max(0,mini.time).toFixed(1)+'s';
+    const b=document.getElementById('miniBar'), t=document.getElementById('miniTime');
+    if(mini.mode==='timing'){
+      if(b) b.style.width='0%';
+      const m=document.getElementById('miniMid'); if(m) m.style.left=(mini.pos*100)+'%';
+      if(t) t.textContent=Math.max(0,mini.time).toFixed(1)+'s · '+mini.hits+'/'+mini.need+' Treffer';
+      return;
+    }
+    if(b&&mini.prog!=null) b.style.width=Math.round(mini.prog*100)+'%';
+    if(t&&mini.time!=null) t.textContent=Math.max(0,mini.time).toFixed(1)+'s';
   }
   function miniWin(){
     if(state!==ST.MINI) return; hide('minigame'); SND.play('correct');
@@ -1541,7 +1642,7 @@
     const mk=currentEvent&&currentEvent.mini;
     if(mk){ if(!save.minisWon) save.minisWon={};
       if(!save.minisWon[mk]){ save.minisWon[mk]=true; persist(); }
-      if(['armwrestle','race','tug','duel'].every(k=>save.minisWon[k])) unlockAch('mini_all'); }
+      if(['armwrestle','race','tug','duel','darts','balloon','mole'].every(k=>save.minisWon[k])) unlockAch('mini_all'); }
     score+=200+streetsCleared*5; speedBuff=SPEED_BUFF_DUR; updateBuffHUD();
     document.getElementById('reactTitle').textContent=mini.def.winT;
     document.getElementById('reactText').textContent=mini.def.winX;
@@ -2465,6 +2566,46 @@
       ctx.fillStyle='#E63946';                                                       // Halstuch
       ctx.beginPath(); ctx.moveTo(x-8,y-8); ctx.lineTo(x+8,y-8); ctx.lineTo(x,y-1); ctx.closePath(); fs();
       drawAcc(ctx,'cowboy',x,y-16,9,'#C8956A');                                      // Cowboyhut
+    } else if(vis==='darter'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#E63946'; rr(x-12,y-6,24,24,8); fs();                           // Shirt
+      ctx.fillStyle='#FFF6E5'; ctx.beginPath(); ctx.arc(x,y+5,7,0,6.283); ctx.fill();// Zielscheibe
+      ctx.fillStyle='#E63946'; ctx.beginPath(); ctx.arc(x,y+5,4.5,0,6.283); ctx.fill();
+      ctx.fillStyle='#FFF6E5'; ctx.beginPath(); ctx.arc(x,y+5,2,0,6.283); ctx.fill();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,9,0,6.283); fs();     // Kopf
+      ctx.fillStyle=INK; ctx.fillRect(x-6,y-17.5,4,1.8); ctx.fillRect(x+2,y-17.5,4,1.8); // fokussierter Blick
+      ctx.strokeStyle=INK; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x+9,y-2); ctx.lineTo(x+18,y-13); ctx.stroke(); // Wurfarm
+      ctx.strokeStyle='#19C3C3'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x+15,y-19); ctx.lineTo(x+24,y-11); ctx.stroke(); // Dart
+      ctx.strokeStyle=INK; ctx.lineWidth=2.2;
+      ctx.fillStyle='#FFD23F'; ctx.beginPath(); ctx.moveTo(x+24,y-11); ctx.lineTo(x+29,y-8); ctx.lineTo(x+26,y-13); ctx.closePath(); fs(); // Spitze
+      ctx.fillStyle='#E63946'; ctx.beginPath(); ctx.moveTo(x+15,y-19); ctx.lineTo(x+11,y-24); ctx.lineTo(x+13,y-17); ctx.closePath(); fs(); // Flights
+      ctx.lineWidth=3.2;
+    } else if(vis==='balloonman'){
+      const bcols=['#FF3B30','#FFD23F','#3A86FF'];
+      for(let i=0;i<3;i++){ const bx=x-14+i*13, by=y-31-(i===1?6:0);                 // Ballons an Schnüren
+        ctx.strokeStyle='rgba(26,26,46,.6)'; ctx.lineWidth=1.6;
+        ctx.beginPath(); ctx.moveTo(x+8,y+2); ctx.quadraticCurveTo(bx,(by+y)/2,bx,by+8); ctx.stroke();
+        ctx.strokeStyle=INK; ctx.lineWidth=2.4; ctx.fillStyle=bcols[i];
+        ctx.beginPath(); ctx.ellipse(bx,by,7,9,0,0,6.283); fs();
+        ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(bx-2.5,by-3,2,0,6.283); ctx.fill(); }
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#FF9EC4'; rr(x-12,y-6,24,24,8); fs();
+      ctx.fillStyle='#FFE0B2'; ctx.beginPath(); ctx.arc(x,y-16,9,0,6.283); fs();
+      ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x-3,y-17,1.6,0,6.283); ctx.arc(x+3,y-17,1.6,0,6.283); ctx.fill();
+      ctx.fillStyle='rgba(255,120,120,.55)';                                         // Pustebacken
+      ctx.beginPath(); ctx.arc(x-6,y-12,2.6,0,6.283); ctx.arc(x+6,y-12,2.6,0,6.283); ctx.fill();
+    } else if(vis==='mole'){
+      ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
+      ctx.fillStyle='#8B5A2B';                                                       // Erdhügel
+      ctx.beginPath(); ctx.moveTo(x-24,y+16); ctx.quadraticCurveTo(x-16,y+2,x-6,y+6);
+      ctx.quadraticCurveTo(x,y,x+6,y+6); ctx.quadraticCurveTo(x+16,y+2,x+24,y+16); ctx.closePath(); fs();
+      ctx.fillStyle='#6d4522'; ctx.beginPath(); ctx.arc(x-10,y+11,2,0,6.283); ctx.arc(x+8,y+12,2.4,0,6.283); ctx.fill();
+      ctx.fillStyle='#5a5560'; ctx.beginPath(); ctx.arc(x,y-6,11,0,6.283); fs();     // Maulwurf
+      ctx.fillStyle='#FF9EC4'; ctx.lineWidth=2.2; ctx.beginPath(); ctx.arc(x,y-2,3.4,0,6.283); fs(); // Schnauze
+      ctx.strokeStyle=INK; ctx.lineWidth=2;                                          // fast blinde Augen
+      ctx.beginPath(); ctx.moveTo(x-6.5,y-9); ctx.lineTo(x-3,y-8); ctx.moveTo(x+6.5,y-9); ctx.lineTo(x+3,y-8); ctx.stroke();
+      ctx.lineWidth=3.2; ctx.fillStyle='#FFE0B2';                                    // Grabe-Pfoten
+      ctx.beginPath(); ctx.arc(x-11,y+2,4,0,6.283); fs(); ctx.beginPath(); ctx.arc(x+11,y+2,4,0,6.283); fs();
     } else if(vis==='shark'){
       ctx.strokeStyle=INK; ctx.lineWidth=3.2; ctx.lineJoin='round';
       ctx.fillStyle='rgba(58,134,255,.30)';                                          // Wasserlache
@@ -2568,7 +2709,7 @@
         const f=Math.sin(t*22+i)*4; ctx.beginPath(); ctx.moveTo(bx-7,by); ctx.quadraticCurveTo(bx,by-5+f,bx+7,by); ctx.stroke(); }
     }
   }
-  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost','tornado','dino','robot','zombie','bodybuilder','shark','clown','ninja','bear','dragon','pirate','reaper','tank','demon','sprinter','oma','sheriff'];
+  const SOLIDS=['anvil','piano','safe','brick','beam','cow','pot','fruit','car','mafia','ufo','meteor','rhino','blitz','plane','monster','cart','cop','reporter','ghost','tornado','dino','robot','zombie','bodybuilder','shark','clown','ninja','bear','dragon','pirate','reaper','tank','demon','sprinter','oma','sheriff','darter','balloonman','mole'];
   function drawBurst(b){
     const solid=SOLIDS.indexOf(b.vis)>=0;
     const seed=(((b.x*131)|0)^((b.y*197)|0))>>>0;
@@ -3258,6 +3399,20 @@
       ctx.beginPath(); ctx.arc(0,0,14,0,6.283); ctx.stroke();
       for(let i=0;i<3;i++){ ctx.beginPath(); ctx.ellipse(0,0,14,5,i*1.05,0,6.283); ctx.stroke(); }
       ctx.restore();
+    } else if(key==='darter'){
+      for(let i=0;i<3;i++){ const q=(t*0.7+i*0.33)%1;                               // Zielscheiben-Ringe
+        ctx.strokeStyle='rgba(230,57,70,'+(0.5*(1-q))+')'; ctx.lineWidth=4;
+        ctx.beginPath(); ctx.arc(W/2,H*0.46,40+q*150,0,6.283); ctx.stroke(); }
+    } else if(key==='balloonman'){
+      const bc=['#FF3B30','#FFD23F','#3A86FF','#2ECC40','#FF9EC4'];                  // aufsteigende Ballons
+      for(let i=0;i<10;i++){ const q=(t*0.25+i*0.1)%1, bx=(i*167)%W+Math.sin(t*2+i)*16;
+        ctx.fillStyle=bc[i%5]; ctx.strokeStyle='rgba(26,26,46,.7)'; ctx.lineWidth=1.6;
+        ctx.beginPath(); ctx.ellipse(bx,H-q*(H+90),8,10,0,0,6.283); ctx.fill(); ctx.stroke(); }
+    } else if(key==='mole'){
+      for(let i=0;i<5;i++){ const q=((now/700)+(i*0.2))%1; if(q>0.4) continue;      // aufpoppende Erdhügel
+        const qa=Math.sin(q/0.4*Math.PI), mx=W*(0.15+0.175*i), my=H*0.78;
+        ctx.fillStyle='rgba(139,90,43,'+(0.8*qa)+')';
+        ctx.beginPath(); ctx.arc(mx,my,16*qa,Math.PI,0); ctx.closePath(); ctx.fill(); }
     } else if(key==='demon'){
       ctx.strokeStyle='rgba(255,80,30,'+(0.5+0.3*Math.sin(t*7))+')'; ctx.lineWidth=3; // glühende Bodenrisse
       for(let i=0;i<5;i++){ let px2=W*(0.12+0.19*i), py2=H;
@@ -3511,8 +3666,12 @@
   const nameInput=document.getElementById('nameInput');
   nameInput.value=save.playerName||'';
   nameInput.addEventListener('input',()=>{ save.playerName=nameInput.value.slice(0,20); persist(); });
-  document.getElementById('miniBtn').onclick=()=>miniClick();
-  document.getElementById('minigame').addEventListener('pointerdown',e=>{ if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
+  document.getElementById('miniBtn').onclick=()=>{ if(mini&&mini.mode==='hold') return; miniClick(); };
+  document.getElementById('miniBtn').addEventListener('pointerdown',e=>{ if(state===ST.MINI&&mini&&mini.mode==='hold'){ mini.holding=true; e.preventDefault(); } });
+  document.getElementById('minigame').addEventListener('pointerdown',e=>{
+    if(state===ST.MINI&&mini&&mini.mode==='hold'){ mini.holding=true; return; }
+    if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
+  document.addEventListener('pointerup',()=>{ if(state===ST.MINI&&mini&&mini.mode==='hold'&&mini.holding){ mini.holding=false; holdRelease(); } });
 
   const muteBtn=document.getElementById('muteBtn'), muteBtn2=document.getElementById('muteBtn2');
   function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted);
