@@ -1482,7 +1482,7 @@
   // ----- Minigames (Armdrücken, Wettrennen, Tauziehen, Blick-Duell) -----
   const MINI_DEFS={
     armwrestle:{ mode:'spam', title:'ARMDRÜCKEN!', desc:'Spam-klicke so schnell du kannst, um den Bodybuilder wegzudrücken!', btn:'DRÜCKEN!',
-      start:0.42, time:6.0, decay:0.40, gain:0.052,
+      start:0.45, time:6.0, decay:0.22, gain:0.06,
       winT:'BUFF! 💪', winX:'Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.',
       loseMsg:'Der Bodybuilder hat dich plattgemacht.' },
     race:{ mode:'spam', title:'WETTRENNEN!', desc:'Tippe so schnell du kannst und erreiche das Ziel vor dem Sprinter!', btn:'RENNEN!',
@@ -1490,7 +1490,7 @@
       winT:'ZIELFOTO! 🏁', winX:'Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.',
       loseMsg:'Der Sprinter hat dich stehen lassen.' },
     tug:{ mode:'spam', title:'TAUZIEHEN!', desc:'Zieh! Aber Vorsicht: Die Oma reißt immer wieder kräftig am Seil!', btn:'ZIEHEN!',
-      start:0.5, time:6.5, decay:0.30, gain:0.05, yank:true,
+      start:0.52, time:6.5, decay:0.17, gain:0.055, yank:true,
       winT:'HAU-RUCK! 💪', winX:'Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.',
       loseMsg:'Die Oma hat dich quer über die Straße geschleift.' },
     duel:{ mode:'duel', title:'BLICK-DUELL!', desc:'Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.', btn:'WARTEN…',
@@ -1523,7 +1523,7 @@
     } else if(def.mode==='mole'){
       mini={def:def,mode:'mole',phase:'wait',t:0,wait:rand(0.8,2.0),win:Math.max(0.35,0.6-streetsCleared*0.01),round:1,rounds:def.rounds,prog:1};
     } else {
-      mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:def.decay+streetsCleared*0.012,gain:def.gain,
+      mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:def.decay+streetsCleared*0.008,gain:def.gain,
         yankT:def.yank?rand(0.7,1.3):0,clicks:0};
     }
     document.getElementById('miniTitle').textContent=def.title;
@@ -1539,12 +1539,28 @@
       else if(def.mode==='hold'){ zone.style.display='block'; zone.style.left='70%'; zone.style.width='25%'; }
       else zone.style.display='none';
     }
+    updateMiniUI();
+    // 3-2-1-Countdown, bevor es losgeht
+    mini.countdown=3.2; mini._cn=4;
+    document.getElementById('miniBtn').textContent='BEREIT …';
+    const tEl0=document.getElementById('miniTime'); if(tEl0) tEl0.textContent='3';
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
-    updateMiniUI(); show('minigame');
+    show('minigame');
   }
   function updateMini(dt){
     if(state!==ST.MINI) return;
     const tEl=document.getElementById('miniTime');
+    if(mini.countdown>0){
+      mini.countdown-=dt;
+      const n=Math.ceil(mini.countdown);
+      if(n!==mini._cn){ mini._cn=n; SND.play(n>0?'click':'district'); }
+      if(tEl) tEl.textContent=n>0?String(n):'LOS!';
+      if(mini.countdown<=0){
+        document.getElementById('miniBtn').textContent=mini.def.btn;
+        updateMiniUI();
+      }
+      return;
+    }
     if(mini.mode==='duel'){
       mini.t+=dt;
       if(mini.phase==='wait'&&mini.t>=mini.wait){
@@ -1584,7 +1600,7 @@
     }
     mini.time-=dt; mini.prog-=mini.decay*dt;
     if(mini.def.yank&&mini.prog<1){ mini.yankT-=dt;
-      if(mini.yankT<=0){ mini.prog-=rand(0.05,0.11); mini.yankT=rand(0.7,1.4); } }
+      if(mini.yankT<=0){ mini.prog-=rand(0.04,0.08); mini.yankT=rand(0.9,1.7); } }
     if(mini.prog>=1){ mini.prog=1; updateMiniUI(); return miniWin(); }
     if(mini.prog<=0||mini.time<=0){ mini.prog=Math.max(0,mini.prog); updateMiniUI(); return miniLose(); }
     updateMiniUI();
@@ -1596,7 +1612,7 @@
     // zu wenig Puste: weitermachen
   }
   function miniClick(){
-    if(state!==ST.MINI) return;
+    if(state!==ST.MINI||mini.countdown>0) return;
     if(mini.mode==='duel'){
       if(mini.phase==='wait') return miniLose(mini.def.earlyMsg);
       return miniWin();
@@ -3667,8 +3683,9 @@
   nameInput.value=save.playerName||'';
   nameInput.addEventListener('input',()=>{ save.playerName=nameInput.value.slice(0,20); persist(); });
   document.getElementById('miniBtn').onclick=()=>{ if(mini&&mini.mode==='hold') return; miniClick(); };
-  document.getElementById('miniBtn').addEventListener('pointerdown',e=>{ if(state===ST.MINI&&mini&&mini.mode==='hold'){ mini.holding=true; e.preventDefault(); } });
+  document.getElementById('miniBtn').addEventListener('pointerdown',e=>{ if(state===ST.MINI&&mini&&mini.mode==='hold'&&!(mini.countdown>0)){ mini.holding=true; e.preventDefault(); } });
   document.getElementById('minigame').addEventListener('pointerdown',e=>{
+    if(state===ST.MINI&&mini&&mini.countdown>0) return;
     if(state===ST.MINI&&mini&&mini.mode==='hold'){ mini.holding=true; return; }
     if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
   document.addEventListener('pointerup',()=>{ if(state===ST.MINI&&mini&&mini.mode==='hold'&&mini.holding){ mini.holding=false; holdRelease(); } });
