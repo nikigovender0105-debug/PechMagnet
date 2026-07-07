@@ -231,6 +231,7 @@
   #miniTime{ font-weight:700; font-size:20px; color:var(--ink); margin-bottom:8px; }
   #ticketChip{ background:var(--purple); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1s infinite alternate; }
   #miniTicketChip{ background:var(--teal); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1.1s infinite alternate; }
+  #auraChip{ background:var(--gold); color:var(--ink); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 0.9s infinite alternate; }
   @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
@@ -295,6 +296,7 @@
         <div class="chip" id="ambientChip">&#9728;&#65039;</div>
         <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
         <div class="chip hidden" id="miniTicketChip">&#127918; MINIGAME</div>
+        <div class="chip hidden" id="auraChip">&#10024; AURA</div>
         <div class="chip hidden" id="buffChip">&#9889; 40s</div>
         <div class="chip hidden" id="magnetChip">&#129522; 10s</div>
         <div class="chip hidden" id="hintChip">&#128269; 1</div>
@@ -696,6 +698,16 @@
   let deathAnim={style:'wasted',t:0,dur:1.7,msg:''};
   let mini={prog:0.5,time:0,decay:0,clicks:0};
   let speedBuff=0; const SPEED_BUFF_DUR=40;
+  // Auren: Buffs für den Rest des Runs, verschenkt von Quest-Gebern
+  let aura=null;
+  const AURAS=[
+    {k:'gold',  col:'#FFD23F', name:'Glücks-Aura',  desc:'Münzen zählen doppelt!'},
+    {k:'tempo', col:'#19C3C3', name:'Tempo-Aura',   desc:'Du läufst 12% schneller!'},
+    {k:'ruhe',  col:'#7C5CFF', name:'Ruhe-Aura',    desc:'Der Verdacht steigt 25% langsamer!'},
+    {k:'charme',col:'#FF5DA2', name:'Charme-Aura',  desc:'Die Menge bleibt beim Erwischen 30% länger geduldig!'}
+  ];
+  function updateAuraHUD(){ const el=document.getElementById('auraChip'); if(!el) return;
+    el.classList.toggle('hidden',!aura); if(aura){ el.textContent='✨ '+aura.name; el.style.background=aura.col; } }
   let spawnProtect=0; const SPAWN_PROTECT=3.0;
   let dust=[]; let nearMiss=false;
   // Tag-Nacht & Wetter
@@ -1288,6 +1300,14 @@
         wx:x,wy:y,wt:rand(0.5,2.5),bob:rand(0,6.28),point:false,ang:Math.PI/2,
         look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
     }
+    // 5% Chance auf einen Quest-Geber im Viertel: anrempeln = Geschenk statt ERWISCHT
+    if(Math.random()<0.05){
+      const gx=rand(playMinX(),playMaxX()), gy=rand(z.y0+60,z.y1-60);
+      npcs.push({x:gx,y:gy,color:'#FFD23F',giver:true,size:1.05,skin:pick(SKINT),
+        head:{t:'bald'},glasses:true,pat:{pat:'star',patCol:'#FFF6E5'},
+        wx:gx,wy:gy,wt:rand(1,3),bob:rand(0,6.28),point:false,ang:Math.PI/2,
+        look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
+    }
   }
   function spawnZoneCoins(z){
     const n=3+((Math.random()*3)|0);
@@ -1332,7 +1352,7 @@
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; guaranteedMini=false; updateTicketHUD();
-    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD();
+    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; aura=null; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD(); updateAuraHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -1408,7 +1428,7 @@
 
   function getCaught(){
     state=ST.CAUGHT; SND.play('caught'); caughtRun++;
-    rageMax=Math.max(3.0,4.6-streetsCleared*0.12)*5; rageTimer=rageMax; rageDrain=1;
+    rageMax=Math.max(3.0,4.6-streetsCleared*0.12)*5*((aura&&aura.k==='charme')?1.3:1); rageTimer=rageMax; rageDrain=1;
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
     const kind=(currentEvent&&EXCUSES[currentEvent.kind])?currentEvent.kind:'fall';
     const pool=EXCUSES[kind];
@@ -1720,7 +1740,33 @@
     questProg('district',streetsCleared); questProg('score',score); questProg('district_total',1);
     updateHUD();
   }
+  // Quest-Geber: schenkt Skin, Aura oder Münzen
+  function questGift(n){
+    const i=npcs.indexOf(n); if(i>=0) npcs.splice(i,1);
+    SND.play('achieve'); score+=50; bumpCD=1.4;
+    const r=Math.random();
+    let title='Ein Geschenk! 🎁', txt='';
+    if(r<0.4){
+      const locked=SKINS.filter(s=>!s.unlock&&save.owned.indexOf(s.id)<0);
+      if(locked.length){ const sk=pick(locked); save.owned.push(sk.id); persist();
+        title='Skin geschenkt! 👕'; txt='„Der steht dir bestimmt!“ – Du erhältst den Skin „'+sk.name+'“.';
+        if(save.owned.length>=10) unlockAch('skins_10');
+      } else { save.coins+=100; persist(); updateCoinUI(); title='Goldregen! 🪙'; txt='„Du hast ja schon alles!“ – Er drückt dir 100 Münzen in die Hand.'; }
+    } else if(r<0.8){
+      aura=pick(AURAS); updateAuraHUD();
+      title=aura.name+'! ✨'; txt='„Nimm diesen Segen mit.“ – '+aura.desc+' (bis zum Ende des Laufs)';
+    } else {
+      const c=30+((Math.random()*50)|0); save.coins+=c; persist(); updateCoinUI();
+      title='Trinkgeld! 🪙'; txt='„Für deine Nerven.“ – Du erhältst '+c+' Münzen.';
+    }
+    addPickFx(n.x,n.y-24,'🎁',aura?aura.col:'#FFD23F');
+    document.getElementById('reactTitle').textContent=title;
+    document.getElementById('reactText').textContent=txt;
+    show('reaction'); state=ST.REACT; reactTimer=2.2;
+    updateHUD();
+  }
   function confrontNPC(n){
+    if(n.giver) return questGift(n);
     const z=currentZone(player.y);
     currentEvent=z?EVENTS[pick(z.events)]:EVENTS.anvil;
     confrontMode=true;
@@ -1913,7 +1959,7 @@
     if(state!==ST.PLAY) return;
     const d=diff(), inp=readInput();
     if(speedBuff>0){ speedBuff=Math.max(0,speedBuff-dt); updateBuffHUD(); }
-    const ms=MAX_SPEED*(speedBuff>0?1.55:1);
+    const ms=MAX_SPEED*(speedBuff>0?1.55:1)*((aura&&aura.k==='tempo')?1.12:1);
     const tvx=inp.dx*ms, tvy=inp.dy*ms;
     player.vx+=(tvx-player.vx)*Math.min(1,dt*16);
     player.vy+=(tvy-player.vy)*Math.min(1,dt*16);
@@ -1949,7 +1995,7 @@
       alarmTimer-=dt;
       if(player.moving){
         const mf=clamp(player.spd/MAX_SPEED,0,1);
-        suspicion+=d.alarmRise*mf*dt; stareStill=0;
+        suspicion+=d.alarmRise*mf*dt*((aura&&aura.k==='ruhe')?0.75:1); stareStill=0;
       } else {
         stareStill+=dt;
         if(stareStill>=d.loseInterest) endAlarm();
@@ -1984,7 +2030,7 @@
         if(dl<150){ const s=260*dt; c.x+=dx/dl*s; c.y+=dy/dl*s; } } }
     const grab=magnetTime>0?22:12;
     for(const c of coins){ if(Math.abs(c.y-player.y)>30+grab) continue;
-      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun++; SND.play('coin'); questProg('coins',1); questProg('coins_run',coinsRun); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
+      const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun+=(aura&&aura.k==='gold')?2:1; SND.play('coin'); questProg('coins',1); questProg('coins_run',coinsRun); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
     if(coins.some(c=>c.got)) coins=coins.filter(c=>!c.got);
     // Power-up-Items einsammeln
     for(const it of items){ if(Math.abs(it.y-player.y)>34) continue;
@@ -2329,6 +2375,16 @@
         ctx.beginPath(); ctx.arc(-6,-36,7,Math.PI*1.1,Math.PI*1.7); ctx.arc(-6,-36,3,Math.PI*1.7,Math.PI*1.1,true); ctx.closePath(); ctx.fill();
         ctx.restore();
       }
+    }
+    // Quest-Geber: goldener Bodenring + hüpfendes "!"
+    if(!isPlayer&&tr&&tr.giver){
+      const gb=Math.sin(t/240)*3, ga=0.55+0.3*Math.sin(t/180);
+      ctx.strokeStyle='rgba(255,210,63,'+ga.toFixed(2)+')'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.ellipse(x,y+17,18,7,0,0,6.283); ctx.stroke();
+      drawAcc(ctx,'wizard',x,y-16+hb,11,'#7C5CFF');
+      ctx.fillStyle='#FFD23F'; ctx.strokeStyle=INK; ctx.lineWidth=2.2;
+      rr(x-3,y-64+gb,6,12,3); fs();
+      ctx.beginPath(); ctx.arc(x,y-48+gb,2.6,0,6.283); fs();
     }
     ctx.restore();
     if(psz!==1) ctx.restore();
@@ -3145,6 +3201,17 @@
     }
     for(const n of npcs){ if(n.y<camY-60||n.y>camY+H+60) continue; const al=(phase==='alarm'||phase==='special'); visionCone(n.x,n.y,n.look,al?'#FF3B30':n.color,al); }
 
+    // Quest-Geber-Aura: farbiger Schein + kreisende Funken um den Spieler
+    if(aura && (state===ST.PLAY||state===ST.CAUGHT)){
+      const ta=performance.now()/1000;
+      const ag=ctx.createRadialGradient(player.x,player.y,6,player.x,player.y,34);
+      ag.addColorStop(0,hexA(aura.col,0.22+0.08*Math.sin(ta*4))); ag.addColorStop(1,hexA(aura.col,0));
+      ctx.fillStyle=ag; ctx.beginPath(); ctx.arc(player.x,player.y,34,0,6.283); ctx.fill();
+      ctx.fillStyle=aura.col; ctx.strokeStyle=INK; ctx.lineWidth=1.4;
+      for(let i=0;i<3;i++){ const a2=ta*2.2+i*2.094;
+        const sx=player.x+Math.cos(a2)*24, sy=player.y+Math.sin(a2)*10-14;
+        ctx.beginPath(); ctx.arc(sx,sy,2.2+0.8*Math.sin(ta*5+i),0,6.283); fs(); }
+    }
     // Magnet-Aura: pulsierender gestrichelter Ring um den Spieler
     if(magnetTime>0 && (state===ST.PLAY||state===ST.CAUGHT)){
       const tm=performance.now()/1000;
