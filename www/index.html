@@ -1259,11 +1259,32 @@
     if(t.id===lastZoneTypeId) t=weightedZone(); // direkte Wiederholung etwas reduzieren
     lastZoneTypeId=t.id; return t;
   }
+  const SKINT=['#FFE0B2','#FFE0B2','#F6D1A7','#E8B98A','#C68642','#9C6B43'];
+  const HAIRC=['#2b2b33','#5a4632','#E6A817','#8B5A2B','#C0C0C8','#B5651D','#E63946'];
+  function npcHead(){
+    const r=Math.random();
+    if(r<0.34) return {t:'cap',c:pick(PALETTE)};
+    if(r<0.56) return {t:'hair',c:pick(HAIRC)};
+    if(r<0.68) return {t:'spiky',c:pick(HAIRC)};
+    if(r<0.80) return {t:'bun',c:pick(HAIRC)};
+    return {t:'bald'};
+  }
+  function npcProp(){
+    const r=Math.random();
+    if(r<0.12) return 'phone';
+    if(r<0.22) return 'coffee';
+    if(r<0.30) return 'bag';
+    if(r<0.36) return 'balloon';
+    return null;
+  }
   function spawnZoneCrowd(z){
     const n=Math.max(1,Math.round(BASE_DENSITY*z.density));
     for(let i=0;i<n;i++){
       const x=rand(playMinX(),playMaxX()), y=rand(z.y0+50,z.y1-50);
-      npcs.push({x,y,color:pick(PALETTE),hat:Math.random()<0.38?pick(PALETTE):null,brolly:Math.random()<0.45?pick(PALETTE):null,
+      npcs.push({x,y,color:pick(PALETTE),brolly:Math.random()<0.45?pick(PALETTE):null,
+        size:rand(0.84,1.16),skin:pick(SKINT),head:npcHead(),
+        pat:Math.random()<0.35?{pat:pick(['stripes','vstripes','spots','tie','scarf']),patCol:pick(PALETTE)}:null,
+        glasses:Math.random()<0.16,tache:Math.random()<0.12,prop:npcProp(),
         wx:x,wy:y,wt:rand(0.5,2.5),bob:rand(0,6.28),point:false,ang:Math.PI/2,
         look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
     }
@@ -2188,16 +2209,20 @@
     else if(p==='star'||p==='heart'||p==='bolt'){ g.fillStyle=acc; drawEmblem(g,p,cx,T+bh*0.42,bw*0.26); }
     g.restore();
   }
-  function person(x,y,color,ang,pointing,bob,isPlayer,hat,mv,brolly){
+  function person(x,y,color,ang,pointing,bob,isPlayer,hat,mv,brolly,tr){
     const t=performance.now();
     let body=color, glow=null;
     if(isPlayer){ if(curSkin.rainbow) body=rainbowHex(t/300); glow=curSkin.glow||(curSkin.rainbow?body:null); }
+    const skinC=(!isPlayer&&tr&&tr.skin)||'#FFE0B2';
     // Bewegungsfaktor 0..1 steuert die Lauf-Animation
     const mvf=isPlayer?(player.moving?clamp(player.spd/MAX_SPEED,0.35,1):0):(mv||0);
     const st=Math.sin(bob*2)*3*mvf;                                   // Schritt-Phase
     const hop=reduceMotion?0:-Math.abs(Math.sin(bob*2))*2.6*mvf;      // Hüpfer im Laufrhythmus
     const breathe=(1-mvf)*Math.sin(t/460+x*0.13)*0.8;                 // Atmen im Stand
     const b=Math.sin(bob)*2*(1-mvf*0.5)+hop+breathe;
+    // individuelle Körpergröße (skaliert um die Füße, inkl. Schatten)
+    const psz=(!isPlayer&&tr&&tr.size)||1;
+    if(psz!==1){ ctx.save(); ctx.translate(x,y+18); ctx.scale(psz,psz); ctx.translate(-x,-(y+18)); }
     // weicher gerichteter Schatten, wird beim Hüpfen etwas kleiner
     groundShadow(x,y+18,15+hop*0.8);
     if(glow){ const gl=ctx.createRadialGradient(x,y+b,3,x,y+b,32); const pul=0.4+0.18*Math.sin(t/180);
@@ -2221,9 +2246,10 @@
     bg.addColorStop(0,shade(body,34)); bg.addColorStop(1,shade(body,-20));
     ctx.fillStyle=bg; rr(x-12,y-6+b,24,26,9); fs();
     if(isPlayer && curSkin.pat) drawBodyPattern(ctx,curSkin,x,y-6+b,24,26);
+    if(!isPlayer && tr && tr.pat) drawBodyPattern(ctx,tr.pat,x,y-6+b,24,26);
     // Kopf nickt leicht zeitversetzt
     const hb=b+(reduceMotion?0:Math.sin(bob*2-0.9)*0.9*mvf);
-    ctx.beginPath(); ctx.arc(x,y-16+hb,11,0,6.283); ctx.fillStyle='#FFE0B2'; fs();
+    ctx.beginPath(); ctx.arc(x,y-16+hb,11,0,6.283); ctx.fillStyle=skinC; fs();
     ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(x-3.5,y-19+hb,3,0,6.283); ctx.fill();
     // Augen: gelegentliches Blinzeln, Pupillen schauen in Blick-/Laufrichtung
     if(((t+x*137)%3600)<110){
@@ -2242,8 +2268,45 @@
       else { ctx.fillStyle=curSkin.cap; ctx.beginPath(); ctx.arc(x,y-22+hb,11,Math.PI,0); fs();
         ctx.beginPath(); ctx.moveTo(x-11,y-22+hb); ctx.lineTo(x+13,y-22+hb); ctx.stroke();
         ctx.fillStyle=shade(curSkin.cap,40); ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(x,y-32.5+hb,2.4,0,6.283); fs(); ctx.lineWidth=3.5; } }
+    else if(tr&&tr.head){
+      const hd=tr.head;
+      if(hd.t==='cap'){ ctx.fillStyle=hd.c; ctx.beginPath(); ctx.arc(x,y-21+hb,10,Math.PI,0); fs();
+        ctx.beginPath(); ctx.moveTo(x-10,y-21+hb); ctx.lineTo(x+12,y-21+hb); ctx.stroke(); }
+      else if(hd.t==='hair'){ ctx.fillStyle=hd.c; ctx.beginPath(); ctx.arc(x,y-18+hb,10.5,Math.PI*0.92,Math.PI*0.08); fs();
+        ctx.fillStyle=hd.c; rr(x-11,y-20+hb,4,7,2); ctx.fill(); rr(x+7,y-20+hb,4,7,2); ctx.fill(); } // Koteletten
+      else if(hd.t==='spiky'){ ctx.fillStyle=hd.c;
+        for(let i=-1;i<2;i++){ ctx.beginPath(); ctx.moveTo(x+i*6-3,y-24+hb); ctx.lineTo(x+i*6,y-31+hb); ctx.lineTo(x+i*6+3,y-24+hb); ctx.closePath(); fs(); } }
+      else if(hd.t==='bun'){ ctx.fillStyle=hd.c; ctx.beginPath(); ctx.arc(x,y-19+hb,10.3,Math.PI,0); fs();
+        ctx.beginPath(); ctx.arc(x,y-28+hb,4.4,0,6.283); fs(); }
+      else { ctx.fillStyle='rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(x-3,y-23+hb,2.6,0,6.283); ctx.fill(); } // Glatze mit Glanz
+      // Brille & Schnurrbart
+      if(tr.glasses){ ctx.strokeStyle=INK; ctx.lineWidth=1.6;
+        ctx.beginPath(); ctx.arc(x-4,y-17+hb,3.4,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x+4,y-17+hb,3.4,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x-0.6,y-17+hb); ctx.lineTo(x+0.6,y-17+hb); ctx.stroke(); ctx.lineWidth=3.5; }
+      if(tr.tache){ ctx.fillStyle=(hd.c||'#5a4632');
+        ctx.beginPath(); ctx.arc(x-2.6,y-11.4+hb,2.4,Math.PI,0); ctx.arc(x+2.6,y-11.4+hb,2.4,Math.PI,0); ctx.fill(); }
+    }
     else if(hat){ ctx.fillStyle=hat; ctx.beginPath(); ctx.arc(x,y-21+hb,10,Math.PI,0); fs();
       ctx.beginPath(); ctx.moveTo(x-10,y-21+hb); ctx.lineTo(x+12,y-21+hb); ctx.stroke(); }
+    // Props in der Hand (nicht beim Zeigen)
+    if(!isPlayer&&tr&&tr.prop&&!pointing){
+      const p=tr.prop;
+      if(p==='phone'){ ctx.save(); ctx.translate(x+13,y+2+b); ctx.rotate(-0.28);
+        ctx.fillStyle='#1f1f27'; ctx.strokeStyle=INK; ctx.lineWidth=1.6; rr(-3,-5,6,10,1.5); fs();
+        ctx.fillStyle=gLights>0.2?'#BFE3FF':'#7fd3e0'; rr(-2,-4,4,7,1); ctx.fill(); ctx.restore(); }
+      else if(p==='coffee'){ ctx.fillStyle='#FFF6E5'; ctx.strokeStyle=INK; ctx.lineWidth=1.8;
+        rr(x+11,y+1+b,6,8,1.5); fs(); ctx.fillStyle='#8B5A2B'; rr(x+10.5,y+b,7,2.5,1); fs(); }
+      else if(p==='bag'){ ctx.fillStyle='#FF9F1C'; ctx.strokeStyle=INK; ctx.lineWidth=1.8;
+        ctx.beginPath(); ctx.moveTo(x-18,y+6+b); ctx.lineTo(x-10,y+6+b); ctx.lineTo(x-9,y+16+b); ctx.lineTo(x-19,y+16+b); ctx.closePath(); fs();
+        ctx.beginPath(); ctx.arc(x-14,y+6+b,3,Math.PI,0); ctx.stroke(); }
+      else if(p==='balloon'){ ctx.strokeStyle='rgba(26,26,46,.6)'; ctx.lineWidth=1.4;
+        ctx.beginPath(); ctx.moveTo(x+12,y+2+b); ctx.quadraticCurveTo(x+16,y-12+b,x+15,y-24+b); ctx.stroke();
+        ctx.fillStyle='#FF3B30'; ctx.strokeStyle=INK; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.ellipse(x+15,y-30+b,5.5,7,0,0,6.283); fs();
+        ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(x+13,y-32+b,1.6,0,6.283); ctx.fill(); }
+      ctx.strokeStyle=INK; ctx.lineWidth=3.5;
+    }
     if(pointing){ const hx=x+Math.cos(ang)*22, hy=(y-2+b)+Math.sin(ang)*16;
       ctx.lineWidth=5; ctx.strokeStyle=INK; ctx.beginPath(); ctx.moveTo(x,y-2+b); ctx.lineTo(hx,hy); ctx.stroke();
       ctx.fillStyle=color; ctx.beginPath(); ctx.arc(hx,hy,4,0,6.283); fs(); }
@@ -2268,6 +2331,7 @@
       }
     }
     ctx.restore();
+    if(psz!==1) ctx.restore();
   }
   function spikeWord(x,y,txt,col){
     ctx.save(); ctx.translate(x,y); const R=26,sp=11; ctx.beginPath();
@@ -3098,7 +3162,7 @@
       ctx.lineCap='butt';
     }
     const ents=[];
-    for(const n of npcs){ if(n.y<camY-50||n.y>camY+H+50) continue; ents.push({y:n.y,d:()=>person(n.x,n.y,n.color,n.ang,n.point,n.bob,false,n.hat,n.mv,n.brolly)}); }
+    for(const n of npcs){ if(n.y<camY-50||n.y>camY+H+50) continue; ents.push({y:n.y,d:()=>person(n.x,n.y,n.color,n.ang,n.point,n.bob,false,null,n.mv,n.brolly,n)}); }
     ents.push({y:player.y,d:()=>person(player.x,player.y,curSkin.body,Math.PI/2,false,player.bob,true)});
     ents.sort((a,b)=>a.y-b.y);
     for(const e of ents) e.d();
