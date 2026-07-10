@@ -81,8 +81,8 @@
     background:repeating-linear-gradient(-35deg, rgba(255,210,63,.07) 0 26px, rgba(124,92,255,.07) 26px 52px);
     animation:stripeMove 4.5s linear infinite; }
   /* ---- Untermenüs im Lobby-Look ---- */
-  #shop, #skins, #achievements{ background:linear-gradient(rgba(14,14,26,.55), rgba(14,14,26,.72)); }
-  #shop .card, #skins .card, #achievements .card{
+  #shop, #skins, #auras, #achievements{ background:linear-gradient(rgba(14,14,26,.55), rgba(14,14,26,.72)); }
+  #shop .card, #skins .card, #auras .card, #achievements .card{
     position:relative; z-index:1; background:rgba(16,16,34,.94); border-color:var(--ink);
     box-shadow:0 5px 0 rgba(0,0,0,.45); color:var(--cream); }
   .mtitle{ font-size:24px; color:var(--gold); letter-spacing:1.5px; margin-bottom:4px; }
@@ -94,6 +94,11 @@
   #achievements .ach .adesc b{ color:var(--gold); }
   #achievements .lead{ color:var(--cream); opacity:.8; }
   #skins .skin.sel{ background:rgba(255,210,63,.14); border-color:var(--gold); }
+  #auras .skin{ background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); box-shadow:none; }
+  #auras .skin .sname{ color:var(--cream); }
+  #auras .skin.sel{ background:rgba(255,210,63,.14); border-color:var(--gold); }
+  #auras .lead{ color:var(--cream); opacity:.8; }
+  #auras .adesc2{ font-size:11px; color:var(--cream); opacity:.72; text-align:center; line-height:1.35; min-height:42px; }
   #shop .upBar .ud{ background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); }
   #shop .upBar .ud.on{ background:var(--gold); border-color:var(--gold); }
   #shop .stat, #skins .stat{ background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.14); }
@@ -235,7 +240,7 @@
   @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
-  #shop .card, #skins .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
+  #shop .card, #skins .card, #auras .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
   .shopSecTitle{ font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--purple); margin:14px 0 6px; text-align:left; }
   .pwr{ display:flex; align-items:center; gap:10px; background:#fff; border:3px solid var(--ink); border-radius:14px; padding:10px; box-shadow:3px 3px 0 var(--ink); }
   .pwr .pico{ font-size:30px; line-height:1; }
@@ -343,6 +348,7 @@
     <div class="navbar">
       <button class="navb" id="shopBtn">&#128722;<span>SHOP</span></button>
       <button class="navb" id="skinsBtn">&#128085;<span>SKINS</span></button>
+      <button class="navb" id="aurasBtn">&#10024;<span>AURAS</span></button>
       <button class="navb" id="achBtn">&#127942;<span>ERFOLGE</span></button>
     </div>
   </div>
@@ -366,6 +372,15 @@
       <div id="skinGrid" class="skinGrid"></div>
     </div>
     <button class="btn go" id="skinsBack">ZUR&Uuml;CK</button>
+  </div>
+
+  <div id="auras" class="screen hidden">
+    <div class="card">
+      <h2 class="mtitle">&#10024; AURAS</h2>
+      <p class="lead" style="font-size:12.5px;margin-bottom:6px;">Auren sind dauerhafte Buffs f&uuml;r deine L&auml;ufe. Du bekommst sie geschenkt, wenn du im Lauf einen Quest-Geber (lila Zauberhut) anrempelst.</p>
+      <div id="auraGrid" class="skinGrid"></div>
+    </div>
+    <button class="btn go" id="aurasBack">ZUR&Uuml;CK</button>
   </div>
 
   <div id="achievements" class="screen hidden">
@@ -698,7 +713,7 @@
   let deathAnim={style:'wasted',t:0,dur:1.7,msg:''};
   let mini={prog:0.5,time:0,decay:0,clicks:0};
   let speedBuff=0; const SPEED_BUFF_DUR=40;
-  // Auren: Buffs für den Rest des Runs, verschenkt von Quest-Gebern
+  // Auren: dauerhafte Buffs, freigeschaltet durch Quest-Geber, Auswahl im Aura-Menü
   let aura=null;
   const AURAS=[
     {k:'gold',  col:'#FFD23F', name:'Glücks-Aura',  desc:'Münzen zählen doppelt!'},
@@ -1061,8 +1076,8 @@
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, miniTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, daily:null };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.miniTokens!=='number') save.miniTokens=0; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, miniTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, daily:null, auras:[], auraSel:'' };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.miniTokens!=='number') save.miniTokens=0; if(!Array.isArray(save.auras)) save.auras=[]; if(typeof save.auraSel!=='string') save.auraSel=''; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -1352,7 +1367,7 @@
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; guaranteedMini=false; updateTicketHUD();
-    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; aura=null; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD(); updateAuraHUD();
+    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; aura=AURAS.find(a=>a.k===save.auraSel)||null; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD(); updateAuraHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -1753,8 +1768,14 @@
         if(save.owned.length>=10) unlockAch('skins_10');
       } else { save.coins+=100; persist(); updateCoinUI(); title='Goldregen! 🪙'; txt='„Du hast ja schon alles!“ – Er drückt dir 100 Münzen in die Hand.'; }
     } else if(r<0.8){
-      aura=pick(AURAS); updateAuraHUD();
-      title=aura.name+'! ✨'; txt='„Nimm diesen Segen mit.“ – '+aura.desc+' (bis zum Ende des Laufs)';
+      const lockedA=AURAS.filter(a=>save.auras.indexOf(a.k)<0);
+      if(lockedA.length){
+        const ga=pick(lockedA); save.auras.push(ga.k);
+        if(!save.auraSel){ save.auraSel=ga.k; aura=ga; updateAuraHUD(); }
+        persist();
+        title=ga.name+'! ✨'; txt='„Nimm diesen Segen mit.“ – '+ga.desc+' Dauerhaft freigeschaltet – wähle sie im Aura-Menü!';
+      } else { save.coins+=80; persist(); updateCoinUI();
+        title='Goldregen! 🪙'; txt='„Du trägst ja schon alle Segen!“ – Er drückt dir 80 Münzen in die Hand.'; }
     } else {
       const c=30+((Math.random()*50)|0); save.coins+=c; persist(); updateCoinUI();
       title='Trinkgeld! 🪙'; txt='„Für deine Nerven.“ – Du erhältst '+c+' Münzen.';
@@ -1902,6 +1923,37 @@
         unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }; }
       else { btn.textContent=sk.price+' M\u00fcnzen'; btn.classList.add('cant'); }
       card.appendChild(btn); grid.appendChild(card); drawSkinPreview(cnv,sk);
+    }
+  }
+  // Aura-Menü: dauerhafte Buffs auswählen (freigeschaltet durch Quest-Geber)
+  function drawAuraPreview(cnv,a,owned){
+    const g=cnv.getContext('2d'); const s=cnv.width/54; g.setTransform(s,0,0,s,0,0);
+    g.clearRect(0,0,54,54);
+    if(!owned) g.globalAlpha=0.32;
+    const grd=g.createRadialGradient(27,27,4,27,27,26);
+    grd.addColorStop(0,hexA(a.col,0.85)); grd.addColorStop(0.6,hexA(a.col,0.32)); grd.addColorStop(1,hexA(a.col,0));
+    g.fillStyle=grd; g.beginPath(); g.arc(27,27,26,0,6.283); g.fill();
+    g.fillStyle=a.col; g.strokeStyle=INK; g.lineWidth=2;
+    g.beginPath(); g.arc(27,27,10,0,6.283); g.fill(); g.stroke();
+    g.fillStyle='#FFF6E5';
+    for(let i=0;i<3;i++){ const an=i*2.1+0.5;
+      g.beginPath(); g.arc(27+Math.cos(an)*18,27+Math.sin(an)*18,2.2,0,6.283); g.fill(); }
+    if(!owned){ g.globalAlpha=1; g.font='15px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('🔒',27,28); }
+  }
+  function renderAuras(){
+    const grid=document.getElementById('auraGrid'); if(!grid) return; grid.innerHTML='';
+    for(const a of AURAS){
+      const owned=save.auras.indexOf(a.k)>=0, sel=save.auraSel===a.k;
+      const card=document.createElement('div'); card.className='skin'+(sel?' sel':'');
+      const pvr=Math.min(window.devicePixelRatio||1,3);
+      const cnv=document.createElement('canvas'); cnv.width=Math.round(54*pvr); cnv.height=Math.round(54*pvr); card.appendChild(cnv);
+      const nm=document.createElement('div'); nm.className='sname'; nm.textContent=a.name; card.appendChild(nm);
+      const ds=document.createElement('div'); ds.className='adesc2'; ds.textContent=a.desc; card.appendChild(ds);
+      const btn=document.createElement('button'); btn.className='sbtn';
+      if(sel){ btn.textContent='Ablegen'; btn.classList.add('sel'); btn.onclick=()=>{ SND.play('click'); save.auraSel=''; persist(); renderAuras(); }; }
+      else if(owned){ btn.textContent='Auswählen'; btn.classList.add('owned'); btn.onclick=()=>{ SND.play('click'); save.auraSel=a.k; persist(); renderAuras(); }; }
+      else { btn.textContent='🔒 Quest-Geber'; btn.classList.add('cant'); }
+      card.appendChild(btn); grid.appendChild(card); drawAuraPreview(cnv,a,owned);
     }
   }
   function renderAchievements(){
@@ -3857,6 +3909,8 @@
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };
   document.getElementById('skinsBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('skins'); updateCoinUI(); updateMenuSkin(); show('menu'); };
+  document.getElementById('aurasBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAuras(); hide('menu'); show('auras'); };
+  document.getElementById('aurasBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('auras'); show('menu'); };
   document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAchievements(); hide('menu'); show('achievements'); };
   document.getElementById('achBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('achievements'); show('menu'); };
   const nameInput=document.getElementById('nameInput');
