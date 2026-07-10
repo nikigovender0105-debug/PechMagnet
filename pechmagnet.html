@@ -421,7 +421,7 @@
       <h2>ERWISCHT!</h2>
       <div class="sub" id="caughtSub">Die Menge br&uuml;llt. Sag irgendwas Glaubhaftes!</div>
       <div class="tactics">
-        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>&#189; Zeit weg, Rest 2&times; schneller</small></button>
+        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>kostet &#189; der Zeit</small></button>
         <button class="tbtn" id="bribeBtn">&#128176; Bestechen<small id="bribeCost">25 M&uuml;nzen</small></button>
       </div>
       <div id="crowdHint" class="crowdHint"></div>
@@ -1493,8 +1493,7 @@
       const lb=document.getElementById('listenBtn');
       lb.disabled=!pendingHint;
       lb.onclick=()=>{ if(!pendingHint) return;
-        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit …
-        rageDrain=2;                                                                   // … und danach tickt sie doppelt so schnell
+        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit
         hintEl.innerHTML=pendingHint; hintEl.style.display='';
         lb.disabled=true; SND.play('click'); unlockAch('listen_1'); questProg('listen',1);
       };
