@@ -1828,7 +1828,7 @@
       '<div class="'+(e===latest?'brow new':'brow')+'"><span class="brk">#'+(i+1)+'</span><span class="bsc">'+e.score+'</span><span class="bst">'+e.streets+' Viertel</span></div>'
     ).join('');
   }
-  const SPECIAL_PRICE=100, MINI_PRICE=100;
+  const SPECIAL_PRICE=100, MINI_PRICE=150;
   function renderUpgrades(){
     const wrap=document.getElementById('upgrades'); if(!wrap) return; wrap.innerHTML='';
     if(!save.upgrades) save.upgrades={};
