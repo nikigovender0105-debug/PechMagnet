@@ -1481,15 +1481,10 @@
       const wrongLens=new Set();
       excuseSet.forEach(e=>{ if(!e.ok) wordsOf(e.t).forEach(w=>wrongLens.add(w.length)); });
       let pendingHint=null;
-      // nur die Buchstaben-Anzahl verraten \u2013 Wortl\u00e4nge muss eindeutig sein
-      const hw=cands.find(w=>!wrongLens.has(w.length));
-      if(hw){
-        pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit einem Wort mit <b>'+hw.length+' Buchstaben</b> \u2026\u201c';
-      } else {
-        // Fallback: eindeutiges Wort, dann Anfangsbuchstabe + L\u00e4nge
-        const fw=cands.find(w=>!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(w.toLowerCase())>=0));
-        if(fw) pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+fw[0]+'\u2026\u2018 ('+fw.length+' Buchstaben)</b> \u2026\u201c';
-      }
+      // Anfangsbuchstabe + Buchstaben-Anzahl verraten \u2013 Wort muss eindeutig sein
+      const hw=cands.find(w=>!wrongLens.has(w.length))
+        ||cands.find(w=>!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(w.toLowerCase())>=0));
+      if(hw) pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+hw[0]+'\u2026\u2018 ('+hw.length+' Buchstaben)</b> \u2026\u201c';
       const lb=document.getElementById('listenBtn');
       lb.disabled=!pendingHint;
       lb.onclick=()=>{ if(!pendingHint) return;
