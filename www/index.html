@@ -410,7 +410,8 @@
       &bull; <span class="safe">LOS!</span> &ndash; ruhig weiterlaufen.<br>
       &bull; <b>STEHENBLEIBEN!</b> &ndash; Finger loslassen, sonst steigt der Verdacht.<br>
       &bull; Nicht in Leute reinrennen.<br>
-      &bull; Erwischt? Dreiste Ausrede w&auml;hlen.
+      &bull; Erwischt? Dreiste Ausrede w&auml;hlen.<br>
+      &bull; <b>Am PC:</b> WASD/Pfeiltasten = laufen, Leertaste = Minigame, Tasten 1&ndash;4 = Ausrede.
       </p>
     </div>
     <button class="btn go" id="tutBtn">VERSTANDEN</button>
@@ -1988,7 +1989,28 @@
   cv.addEventListener('pointermove',e=>{ if(!stick.active||e.pointerId!==stick.id) return; const p=localPt(e); stick.x=p.x; stick.y=p.y; });
   function endStick(e){ if(stick.active&&(e.pointerId===stick.id||e.type==='pointercancel')){ stick.active=false; stick.id=null; } }
   cv.addEventListener('pointerup',endStick); cv.addEventListener('pointercancel',endStick); cv.addEventListener('pointerleave',endStick);
-  const keys={}; window.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true); window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+  // Tastatur (PC): WASD/Pfeile = laufen, Leertaste/Enter = Minigame, 1-4 = Ausrede
+  const keys={};
+  window.addEventListener('keydown',e=>{
+    const k=e.key.toLowerCase(); keys[k]=true;
+    if(state===ST.PLAY&&['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d',' '].indexOf(k)>=0){
+      SND.ensure(); e.preventDefault();
+      if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
+    }
+    if(state===ST.MINI&&(k===' '||k==='enter')){
+      e.preventDefault(); if(e.repeat) return;
+      if(mini&&mini.mode==='hold'){ if(!(mini.countdown>0)) mini.holding=true; }
+      else miniClick();
+    }
+    if(state===ST.CAUGHT&&['1','2','3','4'].indexOf(k)>=0){
+      const btns=document.querySelectorAll('#excuses .excuse'), b=btns[+k-1];
+      if(b&&!b.classList.contains('wrong')) b.click();
+    }
+  });
+  window.addEventListener('keyup',e=>{
+    const k=e.key.toLowerCase(); keys[k]=false;
+    if(state===ST.MINI&&(k===' '||k==='enter')&&mini&&mini.mode==='hold'&&mini.holding){ mini.holding=false; holdRelease(); }
+  });
   function readInput(){
     let dx=0,dy=0;
     if(stick.active){ dx=stick.x-stick.ox; dy=stick.y-stick.oy; const len=Math.hypot(dx,dy),max=70;
