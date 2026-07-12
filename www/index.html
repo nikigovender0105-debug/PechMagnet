@@ -201,6 +201,11 @@
     color:var(--ink); background:#fff; border:3px solid var(--ink); border-radius:13px; padding:11px 13px;
     box-shadow:3px 3px 0 var(--ink); line-height:1.25; transition:transform .05s, box-shadow .05s, background .1s; }
   .excuse:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
+  /* Maus-Hover am PC: klickbare Elemente heben sich sichtbar ab */
+  @media (hover:hover){
+    .excuse:hover:not(.wrong){ background:#FFF6E5; transform:translate(1px,1px); box-shadow:2px 2px 0 var(--ink); }
+    .tbtn:hover:not(:disabled), .btn:hover, .battleBtn:hover, .navb:hover, .sbtn:hover:not(.cant):not(.sel), .pbtn:hover:not(.cant){ filter:brightness(1.08); }
+  }
   .excuse.wrong{ background:#f0c9c6; color:#9a4b45; box-shadow:0 0 0 var(--ink); transform:translate(3px,3px); opacity:.7; pointer-events:none; }
 
   #reaction .card{ background:var(--warn); }
@@ -1444,6 +1449,8 @@
 
   function getCaught(){
     state=ST.CAUGHT; SND.play('caught'); caughtRun++;
+    // laufenden Maus-/Touch-Drag beenden, damit der erste Klick im Dialog sofort zählt
+    if(stick.active){ stick.active=false; if(stick.id!=null&&cv.releasePointerCapture){ try{ cv.releasePointerCapture(stick.id); }catch(e){} } stick.id=null; }
     rageMax=Math.max(3.0,4.6-streetsCleared*0.12)*5*((aura&&aura.k==='charme')?1.3:1); rageTimer=rageMax; rageDrain=1;
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
     const kind=(currentEvent&&EXCUSES[currentEvent.kind])?currentEvent.kind:'fall';
