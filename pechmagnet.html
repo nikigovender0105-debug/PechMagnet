@@ -725,7 +725,11 @@
     {k:'gold',  col:'#FFD23F', name:'Glücks-Aura',  desc:'Münzen zählen doppelt!'},
     {k:'tempo', col:'#19C3C3', name:'Tempo-Aura',   desc:'Du läufst 12% schneller!'},
     {k:'ruhe',  col:'#7C5CFF', name:'Ruhe-Aura',    desc:'Der Verdacht steigt 25% langsamer!'},
-    {k:'charme',col:'#FF5DA2', name:'Charme-Aura',  desc:'Die Menge bleibt beim Erwischen 30% länger geduldig!'}
+    {k:'charme',col:'#FF5DA2', name:'Charme-Aura',  desc:'Die Menge bleibt beim Erwischen 30% länger geduldig!'},
+    {k:'magnet',col:'#FF9F1C', name:'Magnet-Aura',  desc:'Münzen fliegen aus 60% größerer Entfernung zu dir!'},
+    {k:'schild',col:'#BFE3FF', name:'Schild-Aura',  desc:'Schutzschilde halten 50% länger!'},
+    {k:'punkte',col:'#2ECC40', name:'Punkte-Aura',  desc:'Du bekommst 25% mehr Punkte fürs Laufen!'},
+    {k:'freund',col:'#F72585', name:'Freunde-Aura', desc:'Quest-Geber erscheinen doppelt so oft!'}
   ];
   function updateAuraHUD(){ const el=document.getElementById('auraChip'); if(!el) return;
     el.classList.toggle('hidden',!aura); if(aura){ el.textContent='✨ '+aura.name; el.style.background=aura.col; } }
@@ -1325,7 +1329,7 @@
     }
     // 5% Chance auf einen Quest-Geber im Viertel: anrempeln = Geschenk statt ERWISCHT
     // 1,5% Chance auf den kahlen Helden: schenkt garantiert seinen Skin
-    const gvRoll=Math.random();
+    const gvRoll=Math.random()/((aura&&aura.k==='freund')?2:1);
     if(gvRoll<0.05){
       const gx=rand(playMinX(),playMaxX()), gy=rand(z.y0+60,z.y1-60);
       npcs.push({x:gx,y:gy,color:'#FFD23F',giver:true,size:1.05,skin:pick(SKINT),
@@ -1756,7 +1760,7 @@
     const def=ITEMS[it.type]; SND.play('powerup');
     itemsRun++; if(itemsRun>=5) unlockAch('items_run_5');
     questProg('items',1); questProg('items_run',itemsRun); questProg('it_'+it.type,1);
-    if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,upVal('shield')); }
+    if(it.type==='shield'){ spawnProtect=Math.max(spawnProtect,upVal('shield')*((aura&&aura.k==='schild')?1.5:1)); }
     else if(it.type==='boost'){ speedBuff=Math.max(speedBuff,upVal('boost')); updateBuffHUD(); }
     else if(it.type==='magnet'){ magnetTime=Math.max(magnetTime,upVal('magnet')); updateMagnetHUD(); }
     else if(it.type==='hint'){ hintCharges+=upVal('hint'); updateHintHUD(); }
@@ -2077,7 +2081,7 @@
     camY=player.y-H*0.6;
     generateUpTo(camY-ZONE_H*1.5);
     cullBehind(camY+H+ZONE_H);
-    if(player.y<bestY){ score+=Math.floor((bestY-player.y)*0.15); bestY=player.y; }
+    if(player.y<bestY){ score+=Math.floor((bestY-player.y)*0.15*((aura&&aura.k==='punkte')?1.25:1)); bestY=player.y; }
     const cz=currentZone(player.y);
     if(cz && cz!==lastZone){
       if(lastZone && cz.y0<lastZone.y0) districtCrossed();
@@ -2135,7 +2139,7 @@
     if(magnetTime>0){ magnetTime=Math.max(0,magnetTime-dt); updateMagnetHUD();
       for(const c of coins){ if(Math.abs(c.y-player.y)>150) continue; const dx=player.x-c.x, dy=player.y-c.y, dl=Math.hypot(dx,dy)||1;
         if(dl<150){ const s=260*dt; c.x+=dx/dl*s; c.y+=dy/dl*s; } } }
-    const grab=magnetTime>0?22:12;
+    const grab=(magnetTime>0?22:12)*((aura&&aura.k==='magnet')?1.6:1);
     for(const c of coins){ if(Math.abs(c.y-player.y)>30+grab) continue;
       const cx=player.x-c.x, cy=player.y-c.y; if(cx*cx+cy*cy<(PR+grab)*(PR+grab)){ c.got=true; coinsRun+=(aura&&aura.k==='gold')?2:1; SND.play('coin'); questProg('coins',1); questProg('coins_run',coinsRun); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); } }
     if(coins.some(c=>c.got)) coins=coins.filter(c=>!c.got);
