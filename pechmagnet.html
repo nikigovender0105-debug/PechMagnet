@@ -3335,17 +3335,24 @@
     }
     for(const n of npcs){ if(n.y<camY-60||n.y>camY+H+60) continue; const al=(phase==='alarm'||phase==='special'); visionCone(n.x,n.y,n.look,al?'#FF3B30':n.color,al); }
 
-    // Quest-Geber-Aura: farbiger Schein + kreisende Funken um den Spieler
-    if(aura && (state===ST.PLAY||state===ST.CAUGHT)){
+    // Quest-Geber-Aura: Schein hinter dem Spieler, Funken kreisen räumlich um ihn
+    // (front=false: Glow + hintere Bahnhälfte, front=true: vordere Hälfte ÜBER der Figur)
+    function drawAuraFx(front){
+      if(!(aura&&(state===ST.PLAY||state===ST.CAUGHT))) return;
       const ta=performance.now()/1000;
-      const ag=ctx.createRadialGradient(player.x,player.y,6,player.x,player.y,34);
-      ag.addColorStop(0,hexA(aura.col,0.22+0.08*Math.sin(ta*4))); ag.addColorStop(1,hexA(aura.col,0));
-      ctx.fillStyle=ag; ctx.beginPath(); ctx.arc(player.x,player.y,34,0,6.283); ctx.fill();
+      if(!front){
+        const ag=ctx.createRadialGradient(player.x,player.y,6,player.x,player.y,34);
+        ag.addColorStop(0,hexA(aura.col,0.26+0.09*Math.sin(ta*4))); ag.addColorStop(1,hexA(aura.col,0));
+        ctx.fillStyle=ag; ctx.beginPath(); ctx.arc(player.x,player.y,34,0,6.283); ctx.fill();
+      }
       ctx.fillStyle=aura.col; ctx.strokeStyle=INK; ctx.lineWidth=1.4;
-      for(let i=0;i<3;i++){ const a2=ta*2.2+i*2.094;
-        const sx=player.x+Math.cos(a2)*24, sy=player.y+Math.sin(a2)*10-14;
-        ctx.beginPath(); ctx.arc(sx,sy,2.2+0.8*Math.sin(ta*5+i),0,6.283); fs(); }
+      for(let i=0;i<4;i++){ const a2=ta*2.2+i*1.571, s=Math.sin(a2);
+        if(front?s<0.05:s>=0.05) continue;
+        const sx=player.x+Math.cos(a2)*22, sy=player.y-6+s*16;
+        const r2=Math.max(1.2,2.1+0.7*Math.sin(ta*5+i)+(front?0.5:-0.3));
+        ctx.beginPath(); ctx.arc(sx,sy,r2,0,6.283); fs(); }
     }
+    drawAuraFx(false);
     // Magnet-Aura: pulsierender gestrichelter Ring um den Spieler
     if(magnetTime>0 && (state===ST.PLAY||state===ST.CAUGHT)){
       const tm=performance.now()/1000;
@@ -3367,6 +3374,7 @@
     ents.push({y:player.y,d:()=>person(player.x,player.y,curSkin.body,Math.PI/2,false,player.bob,true)});
     ents.sort((a,b)=>a.y-b.y);
     for(const e of ents) e.d();
+    drawAuraFx(true);
     if(spawnProtect>0) drawShield();
 
     if(youHint>0){ const a=Math.abs(Math.sin(performance.now()/200))*6;
