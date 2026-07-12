@@ -729,8 +729,11 @@
     {k:'magnet',col:'#FF9F1C', name:'Magnet-Aura',  desc:'Münzen fliegen aus 60% größerer Entfernung zu dir!'},
     {k:'schild',col:'#BFE3FF', name:'Schild-Aura',  desc:'Schutzschilde halten 50% länger!'},
     {k:'punkte',col:'#2ECC40', name:'Punkte-Aura',  desc:'Du bekommst 25% mehr Punkte fürs Laufen!'},
-    {k:'freund',col:'#F72585', name:'Freunde-Aura', desc:'Quest-Geber erscheinen doppelt so oft!'}
+    {k:'freund',col:'#F72585', name:'Freunde-Aura', desc:'Quest-Geber erscheinen doppelt so oft!'},
+    {k:'einschlag', col:'#E63946', name:'Ein-Schlag-Aura', desc:'1× pro Viertel zerschlägst du ein Hindernis mit einem Schlag, statt erwischt zu werden!', special:true, src:'Kahler Held'},
+    {k:'unendlich', col:'#7DF9FF', name:'Unendlich-Aura',  desc:'1× pro Viertel gleitest du durch einen Passanten hindurch, statt erwischt zu werden!',  special:true, src:'Augenbinden-Meister'}
   ];
+  let auraCharge=true;   // 1 Ladung pro Viertel für die Spezial-Auren
   function updateAuraHUD(){ const el=document.getElementById('auraChip'); if(!el) return;
     el.classList.toggle('hidden',!aura); if(aura){ el.textContent='✨ '+aura.name; el.style.background=aura.col; } }
   let spawnProtect=0; const SPAWN_PROTECT=3.0;
@@ -1394,7 +1397,7 @@
     lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; guaranteedMini=false; updateTicketHUD();
-    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; aura=AURAS.find(a=>a.k===save.auraSel)||null; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD(); updateAuraHUD();
+    spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; aura=AURAS.find(a=>a.k===save.auraSel)||null; auraCharge=true; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD(); updateAuraHUD();
     chaosTimer=4.0; bursts=[]; youHint=2.6;
     setBanner('calm'); updateZoneHUD();
   }
@@ -1769,7 +1772,7 @@
     addPickFx(it.x,it.y-18,def.name,def.col);
   }
   function districtCrossed(){
-    streetsCleared++; score+=150; SND.play('district');
+    streetsCleared++; score+=150; SND.play('district'); auraCharge=true;
     if(streetsCleared>=5) unlockAch('district_5');
     if(streetsCleared>=10) unlockAch('district_10');
     if(streetsCleared>=15) unlockAch('district_15');
@@ -1789,15 +1792,21 @@
       if(save.owned.indexOf(sk.id)<0){ save.owned.push(sk.id); persist();
         title='EIN SCHLAG! 👊'; txt='„Okay.“ – Der kahle Held nickt knapp und schenkt dir den Skin „'+sk.name+'“!';
         if(save.owned.length>=10) unlockAch('skins_10');
+      } else if(save.auras.indexOf('einschlag')<0){
+        save.auras.push('einschlag'); if(!save.auraSel){ save.auraSel='einschlag'; aura=AURAS.find(a=>a.k==='einschlag'); updateAuraHUD(); } persist();
+        title='EIN-SCHLAG-AURA! 👊'; txt='„Du trainierst also auch. Respekt.“ – Er schenkt dir seine Ein-Schlag-Aura: 1× pro Viertel zerschlägst du ein Hindernis!';
       } else { save.coins+=100; persist(); updateCoinUI();
-        title='EIN SCHLAG! 👊'; txt='„Okay.“ – Du trägst seinen Look ja schon. Er drückt dir wortkarg 100 Münzen in die Hand.'; }
+        title='EIN SCHLAG! 👊'; txt='„Okay.“ – Du hast schon alles von ihm. Er drückt dir wortkarg 100 Münzen in die Hand.'; }
     } else if(n.gjo){
       const sk=SKINS.find(s=>s.id==='grenzenlos');
       if(save.owned.indexOf(sk.id)<0){ save.owned.push(sk.id); persist();
         title='UNENDLICHKEIT! 🌀'; txt='„Keine Sorge, ich bin der Stärkste.“ – Der Meister mit der Augenbinde schenkt dir den Skin „'+sk.name+'“!';
         if(save.owned.length>=10) unlockAch('skins_10');
+      } else if(save.auras.indexOf('unendlich')<0){
+        save.auras.push('unendlich'); if(!save.auraSel){ save.auraSel='unendlich'; aura=AURAS.find(a=>a.k==='unendlich'); updateAuraHUD(); } persist();
+        title='UNENDLICH-AURA! 🌀'; txt='„Zwischen dir und den Leuten ist ab jetzt … unendlich viel Platz.“ – Er schenkt dir seine Unendlich-Aura: 1× pro Viertel gleitest du durch einen Passanten!';
       } else { save.coins+=100; persist(); updateCoinUI();
-        title='UNENDLICHKEIT! 🌀'; txt='„Du hast meinen Look ja schon. Guter Geschmack.“ – Er lässt lässig 100 Münzen in deine Tasche schweben.'; }
+        title='UNENDLICHKEIT! 🌀'; txt='„Du hast schon alles von mir. Guter Geschmack.“ – Er lässt lässig 100 Münzen in deine Tasche schweben.'; }
     } else if(r<0.4){
       const locked=SKINS.filter(s=>!s.unlock&&!s.gift&&save.owned.indexOf(s.id)<0);
       if(locked.length){ const sk=pick(locked); save.owned.push(sk.id); persist();
@@ -1805,7 +1814,7 @@
         if(save.owned.length>=10) unlockAch('skins_10');
       } else { save.coins+=100; persist(); updateCoinUI(); title='Goldregen! 🪙'; txt='„Du hast ja schon alles!“ – Er drückt dir 100 Münzen in die Hand.'; }
     } else if(r<0.8){
-      const lockedA=AURAS.filter(a=>save.auras.indexOf(a.k)<0);
+      const lockedA=AURAS.filter(a=>!a.special&&save.auras.indexOf(a.k)<0);
       if(lockedA.length){
         const ga=pick(lockedA); save.auras.push(ga.k);
         if(!save.auraSel){ save.auraSel=ga.k; aura=ga; updateAuraHUD(); }
@@ -1825,6 +1834,12 @@
   }
   function confrontNPC(n){
     if(n.giver) return questGift(n);
+    // Unendlich-Aura: 1× pro Viertel durch den Passanten hindurchgleiten
+    if(aura&&aura.k==='unendlich'&&auraCharge){
+      auraCharge=false; bumpCD=1.4; SND.play('powerup');
+      addPickFx(player.x,player.y-26,'🌀 Unendlich!','#7DF9FF');
+      return;
+    }
     const z=currentZone(player.y);
     currentEvent=z?EVENTS[pick(z.events)]:EVENTS.anvil;
     confrontMode=true;
@@ -1990,7 +2005,7 @@
       const btn=document.createElement('button'); btn.className='sbtn';
       if(sel){ btn.textContent='Ablegen'; btn.classList.add('sel'); btn.onclick=()=>{ SND.play('click'); save.auraSel=''; persist(); renderAuras(); }; }
       else if(owned){ btn.textContent='Auswählen'; btn.classList.add('owned'); btn.onclick=()=>{ SND.play('click'); save.auraSel=a.k; persist(); renderAuras(); }; }
-      else { btn.textContent='🔒 Quest-Geber'; btn.classList.add('cant'); }
+      else { btn.textContent='🔒 '+(a.src||'Quest-Geber'); btn.classList.add('cant'); }
       card.appendChild(btn); grid.appendChild(card); drawAuraPreview(cnv,a,owned);
     }
   }
@@ -2157,7 +2172,16 @@
     if(phase!=='special' && spawnProtect<=0 && bumpCD<=0){
       for(const o of obstacles){ if(o.hit) continue; if(Math.abs(player.y-o.y)>15) continue;
         const inGap = player.x>o.gapX+6 && player.x<o.gapX+o.gapW-6;
-        if(!inGap){ o.hit=true; hitObstacle(o); break; } }
+        if(!inGap){
+          // Ein-Schlag-Aura: 1× pro Viertel das Hindernis wegschlagen
+          if(aura&&aura.k==='einschlag'&&auraCharge){
+            auraCharge=false; obstacles.splice(obstacles.indexOf(o),1);
+            SND.play('crash'); shake=reduceMotion?5:10; score+=25;
+            addPickFx(player.x,player.y-26,'💥 EIN SCHLAG!','#E63946');
+            if(!reduceMotion) for(let k=0;k<10;k++) dust.push({x:player.x+rand(-14,14),y:o.y+rand(-6,6),vx:rand(-40,40),vy:rand(-30,10),t:0,life:rand(0.35,0.6),r:rand(3,6)});
+            break;
+          }
+          o.hit=true; hitObstacle(o); break; } }
     }
     if(state!==ST.PLAY) return;
 
