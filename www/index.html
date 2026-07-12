@@ -799,7 +799,8 @@
     {id:'phantom',name:'Phantom',price:300,body:'#EFEFF6',cap:'#B388FF',glow:'#B388FF',pat:'star',patCol:'#B388FF'},
     {id:'star',name:'Rampenlicht',unlock:'survive_special',body:'#FFD23F',cap:'#FF3B30',glow:'#FFD23F',pat:'star',patCol:'#FF3B30'},
     {id:'goldhut',name:'Goldzylinder',unlock:'district_10',body:'#E6A817',cap:'#FFD23F',acc:'tophat',glow:'#FFD23F',pat:'bowtie',patCol:'#1A1A2E'},
-    {id:'legend',name:'Pech-Legende',unlock:'all_specials',body:'#12122a',cap:'#FFD23F',glow:'#FFD23F',pat:'star',patCol:'#FFD23F'}
+    {id:'legend',name:'Pech-Legende',unlock:'all_specials',body:'#12122a',cap:'#FFD23F',glow:'#FFD23F',pat:'star',patCol:'#FFD23F'},
+    {id:'einschlag',name:'Ein-Schlag-Mann',gift:true,body:'#FFD23F',cap:'#FFE9B0',acc:'bald',glow:'#FFF6A0',pat:'belt',patCol:'#1A1A2E'}
   ];
   let curSkin=SKINS[0];
 
@@ -1322,10 +1323,18 @@
         look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
     }
     // 5% Chance auf einen Quest-Geber im Viertel: anrempeln = Geschenk statt ERWISCHT
-    if(Math.random()<0.05){
+    // 1,5% Chance auf den kahlen Helden: schenkt garantiert seinen Skin
+    const gvRoll=Math.random();
+    if(gvRoll<0.05){
       const gx=rand(playMinX(),playMaxX()), gy=rand(z.y0+60,z.y1-60);
       npcs.push({x:gx,y:gy,color:'#FFD23F',giver:true,size:1.05,skin:pick(SKINT),
         head:{t:'bald'},glasses:true,pat:{pat:'star',patCol:'#FFF6E5'},
+        wx:gx,wy:gy,wt:rand(1,3),bob:rand(0,6.28),point:false,ang:Math.PI/2,
+        look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
+    } else if(gvRoll<0.065){
+      const gx=rand(playMinX(),playMaxX()), gy=rand(z.y0+60,z.y1-60);
+      npcs.push({x:gx,y:gy,color:'#FFD23F',giver:true,opm:true,size:1.06,skin:'#FFE0B2',
+        head:{t:'bald'},pat:{pat:'belt',patCol:'#1A1A2E'},
         wx:gx,wy:gy,wt:rand(1,3),bob:rand(0,6.28),point:false,ang:Math.PI/2,
         look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
     }
@@ -1763,8 +1772,15 @@
     SND.play('achieve'); score+=50; bumpCD=1.4;
     const r=Math.random();
     let title='Ein Geschenk! 🎁', txt='';
-    if(r<0.4){
-      const locked=SKINS.filter(s=>!s.unlock&&save.owned.indexOf(s.id)<0);
+    if(n.opm){
+      const sk=SKINS.find(s=>s.id==='einschlag');
+      if(save.owned.indexOf(sk.id)<0){ save.owned.push(sk.id); persist();
+        title='EIN SCHLAG! 👊'; txt='„Okay.“ – Der kahle Held nickt knapp und schenkt dir den Skin „'+sk.name+'“!';
+        if(save.owned.length>=10) unlockAch('skins_10');
+      } else { save.coins+=100; persist(); updateCoinUI();
+        title='EIN SCHLAG! 👊'; txt='„Okay.“ – Du trägst seinen Look ja schon. Er drückt dir wortkarg 100 Münzen in die Hand.'; }
+    } else if(r<0.4){
+      const locked=SKINS.filter(s=>!s.unlock&&!s.gift&&save.owned.indexOf(s.id)<0);
       if(locked.length){ const sk=pick(locked); save.owned.push(sk.id); persist();
         title='Skin geschenkt! 👕'; txt='„Der steht dir bestimmt!“ – Du erhältst den Skin „'+sk.name+'“.';
         if(save.owned.length>=10) unlockAch('skins_10');
@@ -1908,7 +1924,7 @@
     const grid=document.getElementById('skinGrid'); grid.innerHTML='';
     // nach Preis sortiert (günstig → teuer), Erfolgs-Skins am Ende
     const sorted=SKINS.slice().sort((a,b)=>{
-      const ap=a.unlock?Infinity:(a.price||0), bp=b.unlock?Infinity:(b.price||0);
+      const ap=(a.unlock||a.gift)?Infinity:(a.price||0), bp=(b.unlock||b.gift)?Infinity:(b.price||0);
       return ap===bp?0:(ap-bp);
     });
     for(const sk of sorted){
@@ -1920,6 +1936,7 @@
       const btn=document.createElement('button'); btn.className='sbtn';
       if(sel){ btn.textContent='Ausgew\u00e4hlt'; btn.classList.add('sel'); }
       else if(owned){ btn.textContent='Ausw\u00e4hlen'; btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderSkins(); }; }
+      else if(sk.gift){ btn.textContent='\ud83d\udd12 Quest-Geber'; btn.classList.add('cant'); nm.textContent=sk.name+' \ud83d\udd12'; }
       else if(sk.unlock){ btn.textContent='\ud83d\udd12 Erfolg'; btn.classList.add('cant'); nm.textContent=sk.name+' \ud83d\udd12'; }
       else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI(); questProg('spend',sk.price); questProg('skins_buy',1);
         unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }; }
@@ -2262,6 +2279,14 @@
       g.fillStyle=cap;
       for(const s of [-1,1]){ g.beginPath(); g.moveTo(hx+s*r*0.45,hy-r*0.7); g.quadraticCurveTo(hx+s*r*1.05,hy-r*1.5,hx+s*r*0.62,hy-r*1.72);
         g.quadraticCurveTo(hx+s*r*0.5,hy-r*1.1,hx+s*r*0.18,hy-r*0.78); g.closePath(); g.fill(); g.stroke(); }
+    } else if(acc==='bald'){
+      // glänzende Glatze: großer Glanzbogen + Funkel-Stern
+      g.fillStyle='rgba(255,255,255,.55)';
+      g.beginPath(); g.ellipse(hx-r*0.3,hy-r*0.5,r*0.38,r*0.2,-0.5,0,6.283); g.fill();
+      g.fillStyle='rgba(255,255,255,.9)';
+      g.beginPath(); g.moveTo(hx+r*0.55,hy-r*0.75); g.lineTo(hx+r*0.65,hy-r*0.55); g.lineTo(hx+r*0.85,hy-r*0.45);
+      g.lineTo(hx+r*0.65,hy-r*0.35); g.lineTo(hx+r*0.55,hy-r*0.15); g.lineTo(hx+r*0.45,hy-r*0.35);
+      g.lineTo(hx+r*0.25,hy-r*0.45); g.lineTo(hx+r*0.45,hy-r*0.55); g.closePath(); g.fill();
     } else if(acc==='wizard'){
       g.fillStyle=cap;
       g.beginPath(); g.moveTo(hx-r*0.95,hy-r*0.5); g.lineTo(hx+r*0.15,hy-r*2.5); g.lineTo(hx+r*0.95,hy-r*0.5); g.closePath(); g.fill(); g.stroke();
@@ -2456,7 +2481,8 @@
       const gb=Math.sin(t/240)*3, ga=0.55+0.3*Math.sin(t/180);
       ctx.strokeStyle='rgba(255,210,63,'+ga.toFixed(2)+')'; ctx.lineWidth=2.5;
       ctx.beginPath(); ctx.ellipse(x,y+17,18,7,0,0,6.283); ctx.stroke();
-      drawAcc(ctx,'wizard',x,y-16+hb,11,'#7C5CFF');
+      if(tr.opm) drawAcc(ctx,'bald',x,y-16+hb,11,'#FFE9B0');
+      else drawAcc(ctx,'wizard',x,y-16+hb,11,'#7C5CFF');
       ctx.fillStyle='#FFD23F'; ctx.strokeStyle=INK; ctx.lineWidth=2.2;
       rr(x-3,y-64+gb,6,12,3); fs();
       ctx.beginPath(); ctx.arc(x,y-48+gb,2.6,0,6.283); fs();
