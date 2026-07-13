@@ -731,7 +731,8 @@
     {k:'punkte',col:'#2ECC40', name:'Punkte-Aura',  desc:'Du bekommst 25% mehr Punkte fürs Laufen!'},
     {k:'freund',col:'#F72585', name:'Freunde-Aura', desc:'Quest-Geber erscheinen doppelt so oft!'},
     {k:'einschlag', col:'#E63946', name:'Ein-Schlag-Aura', desc:'1× pro Viertel zerschlägst du ein Hindernis mit einem Schlag, statt erwischt zu werden!', special:true, src:'Kahler Held'},
-    {k:'unendlich', col:'#7DF9FF', name:'Unendlich-Aura',  desc:'1× pro Viertel gleitest du durch einen Passanten hindurch, statt erwischt zu werden!',  special:true, src:'Augenbinden-Meister'}
+    {k:'unendlich', col:'#7DF9FF', name:'Unendlich-Aura',  desc:'1× pro Viertel gleitest du durch einen Passanten hindurch, statt erwischt zu werden!',  special:true, src:'Augenbinden-Meister'},
+    {k:'groove',    col:'#FF9F1C', name:'Groove-Aura',     desc:'Dein Freeze sitzt: Beim STEHENBLEIBEN verliert die Menge 35% schneller das Interesse!', special:true, src:'Break-Dancer'}
   ];
   let auraCharge=true;   // 1 Ladung pro Viertel für die Spezial-Auren
   function updateAuraHUD(){ const el=document.getElementById('auraChip'); if(!el) return;
@@ -808,7 +809,8 @@
     {id:'goldhut',name:'Goldzylinder',unlock:'district_10',body:'#E6A817',cap:'#FFD23F',acc:'tophat',glow:'#FFD23F',pat:'bowtie',patCol:'#1A1A2E'},
     {id:'legend',name:'Pech-Legende',unlock:'all_specials',body:'#12122a',cap:'#FFD23F',glow:'#FFD23F',pat:'star',patCol:'#FFD23F'},
     {id:'einschlag',name:'Ein-Schlag-Mann',gift:true,body:'#FFD23F',cap:'#FFE9B0',acc:'bald',glow:'#FFF6A0',pat:'belt',patCol:'#1A1A2E',gloves:'#E63946',shoes:'#E63946'},
-    {id:'grenzenlos',name:'Grenzenlos',gift:true,body:'#1B2440',cap:'#F4F6FB',acc:'blindfold',glow:'#7DF9FF',pat:'scarf',patCol:'#0F1836'}
+    {id:'grenzenlos',name:'Grenzenlos',gift:true,body:'#1B2440',cap:'#F4F6FB',acc:'blindfold',glow:'#7DF9FF',pat:'scarf',patCol:'#0F1836'},
+    {id:'breaker',name:'B-Boy',gift:true,body:'#19C3C3',cap:'#E63946',glow:'#19C3C3',pat:'vstripes',patCol:'#FFF6E5',shoes:'#FFF6E5'}
   ];
   let curSkin=SKINS[0];
 
@@ -1352,6 +1354,13 @@
         head:{t:'bald'},pat:{pat:'scarf',patCol:'#0F1836'},
         wx:gx,wy:gy,wt:rand(1,3),bob:rand(0,6.28),point:false,ang:Math.PI/2,
         look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
+    } else if(gvRoll<0.095){
+      // 1,5%: der Break-Dancer – tanzt, schenkt garantiert seinen Skin
+      const gx=rand(playMinX(),playMaxX()), gy=rand(z.y0+60,z.y1-60);
+      npcs.push({x:gx,y:gy,color:'#19C3C3',giver:true,bdc:true,rock:true,size:1.02,skin:pick(SKINT),
+        head:{t:'cap',c:'#E63946'},pat:{pat:'vstripes',patCol:'#FFF6E5'},
+        wx:gx,wy:gy,wt:rand(1,3),bob:rand(0,6.28),point:false,ang:Math.PI/2,
+        look:rand(0,6.283),lookTarget:rand(0,6.283),lookT:rand(0.4,2.4),y0:z.y0,y1:z.y1});
     }
   }
   function spawnZoneCoins(z){
@@ -1807,6 +1816,16 @@
         title='UNENDLICH-AURA! 🌀'; txt='„Zwischen dir und den Leuten ist ab jetzt … unendlich viel Platz.“ – Er schenkt dir seine Unendlich-Aura: 1× pro Viertel gleitest du durch einen Passanten!';
       } else { save.coins+=100; persist(); updateCoinUI();
         title='UNENDLICHKEIT! 🌀'; txt='„Du hast schon alles von mir. Guter Geschmack.“ – Er lässt lässig 100 Münzen in deine Tasche schweben.'; }
+    } else if(n.bdc){
+      const sk=SKINS.find(s=>s.id==='breaker');
+      if(save.owned.indexOf(sk.id)<0){ save.owned.push(sk.id); persist();
+        title='BREAK! 🎧'; txt='„Yo, du hast Rhythmus im Stolpern!“ – Der Break-Dancer schenkt dir den Skin „'+sk.name+'“!';
+        if(save.owned.length>=10) unlockAch('skins_10');
+      } else if(save.auras.indexOf('groove')<0){
+        save.auras.push('groove'); if(!save.auraSel){ save.auraSel='groove'; aura=AURAS.find(a=>a.k==='groove'); updateAuraHUD(); } persist();
+        title='GROOVE-AURA! 🎶'; txt='„Spür den Beat!“ – Er schenkt dir seine Groove-Aura: Dein Freeze beim STEHENBLEIBEN überzeugt die Menge 35% schneller!';
+      } else { save.coins+=100; persist(); updateCoinUI();
+        title='BREAK! 🎧'; txt='„Alles schon abgeräumt, Respekt.“ – Er moonwalkt davon und lässt dir 100 Münzen da.'; }
     } else if(r<0.4){
       const locked=SKINS.filter(s=>!s.unlock&&!s.gift&&save.owned.indexOf(s.id)<0);
       if(locked.length){ const sk=pick(locked); save.owned.push(sk.id); persist();
@@ -2124,7 +2143,7 @@
         suspicion+=d.alarmRise*mf*dt*((aura&&aura.k==='ruhe')?0.75:1); stareStill=0;
       } else {
         stareStill+=dt;
-        if(stareStill>=d.loseInterest) endAlarm();
+        if(stareStill>=d.loseInterest*((aura&&aura.k==='groove')?0.65:1)) endAlarm();
       }
       if(phase==='alarm'&&alarmTimer<=0) endAlarm();
     }
@@ -2430,7 +2449,7 @@
     if(glow){ const gl=ctx.createRadialGradient(x,y+b,3,x,y+b,32); const pul=0.4+0.18*Math.sin(t/180);
       gl.addColorStop(0,hexA(glow,pul)); gl.addColorStop(1,hexA(glow,0)); ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(x,y+b,32,0,6.283); ctx.fill(); }
     // Neigung in Laufrichtung, gedreht um die Füße
-    const lean=reduceMotion?0:(isPlayer?clamp(player.vx/MAX_SPEED,-1,1)*0.16:Math.cos(ang)*0.10*mvf);
+    const lean=reduceMotion?0:(isPlayer?clamp(player.vx/MAX_SPEED,-1,1)*0.16:(tr&&tr.rock?Math.sin(t/230)*0.26:Math.cos(ang)*0.10*mvf));
     ctx.save();
     if(lean){ ctx.translate(x,y+16); ctx.rotate(lean); ctx.translate(-x,-(y+16)); }
     ctx.lineWidth=3.5; ctx.strokeStyle=INK; ctx.lineJoin='round';
@@ -2539,6 +2558,17 @@
       ctx.beginPath(); ctx.ellipse(x,y+17,18,7,0,0,6.283); ctx.stroke();
       if(tr.opm) drawAcc(ctx,'bald',x,y-16+hb,11,'#FFE9B0');
       else if(tr.gjo) drawAcc(ctx,'blindfold',x,y-16+hb,11,'#F4F6FB');
+      else if(tr.bdc){
+        // schwebende Musiknoten um den Tänzer
+        ctx.font='700 13px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        for(let ni=0;ni<3;ni++){ const ph=((t/700)+ni*0.33)%1;
+          const nx=x+Math.sin((ph*4+ni)*2.4)*14+(ni-1)*8, ny=y-30-ph*26;
+          ctx.globalAlpha=1-ph;
+          ctx.strokeStyle=INK; ctx.lineWidth=2.6; ctx.strokeText('♪',nx,ny);
+          ctx.fillStyle=ni%2?'#FF9F1C':'#19C3C3'; ctx.fillText('♪',nx,ny);
+        }
+        ctx.globalAlpha=1;
+      }
       else drawAcc(ctx,'wizard',x,y-16+hb,11,'#7C5CFF');
       ctx.fillStyle='#FFD23F'; ctx.strokeStyle=INK; ctx.lineWidth=2.2;
       rr(x-3,y-64+gb,6,12,3); fs();
