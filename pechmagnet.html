@@ -3309,12 +3309,66 @@
         else {
           rr(wx,wy,ww,wh,3); fs();
           if(!lit){ ctx.fillStyle='rgba(255,255,255,.8)'; rr(wx+2,wy+2,ww*0.4,4,2); ctx.fill(); }
-          ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.stroke();
+          // gelegentlich schaut jemand aus dem Fenster (oder eine Katze sitzt drin)
+          const oh=(Math.imul(s.seed+row*13+c*7,2654435761)>>>0);
+          if(oh%17===0){
+            const t=performance.now(), kind=(oh>>>5)%3, px2=wx+ww/2;
+            const sil=lit&&gLights>0.4;   // nachts vor warmem Licht: Silhouette
+            ctx.save(); rrC(ctx,wx+1.5,wy+1.5,ww-3,wh-3,2); ctx.clip();
+            if(kind===2){
+              // Katze auf der Fensterbank
+              ctx.fillStyle=sil?'rgba(28,28,46,.88)':'#3b3b46';
+              ctx.beginPath(); ctx.arc(px2,wy+wh-3,4.5,Math.PI,0); ctx.fill();
+              ctx.beginPath(); ctx.moveTo(px2-4,wy+wh-6.5); ctx.lineTo(px2-2.6,wy+wh-11); ctx.lineTo(px2-1,wy+wh-6.8);
+              ctx.moveTo(px2+1,wy+wh-6.8); ctx.lineTo(px2+2.6,wy+wh-11); ctx.lineTo(px2+4,wy+wh-6.5); ctx.fill();
+            } else {
+              const sk=SKINT[(oh>>>7)%SKINT.length], bc=PALETTE[(oh>>>9)%PALETTE.length];
+              const bob2=Math.sin(t/700+(oh%7))*0.8, hy2=wy+wh*0.5+bob2;
+              ctx.fillStyle=sil?'rgba(28,28,46,.88)':bc; rr(px2-5,hy2+3,10,wh,3); ctx.fill();
+              ctx.fillStyle=sil?'rgba(28,28,46,.88)':sk; ctx.beginPath(); ctx.arc(px2,hy2,4.2,0,6.283); ctx.fill();
+              if(!sil){ ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(px2-1.5,hy2-0.5,0.8,0,6.283); ctx.arc(px2+1.5,hy2-0.5,0.8,0,6.283); ctx.fill(); }
+              if(kind===1&&!reduceMotion){ // winkt
+                ctx.fillStyle=sil?'rgba(28,28,46,.88)':sk;
+                ctx.beginPath(); ctx.arc(px2+6.5,hy2-2+Math.sin(t/150)*2.2,1.8,0,6.283); ctx.fill();
+              }
+            }
+            ctx.restore();
+          }
+          ctx.lineWidth=1.2; ctx.strokeStyle=INK; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.stroke();
           if(!tall){ ctx.beginPath(); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke(); }
         }
         if(lit){ ctx.fillStyle='rgba(255,180,60,.32)'; if(round){ctx.beginPath();ctx.arc(wx+ww/2,wy+wh/2,Math.min(ww,wh)/2,0,6.283);ctx.fill();} else rr(wx,wy,ww,wh,3),ctx.fill(); }
       }
       row++;
+    }
+    // Balkon zur Strasse hin – manchmal steht jemand drauf, sonst Blumenkästen
+    if(h>130 && (s.seed%10)<3){
+      const bh2=Math.imul(s.seed,1103515245)>>>0;
+      const bx=toRoad? x+w-3 : x-11, bw2=14;
+      const by=s.y0+s.ledge+28+(bh2%Math.max(1,h-120));
+      const t=performance.now();
+      ctx.fillStyle=shade(s.col,-34-dk); ctx.strokeStyle=INK; ctx.lineWidth=2.2;
+      rr(bx,by,bw2,30,3); fs();
+      const hasP=(bh2>>>4)%2===0;
+      if(hasP){
+        const sk=SKINT[(bh2>>>6)%SKINT.length], bc=PALETTE[(bh2>>>8)%PALETTE.length];
+        const px3=bx+bw2/2, hy3=by+11+Math.sin(t/650+(bh2%9))*0.9;
+        ctx.fillStyle=bc; rr(px3-5,hy3+3,10,16,3); ctx.fill();
+        ctx.fillStyle=sk; ctx.beginPath(); ctx.arc(px3,hy3,4.4,0,6.283); ctx.fill();
+        ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(px3-1.6,hy3-0.5,0.8,0,6.283); ctx.arc(px3+1.6,hy3-0.5,0.8,0,6.283); ctx.fill();
+        if((bh2>>>10)%3===0&&!reduceMotion){ ctx.fillStyle=sk;
+          ctx.beginPath(); ctx.arc(px3+6.5,hy3-2+Math.sin(t/150)*2.4,1.9,0,6.283); ctx.fill(); }
+      } else {
+        ctx.fillStyle='#7a4a2b'; rr(bx+2,by+18,bw2-4,6,2); ctx.fill();
+        const fc=['#FF5DA2','#F94144','#FFD23F'];
+        for(let i2=0;i2<3;i2++){ ctx.fillStyle=fc[(i2+(bh2>>>3))%3];
+          ctx.beginPath(); ctx.arc(bx+4+i2*3.5,by+17,2,0,6.283); ctx.fill(); }
+      }
+      // Geländer über der Person
+      ctx.strokeStyle=INK; ctx.lineWidth=1.6;
+      for(let i2=0;i2<4;i2++){ const gx2=bx+2.5+i2*(bw2-5)/3;
+        ctx.beginPath(); ctx.moveTo(gx2,by+12); ctx.lineTo(gx2,by+28); ctx.stroke(); }
+      ctx.lineWidth=2.4; ctx.beginPath(); ctx.moveTo(bx,by+12); ctx.lineTo(bx+bw2,by+12); ctx.stroke();
     }
     // Markise
     if(s.awn){ ctx.lineWidth=2.5; ctx.strokeStyle=INK; const ay=s.y1-(s.door?40:16);
