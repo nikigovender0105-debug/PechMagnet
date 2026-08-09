@@ -166,7 +166,7 @@
   .stat{ background:var(--ink); color:var(--cream); border-radius:12px; padding:8px 12px; min-width:90px; }
   .stat .k{ font-size:11px; letter-spacing:1px; opacity:.8; } .stat .v{ font-size:24px; font-weight:700; color:var(--gold); }
 
-  #dialog .card{ max-width:380px; }
+  #dialog .card{ max-width:380px; max-height:88vh; overflow-y:auto; touch-action:pan-y; }
   #dialog h2{ font-size:26px; color:var(--danger); -webkit-text-stroke:1.5px var(--ink); paint-order:stroke fill; margin-bottom:4px; }
   #dialog .sub{ font-size:14px; color:var(--ink); margin-bottom:10px; font-weight:500; }
   .crowdHint{ background:#e2f6f6; border:2.5px solid var(--teal); color:var(--ink); border-radius:11px;
@@ -183,12 +183,21 @@
   #rageBar{ height:16px; background:#fff; border:3px solid var(--ink); border-radius:10px; overflow:hidden; }
   #rageFill{ height:100%; width:100%; background:var(--danger); }
   #rageTxt{ font-size:11px; font-weight:700; letter-spacing:1px; color:var(--ink); text-align:left; margin-bottom:3px; }
-  .excuses{ display:flex; flex-direction:column; gap:9px; }
-  .excuse{ pointer-events:auto; cursor:pointer; text-align:left; font-family:inherit; font-weight:600; font-size:15px;
-    color:var(--ink); background:#fff; border:3px solid var(--ink); border-radius:13px; padding:11px 13px;
-    box-shadow:3px 3px 0 var(--ink); line-height:1.25; transition:transform .05s, box-shadow .05s, background .1s; }
-  .excuse:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
-  .excuse.wrong{ background:#f0c9c6; color:#9a4b45; box-shadow:0 0 0 var(--ink); transform:translate(3px,3px); opacity:.7; pointer-events:none; }
+  /* ---- Ausreden-System: selbst tippen, die Menge bewertet ---- */
+  #accuseBig{ background:var(--danger); color:#fff; border:3px solid var(--ink); border-radius:12px;
+    padding:10px 12px; font-weight:700; font-size:19px; line-height:1.18; text-transform:uppercase;
+    box-shadow:4px 4px 0 var(--ink); transform:rotate(-1.2deg); margin:4px 0 10px; }
+  #excuseInput{ pointer-events:auto; width:100%; min-height:62px; font-family:inherit; font-weight:600;
+    font-size:15px; padding:10px; border:3px solid var(--ink); border-radius:11px; background:#fff;
+    color:var(--ink); resize:none; outline:none; -webkit-user-select:text; user-select:text; touch-action:auto; }
+  #excuseInput:focus{ box-shadow:0 0 0 3px var(--purple); }
+  #excuseSend{ pointer-events:auto; cursor:pointer; width:100%; margin-top:8px; font-family:inherit; font-weight:700;
+    font-size:16px; letter-spacing:.5px; padding:11px; border:3px solid var(--ink); border-radius:11px;
+    background:var(--safe); color:var(--ink); box-shadow:3px 3px 0 var(--ink); }
+  #excuseSend:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
+  #excuseSend:disabled{ opacity:.5; pointer-events:none; box-shadow:none; }
+  #aiThinking{ display:none; margin-top:8px; font-weight:700; font-size:13px; color:var(--purple); }
+  #aiThinking.on{ display:block; }
 
   #reaction .card{ background:var(--warn); }
   #reaction h2{ font-size:30px; color:var(--ink); transform:rotate(-2deg); }
@@ -580,7 +589,7 @@
       &bull; <span class="safe">LOS!</span> &ndash; ruhig weiterlaufen.<br>
       &bull; <b>STEHENBLEIBEN!</b> &ndash; Finger loslassen, sonst steigt der Verdacht.<br>
       &bull; Nicht in Leute reinrennen.<br>
-      &bull; Erwischt? Dreiste Ausrede w&auml;hlen.
+      &bull; Erwischt? <b>Tippe selbst</b> eine dreiste Ausrede &ndash; die Menge bewertet sie!
       </p>
     </div>
     <button class="btn go" id="tutBtn">VERSTANDEN</button>
@@ -589,9 +598,11 @@
   <div id="dialog" class="screen hidden">
     <div class="card">
       <h2>ERWISCHT!</h2>
+      <div id="accuseBig"></div>
       <div class="sub" id="caughtSub">Die Menge br&uuml;llt. Sag irgendwas Glaubhaftes!</div>
       <div class="tactics">
-        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>&#189; Zeit weg, Rest 2&times; schneller</small></button>
+        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>kostet &#189; der Zeit</small></button>
+        <button class="tbtn" id="spickBtn">&#128269; Spicker<small>Ausrede einf&uuml;gen</small></button>
         <button class="tbtn" id="bribeBtn">&#128176; Bestechen<small id="bribeCost">25 M&uuml;nzen</small></button>
       </div>
       <div id="crowdHint" class="crowdHint"></div>
@@ -599,7 +610,9 @@
         <div id="rageTxt">WUT DER MENGE</div>
         <div id="rageBar"><div id="rageFill"></div></div>
       </div>
-      <div class="excuses" id="excuses"></div>
+      <textarea id="excuseInput" rows="2" maxlength="220" placeholder="Deine Ausrede... sei kreativ!" autocomplete="off"></textarea>
+      <button id="excuseSend">AUSREDE ABGEBEN</button>
+      <div id="aiThinking">&#129300; Die Menge &uuml;berlegt, ob sie dir das glaubt...</div>
     </div>
   </div>
 
@@ -875,7 +888,8 @@
   const UP_COSTS=[300,750,3000,8000,18000];
   function upCost(lvl){ return UP_COSTS[lvl]!=null?UP_COSTS[lvl]:UP_COSTS[UP_COSTS.length-1]; }
   let shake=0, youHint=0, firstRound=true;
-  let rageTimer=0, rageMax=4.6, rageDrain=1, excuseSet=[], reactTimer=0, stareStill=0;
+  let rageTimer=0, rageMax=4.6, rageDrain=1, reactTimer=0, stareStill=0;
+  let excuseCorrects=[], excuseAccusation='', excuseEvaluating=false, excuseSuggestions=[], usedExcuses=[];
   let excusesRun=0, caughtRun=0, itemsRun=0, weatherRun={};   // Zähler für Erfolge pro Lauf
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
   const SPECIAL_DUR=2.1;
@@ -1341,7 +1355,7 @@
 
   function resetWorld(){
     zones=[]; npcs=[]; coins=[]; items=[]; obstacles=[]; magnetTime=0; pickFx=[]; hintCharges=0; coinsRun=0; lastZoneTypeId=null;
-    excusesRun=0; caughtRun=0; itemsRun=0; weatherRun={};
+    excusesRun=0; caughtRun=0; itemsRun=0; weatherRun={}; usedExcuses=[];
     player.x=W/2; player.y=0; player.vx=player.vy=0; player.moving=false;
     bottomY=240; topGenY=bottomY;
     addZoneAbove();
@@ -1422,54 +1436,34 @@
     const kind=(currentEvent&&EXCUSES[currentEvent.kind])?currentEvent.kind:'fall';
     const pool=EXCUSES[kind];
     let corrects=pool.filter(e=>e.ok).map(e=>e.t); if(EXCUSE_OK[kind]) corrects=corrects.concat(EXCUSE_OK[kind]);
-    let wrongs=pool.filter(e=>!e.ok).map(e=>e.t).concat(EXCUSE_GENERIC);
-    for(let i=wrongs.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[wrongs[i],wrongs[j]]=[wrongs[j],wrongs[i]];}
-    const base=[{t:pick(corrects),ok:true},{t:wrongs[0],ok:false},{t:wrongs[1],ok:false},{t:wrongs[2],ok:false}];
-    for(let i=base.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[base[i],base[j]]=[base[j],base[i]];}
-    excuseSet=base;
-    const box=document.getElementById('excuses'); box.innerHTML='';
-    const btns=[];
-    excuseSet.forEach((e,i)=>{ const b=document.createElement('button'); b.className='excuse'; b.textContent=e.t;
-      b.onclick=()=>pickExcuse(i,b); box.appendChild(b); btns.push(b); });
-    // Spicker: deckt eine falsche Antwort auf (markiert sie, nicht mehr anklickbar)
-    if(hintCharges>0){
-      const wrongIdx=[]; excuseSet.forEach((e,i)=>{ if(!e.ok) wrongIdx.push(i); });
-      const reveal=Math.min(hintCharges,wrongIdx.length-1); // mind. 1 falsche bleibt verdeckt
-      for(let r=0;r<reveal;r++){ const k=(Math.random()*wrongIdx.length)|0, idx=wrongIdx.splice(k,1)[0];
-        btns[idx].classList.add('wrong'); btns[idx].textContent='🚫 '+btns[idx].textContent; }
-      hintCharges-=reveal; updateHintHUD();
-    }
+    excuseCorrects=corrects; excuseEvaluating=false;
+    excuseAccusation=(currentEvent&&currentEvent.label)?currentEvent.label:'Hier herrscht totales Chaos!';
+    excuseSuggestions=[]; fetchExcuseSuggestions(excuseAccusation);   // KI-Vorschl\u00e4ge im Hintergrund laden
+    document.getElementById('accuseBig').textContent='\u201e'+excuseAccusation.replace(/!+$/,'')+'\u201c \u2013 UND DU WARST DAS?!';
+    const exInp=document.getElementById('excuseInput'); exInp.value=''; exInp.disabled=false;
+    exInp.placeholder='Deine Ausrede... sei kreativ!';
+    document.getElementById('excuseSend').disabled=false;
+    document.getElementById('aiThinking').classList.remove('on');
+    // Spicker: f\u00fcgt eine zur Beschuldigung passende Ausrede ins Feld ein (kostet 1 Ladung)
+    const sb=document.getElementById('spickBtn');
+    sb.disabled=!(hintCharges>0);
+    sb.onclick=()=>{ if(state!==ST.CAUGHT||hintCharges<=0||excuseEvaluating) return;
+      exInp.value=takeSuggestion(); hintCharges--; updateHintHUD(); sb.disabled=!(hintCharges>0); SND.play('click'); };
     document.getElementById('caughtSub').textContent=specialMode
       ? (currentEvent&&currentEvent.subText?currentEvent.subText:'Du wirst direkt zur Rede gestellt!')
       : (confrontMode
         ? 'Du bist direkt in jemanden reingerannt! Sag schnell was!'
-        : (currentEvent?('"'+currentEvent.label+'" \u2013 und alle starren dich an.'):'Die Menge br\u00fcllt. Sag irgendwas!'));
-    // Taktik-Optionen: Belauschen (Hinweis gegen Zeit) & Bestechen (Flucht gegen M\u00fcnzen)
+        : 'Alle starren dich an. Rede dich raus \u2013 tippe deine Ausrede!');
+    // Taktik-Optionen: Belauschen (Vorschlag gegen Zeit) & Bestechen (Flucht gegen M\u00fcnzen)
     const hintEl=document.getElementById('crowdHint');
     if(hintEl){
       hintEl.style.display='none';
-      const wordsOf=t=>t.split(/\s+/).map(w=>w.replace(/[^A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df-]/g,'')).filter(w=>w.length>=5);
-      const correctTxt=excuseSet.find(e=>e.ok).t;
-      const cands=wordsOf(correctTxt).sort((a,b)=>b.length-a.length);
-      // L\u00e4ngen aller langen W\u00f6rter in den falschen Antworten
-      const wrongLens=new Set();
-      excuseSet.forEach(e=>{ if(!e.ok) wordsOf(e.t).forEach(w=>wrongLens.add(w.length)); });
-      let pendingHint=null;
-      // nur die Buchstaben-Anzahl verraten \u2013 Wortl\u00e4nge muss eindeutig sein
-      const hw=cands.find(w=>!wrongLens.has(w.length));
-      if(hw){
-        pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit einem Wort mit <b>'+hw.length+' Buchstaben</b> \u2026\u201c';
-      } else {
-        // Fallback: eindeutiges Wort, dann Anfangsbuchstabe + L\u00e4nge
-        const fw=cands.find(w=>!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(w.toLowerCase())>=0));
-        if(fw) pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+fw[0]+'\u2026\u2018 ('+fw.length+' Buchstaben)</b> \u2026\u201c';
-      }
       const lb=document.getElementById('listenBtn');
-      lb.disabled=!pendingHint;
-      lb.onclick=()=>{ if(!pendingHint) return;
-        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit …
-        rageDrain=2;                                                                   // … und danach tickt sie doppelt so schnell
-        hintEl.innerHTML=pendingHint; hintEl.style.display='';
+      lb.disabled=false;
+      lb.onclick=()=>{ if(state!==ST.CAUGHT||excuseEvaluating) return;
+        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit
+        hintEl.innerHTML='\ud83d\udcac Jemand aus der Menge fl\u00fcstert dir zu: \u201e<b>'+escHtml(takeSuggestion())+'</b>\u201c';
+        hintEl.style.display='';
         lb.disabled=true; SND.play('click'); unlockAch('listen_1');
       };
       const bribeCost=25+streetsCleared*5;
@@ -1486,15 +1480,79 @@
     document.getElementById('rageFill').style.width='100%';
     show('dialog');
   }
-  function pickExcuse(i,btn){
-    if(state!==ST.CAUGHT) return;
-    if(excuseSet[i].ok){ escapeCatch(); }
-    else{ btn.classList.add('wrong'); shake=reduceMotion?6:14; SND.play('wrong');
-      endGame('Falsche Ausrede \u2013 die Menge rastet aus!'); }
+  // ---- Ausreden-Bewertung ----
+  function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // Gemeinsamer Aufruf der Bewertungs-KI. Bricht nach kurzer Zeit ab, damit der
+  // Dialog nie h\u00e4ngt, wenn keine Verbindung besteht \u2013 dann greift die lokale Wertung.
+  const EXCUSE_AI_TIMEOUT=6000;
+  async function askExcuseAI(prompt){
+    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),EXCUSE_AI_TIMEOUT);
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST', signal:ctl.signal, headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+      });
+      const data=await res.json();
+      return (data.content||[]).map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    } finally { clearTimeout(to); }
   }
-  function escapeCatch(bribed){
+  // Holt zur konkreten Beschuldigung passende Ausreden von der KI (l\u00e4uft im Hintergrund)
+  async function fetchExcuseSuggestions(accusation){
+    try{
+      const avoid=usedExcuses.length?('\n\nVermeide Ausreden, die diesen bereits benutzten \u00e4hneln:\n- '+usedExcuses.join('\n- ')):'';
+      const prompt='Lustiges Cartoon-Spiel: Der Spieler wurde bei diesem Chaos-Ereignis erwischt:\n"'+accusation+'"\n\nSchreibe 3 kurze, dreiste, kreative Ausreden (je max. 10 W\u00f6rter), die KONKRET zu genau diesem Ereignis passen und die Schuld witzig von sich weisen.'+avoid+'\n\nAntworte NUR mit einem JSON-Array aus 3 Strings, ohne Markdown:\n["...","...","..."]';
+      const arr=JSON.parse(await askExcuseAI(prompt));
+      if(Array.isArray(arr)&&accusation===excuseAccusation)
+        excuseSuggestions=arr.filter(s=>typeof s==='string'&&s.trim()).map(s=>s.trim().slice(0,120));
+    }catch(e){ /* kein Problem \u2013 Fallback ist der Kategorie-Pool */ }
+  }
+  // Liefert die beste verf\u00fcgbare Vorschlags-Ausrede (KI zuerst, sonst Kategorie-Pool)
+  function takeSuggestion(){
+    if(excuseSuggestions.length) return excuseSuggestions.splice((Math.random()*excuseSuggestions.length)|0,1)[0];
+    return pick(excuseCorrects);
+  }
+  function localExcuseScore(txt){
+    // Notbewertung ohne KI-Verbindung: L\u00e4nge, M\u00fche und ein paar Stichworte
+    const norm=s=>s.toLowerCase().replace(/[^a-z\u00e4\u00f6\u00fc\u00df ]/g,'').replace(/\s+/g,' ').trim();
+    if(usedExcuses.some(u=>norm(u)===norm(txt))) return 15;   // exakt wiederholt \u2013 kennt die Menge schon
+    const t=txt.toLowerCase(); let p=32;
+    const words=txt.trim().split(/\s+/).length;
+    p+=Math.min(24,words*3);
+    if(/keine ahnung|wei\u00df nicht|weiss nicht|^ka$|^nein$|egal|halt so/.test(t)) p-=30;
+    if(/auftrag|stadt|test|inspektion|physik|anwalt|zuf\u00e4llig|versicherung|beweis|zeuge/.test(t)) p+=12;
+    if(words>=7) p+=8;
+    return clamp(Math.round(p),5,78);
+  }
+  async function evalExcuseAI(txt){
+    const usedList=usedExcuses.length?('\n\nDIESE AUSREDEN HAT DER SPIELER IN DIESER RUNDE SCHON ERFOLGREICH BENUTZT:\n- '+usedExcuses.join('\n- ')+'\nWICHTIG: Wenn die neue Ausrede im Kern dieselbe ist wie eine bereits benutzte (auch umformuliert), glaubt die Menge sie NICHT mehr \u2013 gib dann h\u00f6chstens 25 Punkte und weise im Kommentar frech darauf hin, dass sie den Trick schon kennt.'):'';
+    const prompt='Du bist die aufgebrachte Menschenmenge in einem lustigen Cartoon-Spiel. Der Spieler wurde bei einem Chaos-Ereignis erwischt und gibt eine selbst getippte Ausrede ab.\n\nEREIGNIS: "'+excuseAccusation+'"\nAUSREDE DES SPIELERS: "'+txt+'"'+usedList+'\n\nBewerte die Ausrede nach Kreativit\u00e4t, Dreistigkeit und ob sie zum Ereignis passt. Absurde, aber clevere Ausreden d\u00fcrfen gut abschneiden. Faule Antworten wie "wei\u00df nicht" oder Ein-Wort-Antworten schneiden sehr schlecht ab (unter 30). Richtig witzige oder passende Ausreden bekommen 60-95.\n\nAntworte NUR mit einem JSON-Objekt, ohne Markdown, ohne Backticks:\n{"punkte": <Zahl 0-100>, "kommentar": "<1 kurzer frecher Satz auf Deutsch als Reaktion der Menge, direkt an den Spieler>"}';
+    const r=JSON.parse(await askExcuseAI(prompt));
+    return { p:clamp(Math.round(Number(r.punkte)||0),0,100), c:String(r.kommentar||'').slice(0,180) };
+  }
+  async function submitExcuse(){
+    if(state!==ST.CAUGHT||excuseEvaluating) return;
+    const exInp=document.getElementById('excuseInput'); const txt=exInp.value.trim();
+    if(!txt){ exInp.placeholder='Schweigen macht dich nur verd\u00e4chtiger!'; return; }
+    excuseEvaluating=true; exInp.disabled=true; exInp.blur();
+    document.getElementById('excuseSend').disabled=true;
+    document.getElementById('aiThinking').classList.add('on');
+    let v;
+    try{ v=await evalExcuseAI(txt); }
+    catch(e){ v={ p:localExcuseScore(txt), c:'Die Menge murmelt unentschlossen und l\u00e4sst dich z\u00f6gernd ziehen.' }; }
+    excuseEvaluating=false;
+    if(state!==ST.CAUGHT) return; // z.B. inzwischen bestochen worden
+    document.getElementById('aiThinking').classList.remove('on');
+    if(v.p>=50){ usedExcuses.push(txt); escapeCatch(false,v); }
+    else{ shake=reduceMotion?6:14; SND.play('wrong');
+      endGame('Ausrede abgelehnt ('+v.p+'/100): \u201e'+v.c+'\u201c'); }
+  }
+  document.getElementById('excuseSend').addEventListener('click',submitExcuse);
+  document.getElementById('excuseInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); submitExcuse(); } });
+  function escapeCatch(bribed,verdict){
     SND.play(bribed?'coin':'correct');
     if(!bribed){
+      if(verdict) score+=Math.round(verdict.p/2);
       if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); }
       else score+=40+streetsCleared*5;
       excusesRun++; if(excusesRun>=5) unlockAch('excuse_5');
@@ -1502,7 +1560,8 @@
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
     SND.setTrack('game');
-    const r=bribed?['Geschmiert! 💰','Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']:pick(REACTIONS);
+    const r=bribed?['Geschmiert! 💰','Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']
+      :(verdict?[verdict.p+'/100 \u2013 Durchgekommen!',verdict.c]:pick(REACTIONS));
     document.getElementById('reactTitle').textContent=r[0];
     document.getElementById('reactText').textContent=r[1];
     show('reaction'); state=ST.REACT; reactTimer=1.5;
@@ -2018,6 +2077,7 @@
   }
   function updateCaught(dt){
     if(state!==ST.CAUGHT) return;
+    if(excuseEvaluating) return; // Wut pausiert, w\u00e4hrend die Menge \u00fcberlegt
     rageTimer-=dt*rageDrain;
     document.getElementById('rageFill').style.width=clamp(rageTimer/rageMax,0,1)*100+'%';
     if(rageTimer<=0) endGame('Die Wut der Menge kochte \u00fcber.');
