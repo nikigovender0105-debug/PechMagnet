@@ -1907,6 +1907,9 @@
 
   // ---------- update ----------
   function update(dt){
+    // Kamera-Rütteln immer abklingen lassen – auch wenn der Zustand mitten im
+    // Update wechselt (Tod, Verhör), sonst wackelt das Bild bis ins Menü weiter.
+    if(shake>0) shake=Math.max(0,shake-dt*55);
     if(state===ST.REACT){ reactTimer-=dt; if(reactTimer<=0){ hide('reaction'); state=ST.PLAY; } return; }
     if(state!==ST.PLAY) return;
     const d=diff(), inp=readInput();
@@ -2006,7 +2009,6 @@
     bursts=bursts.filter(b=>b.t<b.life);
 
     if(youHint>0) youHint-=dt;
-    if(shake>0) shake=Math.max(0,shake-dt*55);
     // Lauf-Staub
     for(const p of dust){ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=dt*8; }
     if(dust.length) dust=dust.filter(p=>p.t<p.life);
@@ -3571,9 +3573,9 @@
   }
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
-  document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); firstRound=false; score=0; streetsCleared=0; bestNerve=0; suspicion=0;
+  document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); firstRound=false; score=0; streetsCleared=0; bestNerve=0; suspicion=0; shake=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
-  document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
+  document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; shake=0; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };
