@@ -1573,7 +1573,7 @@
   // ----- Minigames (Armdrücken, Wettrennen, Tauziehen, Blick-Duell) -----
   const MINI_DEFS={
     armwrestle:{ mode:'spam', title:'ARMDRÜCKEN!', desc:'Spam-klicke so schnell du kannst, um den Bodybuilder wegzudrücken!', btn:'DRÜCKEN!',
-      start:0.45, time:6.0, decay:0.22, gain:0.06,
+      start:0.50, time:7.0, decay:0.12, gain:0.075,
       winT:'BUFF! 💪', winX:'Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.',
       loseMsg:'Der Bodybuilder hat dich plattgemacht.' },
     race:{ mode:'spam', title:'WETTRENNEN!', desc:'Tippe so schnell du kannst und erreiche das Ziel vor dem Sprinter!', btn:'RENNEN!',
@@ -1581,7 +1581,7 @@
       winT:'ZIELFOTO! 🏁', winX:'Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.',
       loseMsg:'Der Sprinter hat dich stehen lassen.' },
     tug:{ mode:'spam', title:'TAUZIEHEN!', desc:'Zieh! Aber Vorsicht: Die Oma reißt immer wieder kräftig am Seil!', btn:'ZIEHEN!',
-      start:0.52, time:6.5, decay:0.17, gain:0.055, yank:true,
+      start:0.55, time:7.5, decay:0.10, gain:0.065, yank:true,
       winT:'HAU-RUCK! 💪', winX:'Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.',
       loseMsg:'Die Oma hat dich quer über die Straße geschleift.' },
     duel:{ mode:'duel', title:'BLICK-DUELL!', desc:'Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.', btn:'WARTEN…',
@@ -1614,8 +1614,8 @@
     } else if(def.mode==='mole'){
       mini={def:def,mode:'mole',phase:'wait',t:0,wait:rand(0.8,2.0),win:Math.max(0.35,0.6-streetsCleared*0.01),round:1,rounds:def.rounds,prog:1};
     } else {
-      mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:def.decay+streetsCleared*0.008,gain:def.gain,
-        yankT:def.yank?rand(0.7,1.3):0,clicks:0};
+      mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:Math.min(def.decay+streetsCleared*0.004,def.decay*1.5),gain:def.gain,
+        yankT:def.yank?rand(1.2,2.0):0,clicks:0};
     }
     document.getElementById('miniTitle').textContent=def.title;
     document.getElementById('miniDesc').textContent=def.desc;
@@ -1691,7 +1691,7 @@
     }
     mini.time-=dt; mini.prog-=mini.decay*dt;
     if(mini.def.yank&&mini.prog<1){ mini.yankT-=dt;
-      if(mini.yankT<=0){ mini.prog-=rand(0.04,0.08); mini.yankT=rand(0.9,1.7); } }
+      if(mini.yankT<=0){ mini.prog-=rand(0.025,0.05); mini.yankT=rand(1.2,2.2); } }
     if(mini.prog>=1){ mini.prog=1; updateMiniUI(); return miniWin(); }
     if(mini.prog<=0||mini.time<=0){ mini.prog=Math.max(0,mini.prog); updateMiniUI(); return miniLose(); }
     updateMiniUI();
@@ -1876,7 +1876,7 @@
   // Startet die Death-Animation (WASTED bzw. themed je nach Special), danach Game-Over.
   function endGame(msg){
     const style = caughtWasSpecial && currentEvent && currentEvent.death ? currentEvent.death : 'wasted';
-    deathAnim={style:style,t:0,dur:style==='wasted'?1.5:1.9,msg:msg||'Die Menge hat dich erwischt.'};
+    deathAnim={style:style,t:0,dur:style==='wasted'?1.7:2.2,msg:msg||'Die Menge hat dich erwischt.'};
     state=ST.DEATH;
     hide('dialog'); hide('reaction'); hide('minigame');
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
@@ -3918,6 +3918,10 @@
         ctx.beginPath(); ctx.arc((i*181)%W,H-q*H*0.7,2.2,0,6.283); ctx.fill(); }
     }
   }
+  // Easing-Helfer für Cinematic-/Death-Animationen
+  function easeOutCubic(t){ t=clamp(t,0,1)-1; return t*t*t+1; }
+  function easeOutBack(t){ t=clamp(t,0,1)-1; const c=1.70158; return 1+(c+1)*t*t*t+c*t*t; }
+  function easeOutElastic(t){ t=clamp(t,0,1); if(t===0||t===1) return t; return Math.pow(2,-10*t)*Math.sin((t*10-0.75)*2.0944)+1; }
   function drawSpecialCinematic(){
     if(!currentEvent) return;
     const p=clamp(specialAnimT,0,1), now=performance.now();
@@ -3939,10 +3943,13 @@
     ctx.restore();
     // einzigartige Effekte des Events
     drawSpecialFX(key,col,p,now);
-    // Letterbox-Balken
-    const barH=Math.min(1,p/0.22)*Math.min(60,H*0.12);
+    // Letterbox-Balken gleiten mit Easing herein, mit Lauflichtern
+    const barH=easeOutCubic(Math.min(1,p/0.28))*Math.min(62,H*0.125);
     ctx.fillStyle='#0a0a14'; ctx.fillRect(0,0,W,barH); ctx.fillRect(0,H-barH,W,barH);
     ctx.fillStyle=col; ctx.fillRect(0,barH-3,W,3); ctx.fillRect(0,H-barH,W,3);
+    if(!reduceMotion){ ctx.fillStyle=hexA(col,0.5);
+      for(let i=0;i<7;i++){ const lx=((i/7+now/2600)%1)*W;
+        ctx.fillRect(lx,barH*0.4,16,3); ctx.fillRect(W-lx-16,H-barH*0.4-3,16,3); } }
     // grosses, animiertes Objekt mit eigenem Auftritt pro Event
     const pop=p<0.45?(p/0.45):1, overs=1+0.18*Math.sin(Math.min(p,0.55)*11);
     let oy=H*0.46;
@@ -3974,16 +3981,28 @@
       drawObject(currentEvent.vis,0,0);
       ctx.restore();
     }
-    // Titel
-    ctx.save(); ctx.translate(W/2,H*0.78);
-    const ts=0.92+0.08*Math.sin(now/110); ctx.scale(ts,ts);
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.font='800 13px Fredoka,sans-serif'; ctx.fillStyle=col;
-    ctx.fillText('★  SPECIAL EVENT  ★',0,-26);
-    ctx.font='800 20px Fredoka,sans-serif'; ctx.lineWidth=5; ctx.lineJoin='round';
-    ctx.strokeStyle='#0a0a14'; ctx.strokeText(currentEvent.label,0,2);
-    ctx.fillStyle='#FFF6E5'; ctx.fillText(currentEvent.label,0,2);
-    ctx.restore();
+    // Titel-Panel gleitet mit Overshoot von unten herein, inkl. Countdown-Leiste
+    const tp=easeOutBack(clamp((p-0.16)/0.4,0,1));
+    if(tp>0){
+      ctx.save(); ctx.translate(W/2,H*0.78+(1-tp)*60); ctx.globalAlpha=clamp(tp*1.4,0,1);
+      const pw=Math.min(W-70,330);
+      ctx.fillStyle='rgba(10,10,20,.72)'; ctx.strokeStyle=col; ctx.lineWidth=3; rr(-pw/2,-44,pw,72,14); fs();
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='800 13px Fredoka,sans-serif'; ctx.fillStyle=col;
+      const twk=Math.sin(now/160)>0?'★':'✦';
+      ctx.fillText(twk+'  SPECIAL EVENT  '+twk,0,-26);
+      ctx.font='800 20px Fredoka,sans-serif';
+      const lw=ctx.measureText(currentEvent.label).width;
+      if(lw>pw-24) ctx.font='800 '+Math.max(13,20*(pw-24)/lw).toFixed(1)+'px Fredoka,sans-serif';
+      ctx.lineWidth=5; ctx.lineJoin='round';
+      ctx.strokeStyle='#0a0a14'; ctx.strokeText(currentEvent.label,0,2);
+      ctx.fillStyle='#FFF6E5'; ctx.fillText(currentEvent.label,0,2);
+      // Countdown-Leiste bis zur Befragung
+      ctx.fillStyle='rgba(255,255,255,.18)'; rr(-pw/2+16,16,pw-32,6,3); ctx.fill();
+      const rem=clamp(1-p,0,1);
+      if(rem>0.01){ ctx.fillStyle=col; rr(-pw/2+16,16,(pw-32)*rem,6,3); ctx.fill(); }
+      ctx.restore();
+    }
   }
   function starShape(cx,cy,r){
     ctx.beginPath();
@@ -4115,11 +4134,27 @@
       deathDude(W/2+ly*30,H*0.42+ly*H*0.22,1.5*ly+0.12*Math.sin(now/120)*(1-ly),1.6);
       ctx.fillStyle='#FFD23F'; ctx.strokeStyle=INK; ctx.lineWidth=2;
       for(let i=0;i<7;i++){ const a=now/300+i*0.9, rx=W/2+Math.cos(a)*78, ry=H*0.38+Math.sin(a)*30; starShape(rx,ry,8); } }
-    const sc=0.4+0.6*Math.min(1,p*2.2)+0.03*Math.sin(now/120);
-    ctx.save(); ctx.translate(W/2,H*0.5); ctx.scale(sc,sc);
-    ctx.font='900 44px Fredoka,sans-serif'; ctx.lineWidth=8; ctx.lineJoin='round'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.strokeStyle='#0a0a14'; ctx.strokeText(word,0,0); ctx.fillStyle=col; ctx.fillText(word,0,0);
-    ctx.restore();
+    // Wort knallt mit Elastic-Overshoot herein, davor Schockring, danach Nachricht
+    const wp=clamp((p-0.14)/0.5,0,1);
+    if(wp>0){
+      if(wp<0.5){ const rw=easeOutCubic(wp*2);
+        ctx.strokeStyle='rgba(255,255,255,'+(0.5*(1-rw))+')'; ctx.lineWidth=1+6*(1-rw);
+        ctx.beginPath(); ctx.arc(W/2,H*0.5,30+rw*W*0.5,0,6.283); ctx.stroke(); }
+      const sc=easeOutElastic(wp)*(1+0.02*Math.sin(now/120));
+      ctx.save(); ctx.translate(W/2,H*0.5); ctx.rotate((1-wp)*-0.12+0.015*Math.sin(now/160)); ctx.scale(Math.max(0.01,sc),Math.max(0.01,sc));
+      ctx.font='900 46px Fredoka,sans-serif';
+      const ww=ctx.measureText(word).width;
+      if(ww>W-56) ctx.font='900 '+Math.max(26,46*(W-56)/ww).toFixed(0)+'px Fredoka,sans-serif';
+      ctx.lineJoin='round'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(5,5,10,.55)'; ctx.fillText(word,4,5);
+      ctx.lineWidth=9; ctx.strokeStyle='#0a0a14'; ctx.strokeText(word,0,0);
+      ctx.fillStyle=col; ctx.fillText(word,0,0);
+      ctx.restore();
+      if(wp>0.6){ ctx.globalAlpha=clamp((wp-0.6)/0.4,0,1);
+        ctx.font='700 15px Fredoka,sans-serif'; ctx.lineWidth=4; ctx.lineJoin='round'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.strokeStyle='#0a0a14'; ctx.strokeText(deathAnim.msg,W/2,H*0.5+46);
+        ctx.fillStyle='#FFF6E5'; ctx.fillText(deathAnim.msg,W/2,H*0.5+46); ctx.globalAlpha=1; }
+    }
   }
 
   let lastT=performance.now();
