@@ -601,8 +601,7 @@
       <div id="accuseBig"></div>
       <div class="sub" id="caughtSub">Die Menge br&uuml;llt. Sag irgendwas Glaubhaftes!</div>
       <div class="tactics">
-        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>kostet &#189; der Zeit</small></button>
-        <button class="tbtn" id="spickBtn">&#128269; Spicker<small>Ausrede einf&uuml;gen</small></button>
+        <button class="tbtn" id="spickBtn">&#128269; Spicker<small>Ausrede, die sicher zieht</small></button>
         <button class="tbtn" id="bribeBtn">&#128176; Bestechen<small id="bribeCost">25 M&uuml;nzen</small></button>
       </div>
       <div id="crowdHint" class="crowdHint"></div>
@@ -890,6 +889,7 @@
   let shake=0, youHint=0, firstRound=true;
   let rageTimer=0, rageMax=4.6, rageDrain=1, reactTimer=0, stareStill=0;
   let excuseCorrects=[], excuseAccusation='', excuseEvaluating=false, excuseSuggestions=[], usedExcuses=[];
+  let guaranteedExcuse='';   // vom Spicker eingesetzter Text – kommt ungeprüft durch
   let excusesRun=0, caughtRun=0, itemsRun=0, weatherRun={};   // Zähler für Erfolge pro Lauf
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
   const SPECIAL_DUR=2.1;
@@ -969,7 +969,7 @@
     {id:'excuse_5',name:'Silberzunge',desc:'Rede dich 5-mal in einem Lauf richtig heraus.',icon:'🗣️',coins:400},
     {id:'no_excuse_5',name:'Sauber unterwegs',desc:'Erreiche Viertel 5, ohne erwischt zu werden.',icon:'🕊️',coins:500},
     {id:'bribe_1',name:'Schmiergeld',desc:'Besteche die Menge zum ersten Mal.',icon:'🤝',coins:150},
-    {id:'listen_1',name:'Lauscher',desc:'Belausche die Menge zum ersten Mal.',icon:'👂',coins:150},
+    {id:'listen_1',name:'Spicker-Profi',desc:'Setze zum ersten Mal den Spicker ein.',icon:'🔍',coins:150},
     {id:'mini_win_1',name:'Straßenkämpfer',desc:'Gewinne dein erstes Minigame.',icon:'🥇',coins:200},
     {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 4 Minigames mindestens einmal.',icon:'👾',coins:800},
     {id:'items_run_5',name:'Staubsauger',desc:'Sammle 5 Power-ups in einem Lauf.',icon:'🧹',coins:300},
@@ -1444,28 +1444,25 @@
     exInp.placeholder='Deine Ausrede... sei kreativ!';
     document.getElementById('excuseSend').disabled=false;
     document.getElementById('aiThinking').classList.remove('on');
-    // Spicker: f\u00fcgt eine zur Beschuldigung passende Ausrede ins Feld ein (kostet 1 Ladung)
+    // Spicker: setzt eine passende Ausrede ein, die garantiert durchgeht (kostet 1 Ladung)
+    guaranteedExcuse='';
     const sb=document.getElementById('spickBtn');
     sb.disabled=!(hintCharges>0);
     sb.onclick=()=>{ if(state!==ST.CAUGHT||hintCharges<=0||excuseEvaluating) return;
-      exInp.value=takeSuggestion(); hintCharges--; updateHintHUD(); sb.disabled=!(hintCharges>0); SND.play('click'); };
+      const sug=takeSuggestion(); exInp.value=sug; guaranteedExcuse=sug;
+      hintCharges--; updateHintHUD(); sb.disabled=!(hintCharges>0);
+      const ce=document.getElementById('crowdHint');
+      if(ce){ ce.innerHTML='\ud83d\udd0d Spicker eingesetzt \u2013 diese Ausrede zieht <b>garantiert</b>. Einfach abgeben!'; ce.style.display=''; }
+      SND.play('click'); unlockAch('listen_1'); };
     document.getElementById('caughtSub').textContent=specialMode
       ? (currentEvent&&currentEvent.subText?currentEvent.subText:'Du wirst direkt zur Rede gestellt!')
       : (confrontMode
         ? 'Du bist direkt in jemanden reingerannt! Sag schnell was!'
         : 'Alle starren dich an. Rede dich raus \u2013 tippe deine Ausrede!');
-    // Taktik-Optionen: Belauschen (Vorschlag gegen Zeit) & Bestechen (Flucht gegen M\u00fcnzen)
+    // Taktik-Option: Bestechen (Flucht gegen Münzen)
     const hintEl=document.getElementById('crowdHint');
     if(hintEl){
       hintEl.style.display='none';
-      const lb=document.getElementById('listenBtn');
-      lb.disabled=false;
-      lb.onclick=()=>{ if(state!==ST.CAUGHT||excuseEvaluating) return;
-        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit
-        hintEl.innerHTML='\ud83d\udcac Jemand aus der Menge fl\u00fcstert dir zu: \u201e<b>'+escHtml(takeSuggestion())+'</b>\u201c';
-        hintEl.style.display='';
-        lb.disabled=true; SND.play('click'); unlockAch('listen_1');
-      };
       const bribeCost=25+streetsCleared*5;
       document.getElementById('bribeCost').textContent=bribeCost+' M\u00fcnzen';
       const bb=document.getElementById('bribeBtn');
@@ -1535,6 +1532,13 @@
     if(!txt){ exInp.placeholder='Schweigen macht dich nur verd\u00e4chtiger!'; return; }
     excuseEvaluating=true; exInp.disabled=true; exInp.blur();
     document.getElementById('excuseSend').disabled=true;
+    // Spicker-Ausrede unverändert abgegeben? Dann keine Bewertung – die zieht immer.
+    if(guaranteedExcuse&&txt===guaranteedExcuse.trim()){
+      excuseEvaluating=false; guaranteedExcuse='';
+      usedExcuses.push(txt);
+      escapeCatch(false,{p:75,c:'Dein Spicker sitzt \u2013 die Menge nickt und macht dir Platz.'});
+      return;
+    }
     document.getElementById('aiThinking').classList.add('on');
     let v;
     try{ v=await evalExcuseAI(txt); }
