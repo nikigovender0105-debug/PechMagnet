@@ -6,7 +6,11 @@
 <title>Pech-Magnet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<!-- Nicht renderblockierend: in der verpackten App (offline) startet das Spiel sofort mit der
+     System-Schrift, statt auf einen Netzwerk-Timeout zu warten. Fredoka wird nachgezogen. -->
+<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap"></noscript>
 <style>
   :root{
     --ink:#1A1A2E; --cream:#FFF6E5; --gold:#FFB300; --danger:#FF3B30;
@@ -87,11 +91,10 @@
     box-shadow:0 5px 0 rgba(0,0,0,.45); color:var(--cream); }
   .mtitle{ font-size:24px; color:var(--gold); letter-spacing:1.5px; margin-bottom:4px; }
   #shop .shopSecTitle{ color:var(--teal); }
-  #shop .pwr, #skins .skin, #achievements .ach{
+  #shop .pwr, #skins .skin{
     background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); box-shadow:none; }
-  #shop .pwr .pname, #skins .skin .sname, #achievements .ach .aname{ color:var(--cream); }
-  #shop .pwr .pdesc, #achievements .ach .adesc{ color:var(--cream); opacity:.72; }
-  #achievements .ach .adesc b{ color:var(--gold); }
+  #shop .pwr .pname, #skins .skin .sname{ color:var(--cream); }
+  #shop .pwr .pdesc{ color:var(--cream); opacity:.72; }
   #achievements .lead{ color:var(--cream); opacity:.8; }
   #skins .skin.sel{ background:rgba(255,210,63,.14); border-color:var(--gold); }
   #shop .upBar .ud{ background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); }
@@ -246,14 +249,66 @@
   .skin .sbtn.owned{ background:var(--safe); color:var(--ink); }
   .skin .sbtn.sel{ background:var(--ink); color:var(--cream); }
   .skin .sbtn.cant{ background:#c4c4cc; color:#6a6a72; cursor:default; }
-  .achGrid{ display:flex; flex-direction:column; gap:9px; margin-top:6px; }
-  .ach{ display:flex; align-items:center; gap:11px; background:#fff; border:3px solid var(--ink); border-radius:14px; padding:9px 11px; box-shadow:3px 3px 0 var(--ink); }
-  .ach.locked{ opacity:.55; filter:grayscale(.6); }
-  .ach .aico{ font-size:28px; line-height:1; width:34px; text-align:center; }
-  .ach .ainfo{ flex:1; text-align:left; }
-  .ach .aname{ font-size:14px; font-weight:700; color:var(--ink); }
-  .ach .adesc{ font-size:11px; color:var(--ink); opacity:.8; line-height:1.2; }
-  .ach .astat{ font-size:18px; }
+  /* ---- Erfolge: Kachel-Raster, nach Schwierigkeit in Kapitel geteilt ---- */
+  .achSummary{ margin:2px 0 4px; }
+  .asRow{ display:flex; align-items:baseline; gap:6px; }
+  .asBig{ font-size:26px; font-weight:700; color:var(--gold); line-height:1; }
+  .asOf{ font-size:12px; font-weight:700; color:var(--cream); opacity:.75; letter-spacing:.5px; }
+  .asCoins{ margin-left:auto; font-size:11px; font-weight:700; color:var(--gold); }
+  .asBar{ height:9px; margin-top:6px; background:rgba(255,255,255,.10);
+    border:2px solid rgba(255,255,255,.18); border-radius:7px; overflow:hidden; }
+  .asBar i{ display:block; height:100%; border-radius:5px 0 0 5px;
+    background:linear-gradient(90deg,var(--safe),var(--gold)); transition:width .35s ease; }
+
+  .achTier{ margin-top:18px; }
+  /* Kapitel-Balken wie ein aufgeschlagenes Register: Linie drueber, Linie drunter */
+  .tierHead{ display:flex; align-items:center; gap:7px; padding:6px 2px; text-align:left;
+    border-top:3px solid var(--tc); border-bottom:3px solid var(--tc); }
+  .tierIco{ font-size:18px; line-height:1; }
+  .tierName{ font-size:12.5px; font-weight:700; letter-spacing:1.4px; color:var(--tc); }
+  .tierStars{ font-size:9.5px; letter-spacing:.5px; color:var(--tc); opacity:.7; }
+  .tierCount{ margin-left:auto; font-size:11px; font-weight:700; color:var(--cream);
+    background:rgba(255,255,255,.08); border:2px solid var(--tc); border-radius:9px; padding:1px 7px; }
+  .tierBar{ height:5px; margin:6px 0 3px; background:rgba(255,255,255,.10); border-radius:4px; overflow:hidden; }
+  .tierBar i{ display:block; height:100%; background:var(--tc); transition:width .3s ease; }
+  .tierHint{ font-size:10.5px; color:var(--cream); opacity:.55; text-align:left; margin-bottom:8px; }
+
+  .achGrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .ach{ position:relative; pointer-events:auto; cursor:pointer; font-family:inherit; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:2px;
+    min-height:104px; padding:13px 4px 8px; text-align:center;
+    background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.16); border-radius:14px;
+    transition:transform .06s, border-color .12s, background .12s; }
+  /* Farbkante oben zeigt, zu welcher Stufe die Kachel gehoert */
+  .ach::before{ content:''; position:absolute; left:0; right:0; top:0; height:5px; background:var(--tc); }
+  .ach .aico{ font-size:27px; line-height:1.05; }
+  .ach .aname{ font-size:10px; font-weight:700; line-height:1.15; color:var(--cream);
+    hyphens:auto; overflow-wrap:break-word; max-width:100%; }
+  .ach .arw{ font-size:9.5px; font-weight:700; color:var(--gold); margin-top:auto; }
+  .ach .astat{ position:absolute; top:8px; right:5px; font-size:10px; line-height:1; }
+  .ach .askin{ position:absolute; top:8px; left:5px; font-size:10px; line-height:1; }
+  .ach:active{ transform:translate(1px,1px); }
+  .ach.locked{ background:rgba(255,255,255,.03); }
+  .ach.locked::before{ opacity:.35; }
+  .ach.locked .aico{ filter:grayscale(1); opacity:.4; }
+  .ach.locked .aname{ opacity:.5; }
+  .ach.locked .arw{ opacity:.45; }
+  .ach.got{ background:rgba(255,255,255,.12); border-color:var(--tc); }
+  .ach.sel{ border-color:var(--cream); background:rgba(255,246,229,.18); box-shadow:0 0 0 2px rgba(255,246,229,.35); }
+
+  /* Details bleiben beim Scrollen unten stehen – auf der Kachel ist kein Platz dafuer */
+  .achDetail{ position:sticky; bottom:-2px; z-index:2; margin-top:14px;
+    display:flex; align-items:center; gap:10px; text-align:left; min-height:52px;
+    background:#16162e; border:3px solid rgba(255,255,255,.18); border-radius:14px; padding:8px 10px; }
+  .achDetail.on{ border-color:var(--tc); }
+  .achDetail .adHint{ font-size:11px; color:var(--cream); opacity:.55; line-height:1.25; }
+  .achDetail .adIco{ font-size:26px; line-height:1; }
+  .achDetail.on.locked .adIco{ filter:grayscale(1); opacity:.5; }
+  .achDetail .adTxt{ flex:1; }
+  .achDetail .adName{ font-size:13px; font-weight:700; color:var(--cream); }
+  .achDetail .adDesc{ font-size:10.5px; color:var(--cream); opacity:.72; line-height:1.25; }
+  .achDetail .adRw{ font-size:10.5px; font-weight:700; color:var(--gold); margin-top:1px; }
+  .achDetail .adStat{ font-size:16px; }
   #achievements .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
   #dialog.specialCaught .card{ background:var(--warn); border-color:var(--purple); box-shadow:8px 8px 0 var(--purple); }
   #dialog.specialCaught h2::before{ content:'\2605 '; }
@@ -357,8 +412,9 @@
   <div id="achievements" class="screen hidden">
     <div class="card">
       <h2 class="mtitle">&#127942; ERFOLGE</h2>
-      <p class="lead" style="font-size:12.5px;margin-bottom:6px;">Meistere die seltenen Special-Events und schalte exklusive Skins frei.</p>
+      <div id="achSummary" class="achSummary"></div>
       <div id="achList"></div>
+      <div id="achDetail" class="achDetail"></div>
     </div>
     <button class="btn go" id="achBack">ZUR&Uuml;CK</button>
   </div>
@@ -471,7 +527,7 @@
   window.addEventListener('resize', resize); resize();
 
   const INK='#1A1A2E';
-  const MARGIN=26, MAX_SPEED=205, PR=15;
+  const MAX_SPEED=205, PR=15;
   const ROAD_L=92, ROAD_R=92, ZONE_H=820, BASE_DENSITY=5;
   // Spielfeld-Grenzen: Spieler & Menge bleiben auf der Strasse zwischen den (breiten) Gebaeuden
   function playMinX(){ return ROAD_L+12; }
@@ -662,7 +718,6 @@
     coins:{col:'#FFD23F',name:'Geld'},
     calm:{col:'#2ECC40',name:'Ruhe'}
   };
-  const ITEM_KEYS=['shield','boost','magnet','hint','coins','calm'];
   // Item-Upgrades (Subway-Surfers-Stil): mit Münzen Stufen kaufen
   const UPGRADES=[
     {key:'shield',name:'Schild',icon:'🛡️',unit:'s',base:5,step:2,max:5,desc:'Unverwundbarkeit beim Aufsammeln'},
@@ -675,7 +730,7 @@
   function upVal(key){ const u=UPGRADES.find(x=>x.key===key); return u?u.base+upLvl(key)*u.step:0; }
   const UP_COSTS=[300,750,3000,8000,18000];
   function upCost(lvl){ return UP_COSTS[lvl]!=null?UP_COSTS[lvl]:UP_COSTS[UP_COSTS.length-1]; }
-  let shake=0, youHint=0, firstRound=true;
+  let shake=0, youHint=0;
   let rageTimer=0, rageMax=4.6, rageDrain=1, excuseSet=[], reactTimer=0, stareStill=0;
   let excusesRun=0, caughtRun=0, itemsRun=0, weatherRun={};   // Zähler für Erfolge pro Lauf
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
@@ -737,37 +792,46 @@
   let curSkin=SKINS[0];
 
   // ---------- achievements ----------
+  // Erfolge sind in fünf Schwierigkeitsstufen geteilt – von „läuft nebenbei mit“
+  // bis zur Königsdisziplin. tier auf dem Erfolg verweist auf diese Liste.
+  const ACH_TIERS=[
+    {tier:1,name:'LEICHTES PECH',icon:'\ud83c\udf40',col:'#2ECC40',hint:'Läuft beim Spielen fast von allein mit.'},
+    {tier:2,name:'ECHTES PECH',  icon:'\u26a1',col:'#FFB300',hint:'Dafür brauchst du ein paar Runden Übung.'},
+    {tier:3,name:'DICKES PECH',  icon:'\ud83d\udd25',col:'#FF7A45',hint:'Lange Läufe und eine ruhige Hand.'},
+    {tier:4,name:'SELTENES PECH',icon:'\ud83c\udfaf',col:'#19C3C3',hint:'Jedes Special einmal treffen – und überstehen.'},
+    {tier:5,name:'PECH-LEGENDE', icon:'\ud83d\udc51',col:'#7C5CFF',hint:'Die Königsdisziplin. Viel Glück. Oder Pech.'}
+  ];
   const ACHIEVEMENTS=[
-    {id:'first_special',name:'Im Rampenlicht',desc:'Erlebe dein erstes Special-Event.',icon:'🌟',coins:150},
-    {id:'survive_special',name:'Cool geblieben',desc:'Überstehe ein Special-Event mit der richtigen Ausrede.',icon:'😎',skin:'star',coins:300},
-    {id:'specials_3',name:'Chaos-Sammler',desc:'Erlebe 3 verschiedene Special-Typen.',icon:'🎲',coins:200},
-    {id:'specials_6',name:'Magnet für Ärger',desc:'Erlebe 6 verschiedene Special-Typen.',icon:'🧲',coins:400},
-    {id:'all_specials',name:'Pech-Legende',desc:'Erlebe alle Special-Typen – das gesamte Chaos.',icon:'👑',skin:'legend',coins:1500},
-    {id:'district_5',name:'Stadtbummler',desc:'Erreiche Viertel 5 in einem Lauf.',icon:'🏙️',coins:200},
-    {id:'district_10',name:'Pech-Marathon',desc:'Erreiche Viertel 10 in einem Lauf.',icon:'🏃',skin:'goldhut',coins:600},
-    {id:'score_1000',name:'Punktejäger',desc:'Knacke 1000 Punkte in einem Lauf.',icon:'💯',coins:300},
-    {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'🪙',coins:150},
-    {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'😰',coins:200},
-    {id:'district_15',name:'Stadtflucht',desc:'Erreiche Viertel 15 in einem Lauf.',icon:'🚀',coins:800},
-    {id:'district_20',name:'Unaufhaltbar',desc:'Erreiche Viertel 20 in einem Lauf.',icon:'🌪️',coins:1200},
-    {id:'score_2500',name:'Punkte-Profi',desc:'Knacke 2500 Punkte in einem Lauf.',icon:'🎯',coins:500},
-    {id:'score_5000',name:'Punkte-Legende',desc:'Knacke 5000 Punkte in einem Lauf.',icon:'💎',coins:1000},
-    {id:'coins_run_30',name:'Goldrausch',desc:'Sammle 30 Münzen in einem einzigen Lauf.',icon:'🤑',coins:300},
-    {id:'excuse_5',name:'Silberzunge',desc:'Rede dich 5-mal in einem Lauf richtig heraus.',icon:'🗣️',coins:400},
-    {id:'no_excuse_5',name:'Sauber unterwegs',desc:'Erreiche Viertel 5, ohne erwischt zu werden.',icon:'🕊️',coins:500},
-    {id:'bribe_1',name:'Schmiergeld',desc:'Besteche die Menge zum ersten Mal.',icon:'🤝',coins:150},
-    {id:'listen_1',name:'Lauscher',desc:'Belausche die Menge zum ersten Mal.',icon:'👂',coins:150},
-    {id:'mini_win_1',name:'Straßenkämpfer',desc:'Gewinne dein erstes Minigame.',icon:'🥇',coins:200},
-    {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 4 Minigames mindestens einmal.',icon:'👾',coins:800},
-    {id:'items_run_5',name:'Staubsauger',desc:'Sammle 5 Power-ups in einem Lauf.',icon:'🧹',coins:300},
-    {id:'buy_skin_1',name:'Neuer Look',desc:'Kaufe deinen ersten Skin im Shop.',icon:'🛍️',coins:150},
-    {id:'skins_10',name:'Kleiderschrank',desc:'Besitze 10 Skins.',icon:'👗',coins:500},
-    {id:'rich_1000',name:'Sparschwein',desc:'Habe 1000 Münzen gleichzeitig.',icon:'🐖',coins:200},
-    {id:'rich_5000',name:'Dagobert',desc:'Habe 5000 Münzen gleichzeitig.',icon:'💰',coins:800},
-    {id:'upgrade_1',name:'Tuning',desc:'Kaufe dein erstes Item-Upgrade.',icon:'🔧',coins:200},
-    {id:'upgrade_max',name:'Vollausbau',desc:'Bringe ein Item-Upgrade auf Maximum.',icon:'⚙️',coins:600},
-    {id:'weather_run',name:'Wetterfest',desc:'Erlebe Regen, Schnee und Nebel in einem Lauf.',icon:'🌦️',coins:400},
-    {id:'death_5',name:'Stehaufmännchen',desc:'Werde insgesamt 5-mal geschnappt.',icon:'🎢',coins:250}
+    {id:'first_special',name:'Im Rampenlicht',desc:'Erlebe dein erstes Special-Event.',icon:'🌟',coins:150,tier:1},
+    {id:'survive_special',name:'Cool geblieben',desc:'Überstehe ein Special-Event mit der richtigen Ausrede.',icon:'😎',skin:'star',coins:300,tier:2},
+    {id:'specials_3',name:'Chaos-Sammler',desc:'Erlebe 3 verschiedene Special-Typen.',icon:'🎲',coins:200,tier:2},
+    {id:'specials_6',name:'Magnet für Ärger',desc:'Erlebe 6 verschiedene Special-Typen.',icon:'🧲',coins:400,tier:3},
+    {id:'all_specials',name:'Pech-Legende',desc:'Erlebe alle Special-Typen – das gesamte Chaos.',icon:'👑',skin:'legend',coins:1500,tier:5},
+    {id:'district_5',name:'Stadtbummler',desc:'Erreiche Viertel 5 in einem Lauf.',icon:'🏙️',coins:200,tier:1},
+    {id:'district_10',name:'Pech-Marathon',desc:'Erreiche Viertel 10 in einem Lauf.',icon:'🏃',skin:'goldhut',coins:600,tier:2},
+    {id:'score_1000',name:'Punktejäger',desc:'Knacke 1000 Punkte in einem Lauf.',icon:'💯',coins:300,tier:1},
+    {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'🪙',coins:150,tier:1},
+    {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'😰',coins:200,tier:2},
+    {id:'district_15',name:'Stadtflucht',desc:'Erreiche Viertel 15 in einem Lauf.',icon:'🚀',coins:800,tier:3},
+    {id:'district_20',name:'Unaufhaltbar',desc:'Erreiche Viertel 20 in einem Lauf.',icon:'🌪️',coins:1200,tier:5},
+    {id:'score_2500',name:'Punkte-Profi',desc:'Knacke 2500 Punkte in einem Lauf.',icon:'🎯',coins:500,tier:2},
+    {id:'score_5000',name:'Punkte-Legende',desc:'Knacke 5000 Punkte in einem Lauf.',icon:'💎',coins:1000,tier:3},
+    {id:'coins_run_30',name:'Goldrausch',desc:'Sammle 30 Münzen in einem einzigen Lauf.',icon:'🤑',coins:300,tier:2},
+    {id:'excuse_5',name:'Silberzunge',desc:'Rede dich 5-mal in einem Lauf richtig heraus.',icon:'🗣️',coins:400,tier:2},
+    {id:'no_excuse_5',name:'Sauber unterwegs',desc:'Erreiche Viertel 5, ohne erwischt zu werden.',icon:'🕊️',coins:500,tier:3},
+    {id:'bribe_1',name:'Schmiergeld',desc:'Besteche die Menge zum ersten Mal.',icon:'🤝',coins:150,tier:1},
+    {id:'listen_1',name:'Lauscher',desc:'Belausche die Menge zum ersten Mal.',icon:'👂',coins:150,tier:1},
+    {id:'mini_win_1',name:'Straßenkämpfer',desc:'Gewinne dein erstes Minigame.',icon:'🥇',coins:200,tier:2},
+    {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 4 Minigames mindestens einmal.',icon:'👾',coins:800,tier:3},
+    {id:'items_run_5',name:'Staubsauger',desc:'Sammle 5 Power-ups in einem Lauf.',icon:'🧹',coins:300,tier:2},
+    {id:'buy_skin_1',name:'Neuer Look',desc:'Kaufe deinen ersten Skin im Shop.',icon:'🛍️',coins:150,tier:1},
+    {id:'skins_10',name:'Kleiderschrank',desc:'Besitze 10 Skins.',icon:'👗',coins:500,tier:3},
+    {id:'rich_1000',name:'Sparschwein',desc:'Habe 1000 Münzen gleichzeitig.',icon:'🐖',coins:200,tier:1},
+    {id:'rich_5000',name:'Dagobert',desc:'Habe 5000 Münzen gleichzeitig.',icon:'💰',coins:800,tier:3},
+    {id:'upgrade_1',name:'Tuning',desc:'Kaufe dein erstes Item-Upgrade.',icon:'🔧',coins:200,tier:1},
+    {id:'upgrade_max',name:'Vollausbau',desc:'Bringe ein Item-Upgrade auf Maximum.',icon:'⚙️',coins:600,tier:3},
+    {id:'weather_run',name:'Wetterfest',desc:'Erlebe Regen, Schnee und Nebel in einem Lauf.',icon:'🌦️',coins:400,tier:2},
+    {id:'death_5',name:'Stehaufmännchen',desc:'Werde insgesamt 5-mal geschnappt.',icon:'🎢',coins:250,tier:1}
   ];
 
   // ---------- Special-Event-Katalog (Event + Achievement + Belohnungs-Skin + Death-Stil) ----------
@@ -843,7 +907,7 @@
       if(!EVENTS[d.key] && d.label){ EVENTS[d.key]={label:d.label,kind:d.kind,boom:d.boom,vis:d.vis,fall:false,special:true,snd:d.snd,subText:d.subText}; }
       const ev=EVENTS[d.key]; if(ev){ ev.death=d.death; if(d.mob) ev.mob=d.mob; if(d.mini) ev.mini=d.mini; ev.aKey=d.key; }
       if(SPECIAL.indexOf(d.key)<0) SPECIAL.push(d.key);
-      if(d.ach && !ACHIEVEMENTS.some(a=>a.id==='sp_'+d.key)) ACHIEVEMENTS.push({id:'sp_'+d.key,name:d.ach.name,desc:d.ach.desc,icon:d.ach.icon,skin:'sk_'+d.key,coins:300});
+      if(d.ach && !ACHIEVEMENTS.some(a=>a.id==='sp_'+d.key)) ACHIEVEMENTS.push({id:'sp_'+d.key,name:d.ach.name,desc:d.ach.desc,icon:d.ach.icon,skin:'sk_'+d.key,coins:300,tier:4});
       if(d.skin && !SKINS.some(s=>s.id==='sk_'+d.key)) SKINS.push(Object.assign({id:'sk_'+d.key,unlock:'sp_'+d.key},d.skin));
     }
   }
@@ -1164,12 +1228,12 @@
   const tutorialEl=document.getElementById('tutorial');
   function tutorialOpen(){ return !tutorialEl.classList.contains('hidden'); }
   function startGame(){
-    score=0; streetsCleared=0; bestNerve=0; suspicion=0; firstRound=true;
+    score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); updateHUD();
     hide('menu'); hide('gameover'); hide('dialog'); hide('reaction');
     show('tutorial'); state=ST.MENU;
   }
-  function beginPlay(){ firstRound=false; hide('tutorial'); state=ST.PLAY; SND.setTrack('game'); armGuaranteed(); lastT=performance.now(); }
+  function beginPlay(){ hide('tutorial'); state=ST.PLAY; SND.setTrack('game'); armGuaranteed(); lastT=performance.now(); }
   // Spezial-Ticket: garantiert ein Special-Event innerhalb der ersten 2 Viertel dieser Runde.
   function armGuaranteed(){
     guaranteedActive=false;
@@ -1554,23 +1618,91 @@
       card.appendChild(btn); grid.appendChild(card); drawSkinPreview(cnv,sk);
     }
   }
+  let achSel='';
+  function achRewardText(a){
+    const rw=[]; if(a.coins) rw.push(a.coins+' 🪙');
+    const sk=a.skin?(SKINS.find(s=>s.id===a.skin)||{}).name:'';
+    if(sk) rw.push('Skin „'+sk+'“');
+    return rw.join(' + ');
+  }
+  // Auf den kleinen Kacheln ist kein Platz für die Beschreibung – die steht in der Leiste
+  // am unteren Rand und wechselt, sobald man eine Kachel antippt.
+  function showAchDetail(a){
+    const el=document.getElementById('achDetail'); if(!el) return;
+    if(!a){ el.className='achDetail';
+      el.innerHTML='<div class="adHint">Tippe einen Erfolg an – hier steht dann, wie du ihn bekommst.</div>'; return; }
+    const got=!!(save.achievements&&save.achievements[a.id]);
+    const t=ACH_TIERS.find(x=>x.tier===(a.tier||1))||ACH_TIERS[0];
+    const rw=achRewardText(a);
+    el.className='achDetail on'+(got?'':' locked');
+    el.style.setProperty('--tc',t.col);
+    el.innerHTML='<div class="adIco">'+a.icon+'</div><div class="adTxt">'
+      +'<div class="adName">'+a.name+'</div><div class="adDesc">'+a.desc+'</div>'
+      +(rw?'<div class="adRw">Belohnung: '+rw+'</div>':'')
+      +'</div><div class="adStat">'+(got?'✅':'🔒')+'</div>';
+  }
+  // Fredoka ist nicht auf jedem Gerät verfügbar, und die Ersatzschrift ist breiter. Namen,
+  // deren längstes Wort nicht in die Kachel passt, werden deshalb gemessen und verkleinert –
+  // sonst bricht die Schrift mitten im Wort um.
+  function fitAchNames(list){
+    const names=list.querySelectorAll('.aname'); if(!names.length) return;
+    const maxW=names[0].clientWidth; if(!maxW) return;
+    const fam=getComputedStyle(names[0]).fontFamily;
+    ctx.save();
+    for(const n of names){
+      const words=n.textContent.replace(/-/g,'- ').split(/\s+/);
+      let fs=10;
+      while(fs>7){
+        ctx.font='700 '+fs+'px '+fam;
+        if(words.every(w=>ctx.measureText(w).width<=maxW)) break;
+        fs-=0.5;
+      }
+      if(fs<10) n.style.fontSize=fs+'px';
+    }
+    ctx.restore();
+  }
   function renderAchievements(){
     const list=document.getElementById('achList'); if(!list) return;
-    list.innerHTML='';
-    const grid=document.createElement('div'); grid.className='achGrid';
-    for(const a of ACHIEVEMENTS){
-      const got=!!(save.achievements&&save.achievements[a.id]);
-      const row=document.createElement('div'); row.className='ach'+(got?'':' locked');
-      const sk=a.skin?(SKINS.find(s=>s.id===a.skin)||{}).name:'';
-      const rw=[];
-      if(a.coins) rw.push(a.coins+' 🪙');
-      if(sk) rw.push('Skin „'+sk+'“');
-      row.innerHTML='<div class="aico">'+a.icon+'</div><div class="ainfo"><div class="aname">'+a.name+'</div>'
-        +'<div class="adesc">'+a.desc+(rw.length?(' <b>Belohnung: '+rw.join(' + ')+'</b>'):'')+'</div></div>'
-        +'<div class="astat">'+(got?'✅':'🔒')+'</div>';
-      grid.appendChild(row);
+    list.innerHTML=''; achSel='';
+    let doneAll=0, total=0, earned=0;
+    for(const t of ACH_TIERS){
+      const items=ACHIEVEMENTS.filter(a=>(a.tier||1)===t.tier);
+      if(!items.length) continue;
+      let done=0;
+      for(const a of items){ if(save.achievements&&save.achievements[a.id]){ done++; earned+=a.coins||0; } }
+      doneAll+=done; total+=items.length;
+      const sec=document.createElement('div'); sec.className='achTier'; sec.style.setProperty('--tc',t.col);
+      sec.innerHTML='<div class="tierHead"><span class="tierIco">'+t.icon+'</span>'
+        +'<span class="tierName">'+t.name+'</span>'
+        +'<span class="tierStars">'+'★'.repeat(t.tier)+'☆'.repeat(5-t.tier)+'</span>'
+        +'<span class="tierCount">'+done+'/'+items.length+'</span></div>'
+        +'<div class="tierBar"><i style="width:'+Math.round(done/items.length*100)+'%"></i></div>'
+        +'<div class="tierHint">'+t.hint+'</div>';
+      const grid=document.createElement('div'); grid.className='achGrid';
+      for(const a of items){
+        const got=!!(save.achievements&&save.achievements[a.id]);
+        const b=document.createElement('button'); b.type='button'; b.className='ach '+(got?'got':'locked');
+        b.innerHTML='<div class="aico">'+a.icon+'</div><div class="aname">'+a.name+'</div>'
+          +(a.coins?'<div class="arw">'+a.coins+' 🪙</div>':'')
+          +'<div class="astat">'+(got?'✅':'🔒')+'</div>'
+          +(a.skin?'<div class="askin">👕</div>':'');
+        b.onclick=()=>{
+          const prev=list.querySelector('.ach.sel'); if(prev) prev.classList.remove('sel');
+          if(achSel===a.id){ achSel=''; showAchDetail(null); }
+          else { achSel=a.id; b.classList.add('sel'); showAchDetail(a); }
+          SND.play('click');
+        };
+        grid.appendChild(b);
+      }
+      sec.appendChild(grid); list.appendChild(sec);
     }
-    list.appendChild(grid);
+    const sum=document.getElementById('achSummary');
+    if(sum) sum.innerHTML='<div class="asRow"><span class="asBig">'+doneAll+'</span>'
+      +'<span class="asOf">von '+total+' Erfolgen</span>'
+      +'<span class="asCoins">'+earned+' 🪙 kassiert</span></div>'
+      +'<div class="asBar"><i style="width:'+(total?Math.round(doneAll/total*100):0)+'%"></i></div>';
+    showAchDetail(null);
+    fitAchNames(list);
   }
   function updateZoneHUD(){ const z=currentZone(player.y); if(z&&z.name!==lastZoneName){ document.getElementById('scene').textContent=z.name; lastZoneName=z.name; } }
   function setSusBar(){ const f=document.getElementById('susFill'); f.style.width=suspicion+'%';
@@ -2656,13 +2788,6 @@
       ctx.fillText(z.name.toUpperCase(),W/2,by);
     }
   }
-  function drawExit(){
-    ctx.fillStyle='#1ca233'; rr(W/2-86,18,172,42,12); ctx.fillStyle='#1ca233'; ctx.fill();
-    ctx.lineWidth=4; ctx.strokeStyle=INK; ctx.stroke();
-    ctx.fillStyle='#FFF6E5'; ctx.font='700 18px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('STADTGRENZE',W/2,39);
-    ctx.fillStyle='#FFF6E5'; ctx.beginPath(); ctx.moveTo(W/2,2); ctx.lineTo(W/2-9,16); ctx.lineTo(W/2+9,16); ctx.closePath(); ctx.fill();
-  }
   function drawStick(){
     if(!stick.active) return;
     ctx.lineWidth=4; ctx.strokeStyle='rgba(26,26,46,.4)'; ctx.beginPath(); ctx.arc(stick.ox,stick.oy,40,0,6.283); ctx.stroke();
@@ -3278,14 +3403,15 @@
   }
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
-  document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); firstRound=false; score=0; streetsCleared=0; bestNerve=0; suspicion=0;
+  document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };
   document.getElementById('skinsBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('skins'); updateCoinUI(); updateMenuSkin(); show('menu'); };
-  document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderAchievements(); hide('menu'); show('achievements'); };
+  // erst einblenden, dann rendern: fitAchNames() braucht die echte Kachelbreite
+  document.getElementById('achBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('menu'); show('achievements'); renderAchievements(); };
   document.getElementById('achBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('achievements'); show('menu'); };
   const nameInput=document.getElementById('nameInput');
   nameInput.value=save.playerName||'';
