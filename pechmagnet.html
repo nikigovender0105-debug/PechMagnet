@@ -135,6 +135,8 @@
   .chTitle{ font-size:15px; font-weight:700; color:var(--gold); letter-spacing:1px; }
   .chapterCard .boardTitle{ margin-top:6px; color:var(--teal); }
   .chapterCard .board{ max-height:clamp(44px,10vh,96px); overflow-y:auto; touch-action:pan-y; pointer-events:auto; }
+  /* Leere Bestenliste steht im Menü auf dunklem Grund – dort braucht sie helle Schrift. */
+  .chapterCard .bempty{ color:var(--cream); }
   .battleBtn{ position:relative; z-index:1; pointer-events:auto; cursor:pointer; width:100%; flex-shrink:0;
     font-family:inherit; font-weight:700; font-size:26px; color:#fff; letter-spacing:1px;
     -webkit-text-stroke:2.5px var(--ink); paint-order:stroke fill;
@@ -647,7 +649,7 @@
   const ST={MENU:0,PLAY:1,CAUGHT:2,REACT:3,OVER:4,MINI:5,DEATH:6};
   let state=ST.MENU;
   let score=0,highscore=0,streetsCleared=0,bestNerve=0,coinsRun=0;
-  let zones=[], camY=0, topGenY=0, bottomY=0, lastZone=null, lastZoneName='', bestY=0, confrontMode=false, bumpCD=0;
+  let zones=[], camY=0, topGenY=0, bottomY=0, lastZone=null, lastZoneName='', bestY=0, bestZoneY=0, confrontMode=false, bumpCD=0;
   let suspicion=0, susLocked=false, phase='calm', chaosTimer=2.6, alarmTimer=0, currentEvent=null;
   let player={x:0,y:0,vx:0,vy:0,bob:0,moving:false,spd:0};
   let npcs=[], bursts=[], coins=[];
@@ -1003,6 +1005,9 @@
     function tick(){
       if(!ctx||!trk) return;
       const T=trk.tempo;
+      // Nach einem Tab-/App-Wechsel wird der Timer gedrosselt und nextTime liegt weit in der
+      // Vergangenheit – ohne Resync würden alle verpassten Schritte auf einmal losgehen.
+      if(nextTime<ctx.currentTime-T) nextTime=ctx.currentTime+0.06;
       while(nextTime<ctx.currentTime+0.12){
         // Offbeats leicht verzögern = Shuffle/Swing-Groove
         const sw=(step%2===1)?T*(trk.swing||0):0, tt=nextTime+sw;
@@ -1128,7 +1133,8 @@
   function spawnZoneObstacle(z){
     if(!z.obsDef) return;
     if(Math.random()<0.78){
-      const gapW=Math.max(80, (W-ROAD_L-ROAD_R)*0.42);
+      const span=(W-ROAD_R-12)-(ROAD_L+12);
+      const gapW=Math.min(Math.max(80,span*0.42),span);   // Durchgang passt auch auf schmalen Displays auf die Straße
       const gapX=rand(ROAD_L+12, W-ROAD_R-12-gapW);
       const y=rand(z.y0+ZONE_H*0.25, z.y1-ZONE_H*0.22);
       obstacles.push({type:z.obsDef.type,label:z.obsDef.label,kind:z.obsDef.kind,y:y,gapX:gapX,gapW:gapW,hit:false});
@@ -1146,7 +1152,7 @@
     addZoneAbove();
     generateUpTo(player.y - H*1.8);
     camY=player.y-H*0.6;
-    lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y;
+    lastZone=currentZone(player.y); lastZoneName=''; bestY=player.y; bestZoneY=lastZone?lastZone.y0:player.y;
     phase='calm'; currentEvent=null; alarmTimer=0; confrontMode=false; specialMode=false; specialTimer=0; specialAnimT=0; caughtWasSpecial=false; bumpCD=0; susLocked=false; suspicion=0;
     guaranteedActive=false; updateTicketHUD();
     spawnProtect=SPAWN_PROTECT; dust=[]; nearMiss=false; speedBuff=0; currentSpecialKey=''; caughtWasSpecial=false; updateBuffHUD(); updateMagnetHUD(); updateHintHUD();
@@ -1155,6 +1161,8 @@
   }
 
   // ---------- flow ----------
+  const tutorialEl=document.getElementById('tutorial');
+  function tutorialOpen(){ return !tutorialEl.classList.contains('hidden'); }
   function startGame(){
     score=0; streetsCleared=0; bestNerve=0; suspicion=0; firstRound=true;
     resetWorld(); updateHUD();
@@ -1182,7 +1190,7 @@
     const roll=Math.random();
     // ~4.5% sehr seltenes Special-Event (direkte Befragung), ~6% seltenes Großereignis
     if(roll<0.045){ triggerSpecial(pick(SPECIAL)); return; }
-    currentEvent=EVENTS[(roll<0.105)?pick(RARE_FREEZE):pick(z.events)];
+    currentEvent=EVENTS[(roll<0.105)?pick(RARE_FREEZE):pick(z.events)]; currentSpecialKey='';
     phase='alarm'; alarmTimer=d.alarmDur+1.8; stareStill=player.moving?0:0.4;
     const bx=clamp(player.x+rand(-90,90),playMinX(),playMaxX());
     const by=clamp(player.y+rand(-110,40),z.y0+30,z.y1-20);
@@ -1328,6 +1336,9 @@
   };
   function startMinigame(){
     state=ST.MINI;
+    // Das Special ist mit dem Minigame abgehandelt – sonst hält specialMode an und die
+    // nächste normale Befragung würde fälschlich als Special gewertet.
+    specialMode=false;
     const def=MINI_DEFS[(currentEvent&&currentEvent.mini)||'armwrestle']||MINI_DEFS.armwrestle;
     if(def.mode==='duel'){
       mini={def:def,mode:'duel',phase:'wait',t:0,wait:rand(1.4,3.2),react:Math.max(0.3,0.6-streetsCleared*0.012),prog:1};
@@ -1582,6 +1593,11 @@
   function endStick(e){ if(stick.active&&(e.pointerId===stick.id||e.type==='pointercancel')){ stick.active=false; stick.id=null; } }
   cv.addEventListener('pointerup',endStick); cv.addEventListener('pointercancel',endStick); cv.addEventListener('pointerleave',endStick);
   const keys={}; window.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true); window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+  // Fokusverlust (Alt-Tab, App in den Hintergrund): gedrückte Tasten und Stick freigeben,
+  // sonst kommt kein keyup/pointerup mehr an und die Figur läuft von allein weiter.
+  function releaseInput(){ for(const k in keys) keys[k]=false; stick.active=false; stick.id=null; }
+  window.addEventListener('blur',releaseInput);
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) releaseInput(); });
   function readInput(){
     let dx=0,dy=0;
     if(stick.active){ dx=stick.x-stick.ox; dy=stick.y-stick.oy; const len=Math.hypot(dx,dy),max=70;
@@ -1612,7 +1628,9 @@
     if(player.y<bestY){ score+=Math.floor((bestY-player.y)*0.15); bestY=player.y; }
     const cz=currentZone(player.y);
     if(cz && cz!==lastZone){
-      if(lastZone && cz.y0<lastZone.y0) districtCrossed();
+      // Nur ein wirklich neu erreichtes Viertel zählt: Zurücklaufen und erneutes
+      // Überqueren derselben Grenze darf Punkte und Viertel nicht doppelt geben.
+      if(lastZone && cz.y0<bestZoneY){ bestZoneY=cz.y0; districtCrossed(); }
       lastZone=cz;
       if(cz.name!==lastZoneName){ document.getElementById('scene').textContent=cz.name; lastZoneName=cz.name; }
     }
@@ -3235,7 +3253,9 @@
   let lastT=performance.now();
   function loop(now){ let dt=(now-lastT)/1000; lastT=now; if(dt>0.05) dt=0.05;
     // Attract-Mode: im Menü zieht die Stadt langsam vorbei
-    if(state===ST.MENU && zones.length && !reduceMotion){
+    // Nicht während des Tutorials scrollen – sonst wandert die Kamera vom Startpunkt weg
+    // und die Kulisse unter der Figur wird nach einer Weile weggeschnitten.
+    if(state===ST.MENU && zones.length && !reduceMotion && !tutorialOpen()){
       camY-=dt*26; generateUpTo(camY-H*1.2); cullBehind(camY+H+600);
     }
     advanceAmbient(dt); update(dt); updateCaught(dt); updateMini(dt); updateDeath(dt); render(); setAmbientHUD(); requestAnimationFrame(loop); }
