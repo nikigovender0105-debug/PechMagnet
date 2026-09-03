@@ -79,7 +79,7 @@
     filter:drop-shadow(0 5px 0 rgba(26,26,46,.28)); }
   @keyframes logoWob{ 0%,100%{transform:rotate(-3.5deg) scale(1);} 50%{transform:rotate(-1deg) scale(1.035);} }
   .logo small{ display:block; font-size:18px; color:var(--purple); -webkit-text-stroke:2px var(--ink); transform:rotate(2deg); }
-  .logoMag{ display:inline-block; -webkit-text-stroke:0; filter:none; font-size:38px;
+  .logoMag{ display:inline-block; -webkit-text-stroke:0; filter:none; width:38px; height:38px;
     animation:magSwing 1.7s ease-in-out infinite alternate; transform-origin:50% 0; }
   @keyframes magSwing{ from{transform:rotate(-14deg);} to{transform:rotate(10deg);} }
   #menu::before, #shop::before, #skins::before, #achievements::before{
@@ -228,6 +228,24 @@
   #miniTime{ font-weight:700; font-size:20px; color:var(--ink); margin-bottom:8px; }
   #ticketChip{ background:var(--purple); color:var(--cream); font-size:13px; padding:4px 10px; box-shadow:3px 3px 0 var(--ink); animation:tkpulse 1s infinite alternate; }
   @keyframes tkpulse{ from{transform:translateY(0) rotate(-2deg);} to{transform:translateY(-2px) rotate(2deg);} }
+  /* ---- eigenes Icon-Set statt Emojis ---- */
+  #iconset{ position:absolute; width:0; height:0; overflow:hidden; }
+  #iconset symbol{ fill:none; stroke:#1A1A2E; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .ic{ display:inline-block; width:1em; height:1em; vertical-align:-.16em; flex:none; overflow:visible; }
+  .ic.lg{ width:1.35em; height:1.35em; }
+  .chip .ic{ vertical-align:-.2em; }
+  .plate .ic, .mtitle .ic{ width:1.22em; height:1.22em; vertical-align:-.26em; }
+  .chTitle .ic, .atIco .ic{ vertical-align:-.18em; }
+  .navb>.ic{ width:26px; height:26px; }
+  .mplate>.ic{ width:19px; height:19px; vertical-align:-.22em; }
+  .battleBtn>.ic{ width:24px; height:24px; vertical-align:-.14em; }
+  .tbtn .ic{ width:15px; height:15px; vertical-align:-.16em; }
+  .atIco>.ic{ width:30px; height:30px; }
+  .ach .astat .ic, .ach .askin .ic{ width:13px; height:13px; }
+  .ach .arw .ic{ width:1.25em; height:1.25em; vertical-align:-.3em; }
+  .tierStars .ic{ width:11px; height:11px; vertical-align:-.1em; margin-right:-1px; }
+  .achDetail .adStat .ic{ width:18px; height:18px; }
+  .asCoins .ic, .adRw .ic, .pbtn .ic{ width:1.2em; height:1.2em; vertical-align:-.28em; }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
   #shop .card, #skins .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
@@ -380,7 +398,10 @@
   .achDetail .adStat{ font-size:16px; }
   #achievements .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
   #dialog.specialCaught .card{ background:var(--warn); border-color:var(--purple); box-shadow:8px 8px 0 var(--purple); }
-  #dialog.specialCaught h2::before{ content:'\2605 '; }
+  /* Stern vor dem Special-Titel: rot wie die Ueberschrift, auf der gelben Karte waere Gold unsichtbar */
+  #dialog.specialCaught h2::before{ content:''; display:inline-block; width:.8em; height:.8em; margin-right:.18em;
+    vertical-align:-.02em; background:no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z' fill='%23FF3B30' stroke='%231A1A2E' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E"); }
   #achToast{ position:absolute; top:14px; left:50%; transform:translate(-50%,-160%); z-index:80; pointer-events:none;
     display:flex; align-items:center; gap:11px; width:calc(100% - 28px); max-width:380px;
     background:var(--ink); color:var(--cream); border:3px solid var(--gold); border-radius:16px; padding:10px 13px;
@@ -400,6 +421,88 @@
 </style>
 </head>
 <body>
+<!-- Eigenes Icon-Set: ersetzt alle Emojis. Inline-SVG, damit die App offline
+     ohne Bilddateien auskommt und die Symbole auf jedem Geraet gleich aussehen. -->
+<svg id="iconset" aria-hidden="true" focusable="false"><defs>
+<g id="i-defaults"></g>
+<symbol id="i-coin" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#FFB300"/><circle cx="16" cy="16" r="6.8" fill="#FFD23F" stroke="none"/><path d="M9.6 12.2a8.6 8.6 0 013.6-3.4" stroke="#FFF6E5" stroke-width="2.4"/></symbol>
+<symbol id="i-moneybag" viewBox="0 0 32 32"><path d="M12 9h8l3.5 8.5A7.5 7.5 0 0116 27a7.5 7.5 0 01-7.5-9.5z" fill="#FFB300"/><path d="M11.5 9c1-2.2 2.4-3.6 4.5-4.4 2.1.8 3.5 2.2 4.5 4.4" fill="#FFD23F"/><path d="M16 14v7M13.6 15.6h4a1.9 1.9 0 010 3.8h-3a1.9 1.9 0 000 3.8h4" stroke-width="1.9"/></symbol>
+<symbol id="i-gem" viewBox="0 0 32 32"><path d="M9 4h14l7 9-14 15L2 13z" fill="#19C3C3"/><path d="M2 13h28M9 4L6 13l10 15M23 4l3 9-10 15" stroke-width="1.9"/></symbol>
+<symbol id="i-hundred" viewBox="0 0 32 32"><path d="M4 12l3.5-2.5V23" stroke="#E63946" stroke-width="3.2"/><ellipse cx="16" cy="16.5" rx="4.4" ry="6.5" stroke="#E63946" stroke-width="3"/><ellipse cx="26.5" cy="16.5" rx="4.4" ry="6.5" stroke="#E63946" stroke-width="3"/><path d="M2 27h28" stroke="#E63946" stroke-width="2.6"/></symbol>
+<symbol id="i-ticket" viewBox="0 0 32 32"><path d="M4 10h24v5a3 3 0 000 6v5H4v-5a3 3 0 000-6z" fill="#FF5DA2"/><path d="M18 11v3M18 18v3M18 25v2" stroke="#FFF6E5" stroke-width="2" stroke-dasharray="0.1 4"/></symbol>
+<symbol id="i-shield" viewBox="0 0 32 32"><path d="M16 4l10 3.5v9c0 6.3-4.2 11-10 12.5C10.2 27.5 6 22.8 6 16.5v-9z" fill="#3A86FF"/><path d="M16 10.5v11" stroke="#FFF6E5" stroke-width="2.6"/><path d="M11 16h10" stroke="#FFF6E5" stroke-width="2.6"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 32 32"><path d="M18.5 3L7 18h7l-1.5 11L25 14h-7z" fill="#FFD23F"/></symbol>
+<symbol id="i-magnet" viewBox="0 0 32 32"><path d="M6 27V15a10 10 0 0120 0v12h-7V15a3 3 0 00-6 0v12z" fill="#E63946"/><path d="M6 21.5h7V27H6zM19 21.5h7V27h-7z" fill="#BFE3FF"/></symbol>
+<symbol id="i-search" viewBox="0 0 32 32"><circle cx="14" cy="13.5" r="8" fill="#19C3C3"/><circle cx="14" cy="13.5" r="4.2" fill="#FFF6E5" stroke="none"/><path d="M20 20l7 7" stroke="#19C3C3" stroke-width="3.6"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 32 32"><path d="M8 3h16v10a8 8 0 01-16 0z" fill="#FFB300"/><path d="M8 6H3.5v2.5A6.5 6.5 0 0010 15M24 6h4.5v2.5A6.5 6.5 0 0122 15" stroke="#FFB300" stroke-width="2.8"/><path d="M13.5 21h5v4h-5z" fill="#FFD23F"/><rect x="7.5" y="24.5" width="17" height="4.5" rx="1.8" fill="#FFD23F"/></symbol>
+<symbol id="i-cart" viewBox="0 0 32 32"><path d="M2 5h4.5l4 14H24" stroke="#FFF6E5" stroke-width="2.8"/><path d="M8 9h22l-3.5 8.5H11z" fill="#7C5CFF"/><circle cx="12.5" cy="25.5" r="3" fill="#FFF6E5"/><circle cx="23" cy="25.5" r="3" fill="#FFF6E5"/></symbol>
+<symbol id="i-shirt" viewBox="0 0 32 32"><path d="M12 5l4 3 4-3 8 4-3 6-3-1.2V27H10V13.8L7 15 4 9z" fill="#19C3C3"/></symbol>
+<symbol id="i-play" viewBox="0 0 32 32"><path d="M8 5l19 11L8 27z" fill="#FFF6E5"/></symbol>
+<symbol id="i-sound-on" viewBox="0 0 32 32"><path d="M5 12h5l7-6v20l-7-6H5z" fill="#FFF6E5"/><path d="M21 11.5a7 7 0 010 9M25 8a12 12 0 010 16" stroke="#FFF6E5" stroke-width="2.8"/></symbol>
+<symbol id="i-sound-off" viewBox="0 0 32 32"><path d="M5 12h5l7-6v20l-7-6H5z" fill="#FFF6E5"/><path d="M21 12l7 8M28 12l-7 8" stroke="#E63946" stroke-width="3"/></symbol>
+<symbol id="i-city" viewBox="0 0 32 32"><path d="M4 27V13h8v14z" fill="#19C3C3"/><path d="M12 27V6h9v21z" fill="#3A86FF"/><path d="M21 27V16h7v11z" fill="#7C5CFF"/><path d="M7 17h2M7 21h2M15 10h3M15 15h3M15 20h3M24 20h2" stroke="#FFF6E5" stroke-width="2"/></symbol>
+<symbol id="i-speech" viewBox="0 0 32 32"><path d="M4 8a3 3 0 013-3h18a3 3 0 013 3v10a3 3 0 01-3 3h-9l-6 5v-5H7a3 3 0 01-3-3z" fill="#FFD23F"/><path d="M11 13h1M16 13h1M21 13h1" stroke-width="3"/></symbol>
+<symbol id="i-check" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5" fill="#2ECC40"/><path d="M9.5 16.5l4.5 4.5 8.5-9" stroke="#FFF6E5" stroke-width="3.2"/></symbol>
+<symbol id="i-lock" viewBox="0 0 32 32"><path d="M10 14v-3a6 6 0 0112 0v3" stroke="#FFB300" stroke-width="3.2"/><rect x="6" y="14" width="20" height="13" rx="3.5" fill="#FFB300"/><circle cx="16" cy="20" r="2.4" fill="#1A1A2E" stroke="none"/></symbol>
+<symbol id="i-ban" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#E63946"/><path d="M8 8l16 16" stroke="#FFF6E5" stroke-width="3.4"/></symbol>
+<symbol id="i-star" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="#FFD23F"/></symbol>
+<symbol id="i-star-o" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="none" stroke="#FFF6E5" stroke-width="2.2" opacity=".42"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="#FFD23F"/><path d="M27 3.5l1 3 3 1-3 1-1 3-1-3-3-1 3-1zM5 2.5l.8 2.3L8 5.5l-2.2.8L5 8.5l-.8-2.2L2 5.5l2.2-.7z" fill="#FFF6E5" stroke="none"/></symbol>
+<symbol id="i-sun" viewBox="0 0 32 32"><circle cx="16" cy="16" r="7.5" fill="#FFD23F"/><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6.3 6.3l2.8 2.8M22.9 22.9l2.8 2.8M25.7 6.3l-2.8 2.8M9.1 22.9l-2.8 2.8" stroke-width="2.6"/></symbol>
+<symbol id="i-sunset" viewBox="0 0 32 32"><circle cx="16" cy="17" r="6.5" fill="#FF7A45"/><path d="M16 5v3M6.5 8.5l2 2M25.5 8.5l-2 2" stroke-width="2.4"/><path d="M3 23h26M6 28h20" stroke-width="2.8"/></symbol>
+<symbol id="i-sunrise" viewBox="0 0 32 32"><circle cx="16" cy="18" r="6.5" fill="#FFD23F"/><path d="M3 24h26M7 29h18" stroke-width="2.8"/><path d="M11 10l5-5 5 5" stroke-width="2.6"/></symbol>
+<symbol id="i-moon" viewBox="0 0 32 32"><path d="M22 4a12 12 0 100 24A14 14 0 0122 4z" fill="#FFF6E5"/><path d="M26 6.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" fill="#FFD23F" stroke="none"/></symbol>
+<symbol id="i-rain" viewBox="0 0 32 32"><path d="M9 20a6 6 0 01.6-12A8 8 0 0125 10.5 5 5 0 0124 20z" fill="#9aa0a6"/><path d="M11 23l-1.5 5M17 23l-1.5 5M23 23l-1.5 5" stroke="#3A86FF" stroke-width="2.6"/></symbol>
+<symbol id="i-snow" viewBox="0 0 32 32"><path d="M16 2v28M4.9 8.5l22.2 15M27.1 8.5L4.9 23.5" stroke="#BFE3FF" stroke-width="2.9"/><path d="M12 5.2L16 9l4-3.8M12 26.8L16 23l4 3.8" stroke="#BFE3FF" stroke-width="2.5"/><path d="M3 12.5l1.4 5.3M27.6 14.2l1.4 5.3" stroke="#BFE3FF" stroke-width="2.3"/></symbol>
+<symbol id="i-fog" viewBox="0 0 32 32"><path d="M9 17a6 6 0 01.6-12A8 8 0 0125 7.5 5 5 0 0124 17z" fill="#FFF6E5"/><path d="M4 22h18M10 27h18" stroke="#9aa0a6" stroke-width="3"/></symbol>
+<symbol id="i-weather" viewBox="0 0 32 32"><circle cx="10" cy="10" r="5" fill="#FFD23F"/><path d="M10 2v2.5M2 10h2.5M4.4 4.4l1.8 1.8" stroke-width="2"/><path d="M15 22a5.5 5.5 0 01.6-11A7.5 7.5 0 0129 13.5 4.6 4.6 0 0128 22z" fill="#9aa0a6"/><path d="M17 24.5l-1 4M23 24.5l-1 4" stroke="#3A86FF" stroke-width="2.4"/></symbol>
+<symbol id="i-tornado" viewBox="0 0 32 32"><path d="M4 6h24M6 11h20M9 16h14M12 21h9M14.5 26h5" stroke="#19C3C3" stroke-width="2.8"/></symbol>
+<symbol id="i-cool" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5" fill="#FFD23F"/><path d="M4.5 12.5h23M8 12.5h6.5v4a2.5 2.5 0 01-2.5 2.5h-1.5a2.5 2.5 0 01-2.5-2.5zM17.5 12.5H24v4a2.5 2.5 0 01-2.5 2.5H20a2.5 2.5 0 01-2.5-2.5z" fill="#1A1A2E"/><path d="M12 23.5c2.5 1.6 5.5 1.6 8 0" stroke-width="2.4"/></symbol>
+<symbol id="i-nervous" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5" fill="#FFD23F"/><path d="M10 13.5l3.5 2M22 13.5l-3.5 2" stroke-width="2.4"/><ellipse cx="16" cy="22" rx="4" ry="3" fill="#1A1A2E"/><path d="M26 6c1.6 2.2 2.4 3.6 2.4 4.6a2.4 2.4 0 11-4.8 0c0-1 .8-2.4 2.4-4.6z" fill="#3A86FF"/></symbol>
+<symbol id="i-rich-face" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5" fill="#FFD23F"/><path d="M11 12l-2.5 2.5L11 17M21 12l2.5 2.5L21 17" stroke="#2ECC40" stroke-width="2.4"/><path d="M11 22h10M16 19.5v5" stroke="#2ECC40" stroke-width="2.4"/></symbol>
+<symbol id="i-devil" viewBox="0 0 32 32"><circle cx="16" cy="17" r="11.5" fill="#E63946"/><path d="M6 9c-1.5-3-1.6-5.5-1-6.5 1.6.4 3.6 2 5 4.4M26 9c1.5-3 1.6-5.5 1-6.5-1.6.4-3.6 2-5 4.4" fill="#E63946"/><path d="M10 15l3.5 2M22 15l-3.5 2" stroke-width="2.4"/><path d="M11 21c2.5 2.5 7.5 2.5 10 0" stroke-width="2.4"/></symbol>
+<symbol id="i-clown" viewBox="0 0 32 32"><circle cx="16" cy="17" r="10.5" fill="#FFF6E5"/><path d="M5.5 12A5.5 5.5 0 0116 10a5.5 5.5 0 0110.5 2" fill="#E63946"/><circle cx="16" cy="19" r="3" fill="#E63946"/><path d="M11 15.5v.1M21 15.5v.1" stroke-width="3.2"/><path d="M11 23c2.5 2 7.5 2 10 0" stroke-width="2.2"/></symbol>
+<symbol id="i-cowboy" viewBox="0 0 32 32"><circle cx="16" cy="19" r="9.5" fill="#FFE0B2"/><path d="M2 12c4-2.4 8-3.4 14-3.4S26 9.6 30 12c-3 2-6 2.6-14 2.6S5 14 2 12z" fill="#8B5A2B"/><path d="M10 9.5c1-4 3-6 6-6s5 2 6 6" fill="#8B5A2B"/><path d="M12 19v.1M20 19v.1" stroke-width="3"/><path d="M12 24c2.5 1.6 5.5 1.6 8 0" stroke-width="2.2"/></symbol>
+<symbol id="i-grandma" viewBox="0 0 32 32"><circle cx="16" cy="18" r="10" fill="#FFE0B2"/><path d="M6 14c0-6 4.5-9.5 10-9.5S26 8 26 14c-2-1.5-4-4-4-4s-3 3-6 3-6-1.5-6-1.5z" fill="#FFF6E5"/><circle cx="11.5" cy="18" r="3" fill="none" stroke-width="2"/><circle cx="20.5" cy="18" r="3" fill="none" stroke-width="2"/><path d="M14.5 18h3" stroke-width="2"/><path d="M13 24c2 1.4 4 1.4 6 0" stroke-width="2.2"/></symbol>
+<symbol id="i-ninja" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#2b2b45"/><path d="M4.4 12.8h23.2v5.6H4.4z" fill="#FFF6E5"/><circle cx="11.6" cy="15.6" r="1.8" fill="#1A1A2E" stroke="none"/><circle cx="20.4" cy="15.6" r="1.8" fill="#1A1A2E" stroke="none"/><path d="M27 12.5l5-3.5-1.5 7z" fill="#E63946"/></symbol>
+<symbol id="i-cop" viewBox="0 0 32 32"><circle cx="16" cy="19" r="9.5" fill="#FFE0B2"/><path d="M4 13c2-5 6.5-8 12-8s10 3 12 8z" fill="#2a3d66"/><path d="M2.5 13h27" stroke-width="2.8"/><path d="M16 6.5l1.2 2.6 2.8.3-2 2 .5 2.8-2.5-1.4-2.5 1.4.5-2.8-2-2 2.8-.3z" fill="#FFD23F" stroke="none"/><path d="M12 19v.1M20 19v.1" stroke-width="3"/><path d="M12 24c2.5 1.6 5.5 1.6 8 0" stroke-width="2.2"/></symbol>
+<symbol id="i-suit" viewBox="0 0 32 32"><path d="M6.5 5.5h19v2.8h-19z" fill="#3a3a52"/><path d="M10.5 5.5c0-2.2 2.5-3.8 5.5-3.8s5.5 1.6 5.5 3.8z" fill="#3a3a52"/><circle cx="16" cy="12.5" r="4.2" fill="#FFE0B2"/><path d="M7 30v-6.5a9 9 0 0118 0V30z" fill="#3a3a52"/><path d="M12.6 17.6l3.4 3 3.4-3 2.6 1.6-3 4.4h-6l-3-4.4z" fill="#FFF6E5"/><path d="M16 21l2 2.6-2 5.4-2-5.4z" fill="#E63946"/></symbol>
+<symbol id="i-runner" viewBox="0 0 32 32"><circle cx="21.5" cy="6" r="4.3" fill="#FFE0B2"/><path d="M20 11.5l-6.5 4.5 4 4.5-4.5 9" stroke="#3A86FF" stroke-width="3.6"/><path d="M17.5 20.5l6.5 1.5 2.5 6.5" stroke="#3A86FF" stroke-width="3.6"/><path d="M13.5 16L5 18" stroke="#FFE0B2" stroke-width="3.2"/><path d="M24 12.5l5 4" stroke="#FFE0B2" stroke-width="3.2"/></symbol>
+<symbol id="i-biceps" viewBox="0 0 32 32"><path d="M29 9v20H13.5A10.5 10.5 0 013 18.5 7.5 7.5 0 0110.5 11h4.2A6.2 6.2 0 0120.9 4.8h2.6A5.5 5.5 0 0129 9z" fill="#FF7A45"/><path d="M12 22.5c5.5-.6 9.5-4 11-9.5" stroke-width="2.3"/><path d="M20.5 29V19" stroke-width="2"/></symbol>
+<symbol id="i-ghost" viewBox="0 0 32 32"><path d="M6 28V14a10 10 0 0120 0v14l-4-3-3 3-3-3-3 3-3-3z" fill="#FFF6E5"/><path d="M12 14v2.5M20 14v2.5" stroke-width="3"/></symbol>
+<symbol id="i-zombie" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#7a9b5e"/><path d="M10 13.5v.1" stroke-width="3.4"/><circle cx="21" cy="13.5" r="2.6" fill="#FFF6E5"/><path d="M10 21h12v3H10z" fill="#FFF6E5"/><path d="M13 21v3M16 21v3M19 21v3" stroke-width="1.6"/></symbol>
+<symbol id="i-skull" viewBox="0 0 32 32"><path d="M6 15a10 10 0 0120 0v4l-2 3v3h-4v-3h-8v3H8v-3l-2-3z" fill="#FFF6E5"/><circle cx="12" cy="15" r="3" fill="#1A1A2E" stroke="none"/><circle cx="20" cy="15" r="3" fill="#1A1A2E" stroke="none"/><path d="M16 19v3" stroke-width="2"/></symbol>
+<symbol id="i-robot" viewBox="0 0 32 32"><rect x="5" y="9" width="22" height="18" rx="4" fill="#9aa0a6"/><circle cx="12" cy="16" r="2.8" fill="#E63946" stroke="none"/><circle cx="20" cy="16" r="2.8" fill="#E63946" stroke="none"/><path d="M11 22h10" stroke-width="2.4"/><path d="M16 9V4M12 3h8" stroke-width="2.4"/></symbol>
+<symbol id="i-dino" viewBox="0 0 32 32"><path d="M2 28l5.5-3c0-6.5 3.5-11 8.5-12V9.5a5.2 5.2 0 0110.4 0c0 2-1 3.2-1.6 4.2 3.6 2.6 5.2 7.2 5.2 14.3h-5.2v-4.2l-3.6 1V28h-6.2v-4.2c-4.2 0-9.4.6-12.6 4.2z" fill="#2ECC40"/><circle cx="23.6" cy="9" r="1.6" fill="#1A1A2E" stroke="none"/><path d="M17 15.5c3.2 2 6.8 2 10 .5" stroke-width="1.9"/><path d="M10 25.5l4 1.5" stroke="#1ca233" stroke-width="2"/></symbol>
+<symbol id="i-shark" viewBox="0 0 32 32"><path d="M2 22.5c6.5-2 9.5-8.5 14.5-8.5 4 0 7 2 9 5.2l5.5-2.2-3.2 5.2 3.2 4.3-6.5-1.1c-3.2 2-7.5 2-11.5.9z" fill="#5C8AA6"/><path d="M14.5 14.5L18 4.5l5.5 11" fill="#5C8AA6"/><circle cx="9.5" cy="20.5" r="1.5" fill="#1A1A2E" stroke="none"/><path d="M13 24.5c3.2 1.1 6.5 1.1 9.5 0" stroke="#FFF6E5" stroke-width="2"/></symbol>
+<symbol id="i-bear" viewBox="0 0 32 32"><circle cx="7.5" cy="8.5" r="4.5" fill="#8B5A2B"/><circle cx="24.5" cy="8.5" r="4.5" fill="#8B5A2B"/><circle cx="16" cy="18" r="11" fill="#8B5A2B"/><ellipse cx="16" cy="22" rx="6" ry="4.5" fill="#FFE0B2"/><path d="M12 16v.1M20 16v.1" stroke-width="3"/><ellipse cx="16" cy="20.5" rx="2.2" ry="1.6" fill="#1A1A2E" stroke="none"/></symbol>
+<symbol id="i-dragon" viewBox="0 0 32 32"><path d="M2 28c0-8.5 5.5-13.5 12.5-14.5 1-4 4-6.5 7.5-6.5 1.2 0 2.3.3 3.2.9l3.6-2.4-.7 5c1.2 1.6 1.5 3.5.9 5.4 2.4 3 3 6.4 3 12.1z" fill="#2ECC40"/><circle cx="23" cy="10.5" r="1.6" fill="#1A1A2E" stroke="none"/><path d="M26.8 13H31" stroke-width="2"/><path d="M9 19.5l7.5 2.5 4.5-1-3.5 7-8.5-1.5z" fill="#1ca233"/></symbol>
+<symbol id="i-pig" viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" fill="#FF9EC4"/><path d="M6 8l1 6M26 8l-1 6" stroke-width="2.6"/><ellipse cx="16" cy="20" rx="5.5" ry="4" fill="#f37fae"/><circle cx="14" cy="20" r="1.3" fill="#1A1A2E" stroke="none"/><circle cx="18" cy="20" r="1.3" fill="#1A1A2E" stroke="none"/><path d="M11 14v.1M21 14v.1" stroke-width="3"/></symbol>
+<symbol id="i-dove" viewBox="0 0 32 32"><path d="M3 20c0-5 4-9 9-9h5l6-4-1 5 8 2-6 4c-1 6-6 9-11 9-5 0-10-2-10-7z" fill="#FFF6E5"/><path d="M20 12v.1" stroke-width="2.6"/><path d="M12 18c3 3 7 3 10 0" stroke="#9aa0a6" stroke-width="2"/></symbol>
+<symbol id="i-invader" viewBox="0 0 32 32"><path d="M8 8h4V4h8v4h4v4h4v10h-4v4h-4v-4h-8v4H8v-4H4V12h4z" fill="#2ECC40"/><path d="M12 13v.1M20 13v.1" stroke-width="3.4"/></symbol>
+<symbol id="i-die" viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="22" rx="5" fill="#FFF6E5"/><circle cx="11.5" cy="11.5" r="2.2" fill="#1A1A2E" stroke="none"/><circle cx="20.5" cy="20.5" r="2.2" fill="#1A1A2E" stroke="none"/><circle cx="16" cy="16" r="2.2" fill="#1A1A2E" stroke="none"/></symbol>
+<symbol id="i-crown" viewBox="0 0 32 32"><path d="M4 24V10l6.5 5L16 6l5.5 9L28 10v14z" fill="#FFD23F"/><path d="M4 24h24" stroke-width="2.6"/><circle cx="16" cy="18" r="2" fill="#E63946" stroke="none"/></symbol>
+<symbol id="i-clover" viewBox="0 0 32 32"><circle cx="10.5" cy="10.5" r="6.6" fill="#2ECC40" stroke="none"/><circle cx="21.5" cy="10.5" r="6.6" fill="#2ECC40" stroke="none"/><circle cx="10.5" cy="21" r="6.6" fill="#2ECC40" stroke="none"/><circle cx="21.5" cy="21" r="6.6" fill="#2ECC40" stroke="none"/><path d="M16 20.5c1 4.5 3.5 7 7.5 8.5" stroke="#1ca233" stroke-width="2.6"/></symbol>
+<symbol id="i-flame" viewBox="0 0 32 32"><path d="M16 2c1 6-6 7-6 14a6 6 0 0012 0c0-3-1-5-2-7 3 1 6 4 6 9a10 10 0 01-20 0C6 10 13 8 16 2z" fill="#FF7A45"/><path d="M16 18c2 1.5 2 4 0 5.5-2-1.5-2-4 0-5.5z" fill="#FFD23F" stroke="none"/></symbol>
+<symbol id="i-target" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#FFF6E5"/><circle cx="16" cy="16" r="7.5" fill="#E63946"/><circle cx="16" cy="16" r="3" fill="#FFF6E5"/><path d="M24 4l-1 5-5 1" fill="none" stroke-width="2.2"/></symbol>
+<symbol id="i-rocket" viewBox="0 0 32 32"><path d="M16 2c5 4 7.5 9 7.5 15L21 22h-10l-2.5-5C8.5 11 11 6 16 2z" fill="#FFF6E5"/><circle cx="16" cy="12" r="3.2" fill="#3A86FF"/><path d="M11 17l-5 4 4 1M21 17l5 4-4 1" fill="#E63946"/><path d="M13 24c1 3 2 4.5 3 6 1-1.5 2-3 3-6" fill="#FF7A45"/></symbol>
+<symbol id="i-mic" viewBox="0 0 32 32"><rect x="11" y="2" width="10" height="16" rx="5" fill="#5a626c"/><path d="M7 15a9 9 0 0018 0M16 24v5M11 29h10" stroke="#BFE3FF" stroke-width="2.8"/></symbol>
+<symbol id="i-car" viewBox="0 0 32 32"><path d="M3 22v-4l3-7c.6-1.4 1.6-2 3-2h14c1.4 0 2.4.6 3 2l3 7v4z" fill="#E63946"/><path d="M8 12h16l2 5H6z" fill="#FFF6E5"/><circle cx="9" cy="23" r="3.4" fill="#1A1A2E"/><circle cx="23" cy="23" r="3.4" fill="#1A1A2E"/></symbol>
+<symbol id="i-ufo" viewBox="0 0 32 32"><ellipse cx="16" cy="17" rx="13" ry="5.5" fill="#9aa0a6"/><path d="M9 14a7.5 7.5 0 0114 0" fill="#19C3C3"/><circle cx="8" cy="18.5" r="1.8" fill="#FFD23F" stroke="none"/><circle cx="16" cy="20" r="1.8" fill="#FFD23F" stroke="none"/><circle cx="24" cy="18.5" r="1.8" fill="#FFD23F" stroke="none"/><path d="M10 23l-4 7M22 23l4 7" stroke="#19C3C3" stroke-width="2"/></symbol>
+<symbol id="i-helmet" viewBox="0 0 32 32"><path d="M3 21a13 13 0 0126 0z" fill="#6B8E7F"/><path d="M2 21h28v4H2z" fill="#4e6b5e"/></symbol>
+<symbol id="i-pirate" viewBox="0 0 32 32"><path d="M5 3v27" stroke="#8B5A2B" stroke-width="3.4"/><path d="M7 5h22v14H7z" fill="#1A1A2E" stroke="#FFF6E5" stroke-width="2"/><circle cx="18" cy="10.5" r="3.8" fill="#FFF6E5" stroke="none"/><path d="M15.2 14h5.6v2.4h-5.6z" fill="#FFF6E5" stroke="none"/><circle cx="16.5" cy="10" r="1.15" fill="#1A1A2E" stroke="none"/><circle cx="19.5" cy="10" r="1.15" fill="#1A1A2E" stroke="none"/></symbol>
+<symbol id="i-flag" viewBox="0 0 32 32"><path d="M6 4v25" stroke="#BFE3FF" stroke-width="3"/><path d="M8 5h20v13H8z" fill="#FFF6E5"/><path d="M8 5h5v4.3H8zm10 0h5v4.3h-5zM13 9.3h5v4.4h-5zm10 0h5v4.4h-5zM8 13.7h5V18H8zm10 0h5V18h-5z" fill="#1A1A2E" stroke="none"/></symbol>
+<symbol id="i-medal" viewBox="0 0 32 32"><path d="M9 3l4 11M23 3l-4 11" stroke="#3A86FF" stroke-width="3.4"/><circle cx="16" cy="21" r="8.5" fill="#FFB300"/><path d="M13 17.5l2-1.5v10" stroke-width="2.4"/></symbol>
+<symbol id="i-handshake" viewBox="0 0 32 32"><rect x="1" y="12.8" width="12" height="7.6" rx="3.6" fill="#FFE0B2"/><rect x="19" y="12.8" width="12" height="7.6" rx="3.6" fill="#FFE0B2"/><rect x="9.6" y="9.6" width="12.8" height="13.6" rx="4.2" fill="#FFD23F"/><path d="M13 14l3 3 3-3" stroke-width="2.1"/></symbol>
+<symbol id="i-ear" viewBox="0 0 32 32"><path d="M10 30c-2.5-5-3-8.5-3-13.5a9 9 0 1118 0c0 4.5-4.5 5-4.5 9S18 30 15.5 30 13 27.5 13 25s2.5-3 2.5-5.5A2.75 2.75 0 0010 19" fill="#FFE0B2" stroke-width="2.5"/></symbol>
+<symbol id="i-speak" viewBox="0 0 32 32"><circle cx="12" cy="16" r="9" fill="#FFE0B2"/><path d="M12 12v.1" stroke-width="3"/><path d="M9 20c2 1.6 4 1.6 6 0" stroke-width="2.2"/><path d="M23 10a9 9 0 010 12M28 6a15 15 0 010 20" stroke="#19C3C3" stroke-width="2.6"/></symbol>
+<symbol id="i-broom" viewBox="0 0 32 32"><path d="M28.5 2.5L15 16" stroke="#8B5A2B" stroke-width="3.8"/><path d="M13.5 13.5l5 5-2.5 4c-1.8 2.8-5.5 5-9 6.2L3 24.5c1.2-3.5 3.4-7.2 6.2-9z" fill="#FFD23F"/><path d="M7.5 20l6 6M10.5 17l6 6" stroke-width="1.8"/></symbol>
+<symbol id="i-bags" viewBox="0 0 32 32"><path d="M3 12h11v17H3z" fill="#FF5DA2"/><path d="M16 9h13v20H16z" fill="#19C3C3"/><path d="M6 12V9a2.5 2.5 0 015 0v3M20 9V6a2.5 2.5 0 015 0v3" stroke="#FFF6E5" stroke-width="2.4"/></symbol>
+<symbol id="i-dress" viewBox="0 0 32 32"><path d="M11 3h10l-1.5 7L26 29H6l6.5-19z" fill="#FF5DA2"/><path d="M12.5 10h7" stroke-width="2.2"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 32 32"><path d="M21 3a8 8 0 00-7.6 10.4L3 23.8 8.2 29l10.4-10.4A8 8 0 0029 11l-4.6 4.6-4-1-1-4z" fill="#3A86FF"/></symbol>
+<symbol id="i-gear" viewBox="0 0 32 32"><path d="M13.4 3h5.2l.8 3.6 2.6 1.5 3.5-1.2 2.6 4.5-2.7 2.5v3l2.7 2.5-2.6 4.5-3.5-1.2-2.6 1.5-.8 3.6h-5.2l-.8-3.6-2.6-1.5-3.5 1.2-2.6-4.5L4.4 19v-3l-2.7-2.5 2.6-4.5 3.5 1.2 2.6-1.5z" fill="#9aa0a6"/><circle cx="16" cy="16" r="4.5" fill="#1A1A2E" stroke="none"/></symbol>
+<symbol id="i-coaster" viewBox="0 0 32 32"><path d="M2 29V19a14 14 0 0128 0v10" stroke="#FF7A45" stroke-width="3.2"/><path d="M2 29v-5M9 29v-9M16 29V17M23 29v-9M30 29v-5" stroke="#9aa0a6" stroke-width="2.4"/><path d="M9.5 11h9l-1.5 5.5h-6z" fill="#E63946"/></symbol>
+</defs></svg>
 <div id="game">
   <canvas id="cv"></canvas>
 
@@ -407,11 +510,11 @@
     <div id="toprow">
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;">
         <div class="chip" id="scene">Stra&szlig;e</div>
-        <div class="chip" id="ambientChip">&#9728;&#65039;</div>
-        <div class="chip hidden" id="ticketChip">&#127915; SPEZIAL</div>
-        <div class="chip hidden" id="buffChip">&#9889; 40s</div>
-        <div class="chip hidden" id="magnetChip">&#129522; 10s</div>
-        <div class="chip hidden" id="hintChip">&#128269; 1</div>
+        <div class="chip" id="ambientChip"><svg class="ic"><use href="#i-sun"/></svg></div>
+        <div class="chip hidden" id="ticketChip"><svg class="ic"><use href="#i-ticket"/></svg> SPEZIAL</div>
+        <div class="chip hidden" id="buffChip"><svg class="ic"><use href="#i-bolt"/></svg> 40s</div>
+        <div class="chip hidden" id="magnetChip"><svg class="ic"><use href="#i-magnet"/></svg> 10s</div>
+        <div class="chip hidden" id="hintChip"><svg class="ic"><use href="#i-search"/></svg> 1</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <div class="chip" id="score">Punkte <span class="num">0</span></div>
@@ -433,33 +536,33 @@
         <input id="nameInput" maxlength="20" placeholder="Dein Name" autocomplete="off" />
       </div>
       <div class="plates">
-        <div class="plate cur">&#127942; <b id="hsMenu">0</b></div>
-        <div class="plate cur">&#129689; <b id="coinsMenu">0</b></div>
-        <button class="plate cur mplate" id="muteBtn2">&#128266;</button>
+        <div class="plate cur"><svg class="ic"><use href="#i-trophy"/></svg> <b id="hsMenu">0</b></div>
+        <div class="plate cur"><svg class="ic"><use href="#i-coin"/></svg> <b id="coinsMenu">0</b></div>
+        <button class="plate cur mplate" id="muteBtn2"><svg class="ic"><use href="#i-sound-on"/></svg></button>
       </div>
     </div>
     <div class="hero">
-      <h1 class="logo"><span class="logoMag">&#129522;</span> PECH<small>MAGNET</small></h1>
+      <h1 class="logo"><svg class="logoMag"><use href="#i-magnet"/></svg> PECH<small>MAGNET</small></h1>
       <canvas id="meSkin" width="450" height="450"></canvas>
       <div class="heroShadow"></div>
       <div class="plate" id="meSkinName">Klassiker</div>
     </div>
     <div class="chapterCard">
-      <div class="chTitle">&#127961;&#65039; KAPITEL 1 &middot; ENDLOSE STRASSE</div>
+      <div class="chTitle"><svg class="ic"><use href="#i-city"/></svg> KAPITEL 1 &middot; ENDLOSE STRASSE</div>
       <div class="boardTitle">BESTENLISTE</div>
       <div id="boardMenu" class="board"></div>
     </div>
-    <button class="battleBtn" id="startBtn">&#9654; LOS GEHT'S</button>
+    <button class="battleBtn" id="startBtn"><svg class="ic"><use href="#i-play"/></svg> LOS GEHT'S</button>
     <div class="navbar">
-      <button class="navb" id="shopBtn">&#128722;<span>SHOP</span></button>
-      <button class="navb" id="skinsBtn">&#128085;<span>SKINS</span></button>
-      <button class="navb" id="achBtn">&#127942;<span>ERFOLGE</span></button>
+      <button class="navb" id="shopBtn"><svg class="ic"><use href="#i-cart"/></svg><span>SHOP</span></button>
+      <button class="navb" id="skinsBtn"><svg class="ic"><use href="#i-shirt"/></svg><span>SKINS</span></button>
+      <button class="navb" id="achBtn"><svg class="ic"><use href="#i-trophy"/></svg><span>ERFOLGE</span></button>
     </div>
   </div>
 
   <div id="shop" class="screen hidden">
     <div class="card">
-      <h2 class="mtitle">&#128722; SHOP</h2>
+      <h2 class="mtitle"><svg class="ic"><use href="#i-cart"/></svg> SHOP</h2>
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsShop">0</div></div></div>
       <div class="shopSecTitle">POWER-UPS</div>
       <div id="powerups"></div>
@@ -471,7 +574,7 @@
 
   <div id="skins" class="screen hidden">
     <div class="card">
-      <h2 class="mtitle">&#128085; SKINS</h2>
+      <h2 class="mtitle"><svg class="ic"><use href="#i-shirt"/></svg> SKINS</h2>
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsSkins">0</div></div></div>
       <div id="skinGrid" class="skinGrid"></div>
     </div>
@@ -480,7 +583,7 @@
 
   <div id="achievements" class="screen hidden">
     <div class="card">
-      <h2 class="mtitle">&#127942; ERFOLGE</h2>
+      <h2 class="mtitle"><svg class="ic"><use href="#i-trophy"/></svg> ERFOLGE</h2>
       <div id="achSummary" class="achSummary"></div>
       <div id="achList"></div>
       <div id="achDetail" class="achDetail"></div>
@@ -490,7 +593,7 @@
 
 
   <div id="achToast" class="hidden">
-    <div class="atIco" id="achToastIcon">&#127942;</div>
+    <div class="atIco" id="achToastIcon"><svg class="ic"><use href="#i-trophy"/></svg></div>
     <div class="atTxt">
       <div class="atLbl">ERFOLG FREIGESCHALTET</div>
       <div class="atName" id="achToastName"></div>
@@ -517,8 +620,8 @@
       <h2>ERWISCHT!</h2>
       <div class="sub" id="caughtSub">Die Menge br&uuml;llt. Sag irgendwas Glaubhaftes!</div>
       <div class="tactics">
-        <button class="tbtn" id="listenBtn">&#128172; Belauschen<small>&#189; Zeit weg, Rest 2&times; schneller</small></button>
-        <button class="tbtn" id="bribeBtn">&#128176; Bestechen<small id="bribeCost">25 M&uuml;nzen</small></button>
+        <button class="tbtn" id="listenBtn"><span><svg class="ic"><use href="#i-speech"/></svg> Belauschen</span><small>&#189; Zeit weg, Rest 2&times; schneller</small></button>
+        <button class="tbtn" id="bribeBtn"><span><svg class="ic"><use href="#i-moneybag"/></svg> Bestechen</span><small id="bribeCost">25 M&uuml;nzen</small></button>
       </div>
       <div id="crowdHint" class="crowdHint"></div>
       <div id="rageWrap">
@@ -789,11 +892,11 @@
   };
   // Item-Upgrades (Subway-Surfers-Stil): mit Münzen Stufen kaufen
   const UPGRADES=[
-    {key:'shield',name:'Schild',icon:'🛡️',unit:'s',base:5,step:2,max:5,desc:'Unverwundbarkeit beim Aufsammeln'},
-    {key:'boost', name:'Speed-Boost',icon:'⚡',unit:'s',base:12,step:3,max:5,desc:'Dauer des Tempo-Boosts'},
-    {key:'magnet',name:'Münzmagnet',icon:'🧲',unit:'s',base:10,step:3,max:5,desc:'Dauer der Münz-Anziehung'},
-    {key:'hint',  name:'Spicker',icon:'🔍',unit:'×',base:1,step:1,max:5,desc:'Aufgedeckte Antworten pro Spicker'},
-    {key:'coins', name:'Geldsack',icon:'💰',unit:' Mü.',base:10,step:5,max:5,desc:'Münzen pro Geldsack'}
+    {key:'shield',name:'Schild',icon:'shield',unit:'s',base:5,step:2,max:5,desc:'Unverwundbarkeit beim Aufsammeln'},
+    {key:'boost', name:'Speed-Boost',icon:'bolt',unit:'s',base:12,step:3,max:5,desc:'Dauer des Tempo-Boosts'},
+    {key:'magnet',name:'Münzmagnet',icon:'magnet',unit:'s',base:10,step:3,max:5,desc:'Dauer der Münz-Anziehung'},
+    {key:'hint',  name:'Spicker',icon:'search',unit:'×',base:1,step:1,max:5,desc:'Aufgedeckte Antworten pro Spicker'},
+    {key:'coins', name:'Geldsack',icon:'moneybag',unit:' Mü.',base:10,step:5,max:5,desc:'Münzen pro Geldsack'}
   ];
   function upLvl(key){ return (save.upgrades&&save.upgrades[key])|0; }
   function upVal(key){ const u=UPGRADES.find(x=>x.key===key); return u?u.base+upLvl(key)*u.step:0; }
@@ -864,112 +967,112 @@
   // Erfolge sind in fünf Schwierigkeitsstufen geteilt – von „läuft nebenbei mit“
   // bis zur Königsdisziplin. tier auf dem Erfolg verweist auf diese Liste.
   const ACH_TIERS=[
-    {tier:1,name:'LEICHTES PECH',icon:'\ud83c\udf40',col:'#2ECC40',hint:'Läuft beim Spielen fast von allein mit.'},
-    {tier:2,name:'ECHTES PECH',  icon:'\u26a1',col:'#FFB300',hint:'Dafür brauchst du ein paar Runden Übung.'},
-    {tier:3,name:'DICKES PECH',  icon:'\ud83d\udd25',col:'#FF7A45',hint:'Lange Läufe und eine ruhige Hand.'},
-    {tier:4,name:'SELTENES PECH',icon:'\ud83c\udfaf',col:'#19C3C3',hint:'Jedes Special einmal treffen – und überstehen.'},
-    {tier:5,name:'PECH-LEGENDE', icon:'\ud83d\udc51',col:'#7C5CFF',hint:'Die Königsdisziplin. Viel Glück. Oder Pech.'}
+    {tier:1,name:'LEICHTES PECH',icon:'clover',col:'#2ECC40',hint:'Läuft beim Spielen fast von allein mit.'},
+    {tier:2,name:'ECHTES PECH',  icon:'bolt',col:'#FFB300',hint:'Dafür brauchst du ein paar Runden Übung.'},
+    {tier:3,name:'DICKES PECH',  icon:'flame',col:'#FF7A45',hint:'Lange Läufe und eine ruhige Hand.'},
+    {tier:4,name:'SELTENES PECH',icon:'target',col:'#19C3C3',hint:'Jedes Special einmal treffen – und überstehen.'},
+    {tier:5,name:'PECH-LEGENDE', icon:'crown',col:'#7C5CFF',hint:'Die Königsdisziplin. Viel Glück. Oder Pech.'}
   ];
   const ACHIEVEMENTS=[
-    {id:'first_special',name:'Im Rampenlicht',desc:'Erlebe dein erstes Special-Event.',icon:'🌟',coins:150,tier:1},
-    {id:'survive_special',name:'Cool geblieben',desc:'Überstehe ein Special-Event mit der richtigen Ausrede.',icon:'😎',skin:'star',coins:300,tier:2},
-    {id:'specials_3',name:'Chaos-Sammler',desc:'Erlebe 3 verschiedene Special-Typen.',icon:'🎲',coins:200,tier:2},
-    {id:'specials_6',name:'Magnet für Ärger',desc:'Erlebe 6 verschiedene Special-Typen.',icon:'🧲',coins:400,tier:3},
-    {id:'all_specials',name:'Pech-Legende',desc:'Erlebe alle Special-Typen – das gesamte Chaos.',icon:'👑',skin:'legend',coins:1500,tier:5},
-    {id:'district_5',name:'Stadtbummler',desc:'Erreiche Viertel 5 in einem Lauf.',icon:'🏙️',coins:200,tier:1},
-    {id:'district_10',name:'Pech-Marathon',desc:'Erreiche Viertel 10 in einem Lauf.',icon:'🏃',skin:'goldhut',coins:600,tier:2},
-    {id:'score_1000',name:'Punktejäger',desc:'Knacke 1000 Punkte in einem Lauf.',icon:'💯',coins:300,tier:1},
-    {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'🪙',coins:150,tier:1},
-    {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'😰',coins:200,tier:2},
-    {id:'district_15',name:'Stadtflucht',desc:'Erreiche Viertel 15 in einem Lauf.',icon:'🚀',coins:800,tier:3},
-    {id:'district_20',name:'Unaufhaltbar',desc:'Erreiche Viertel 20 in einem Lauf.',icon:'🌪️',coins:1200,tier:5},
-    {id:'score_2500',name:'Punkte-Profi',desc:'Knacke 2500 Punkte in einem Lauf.',icon:'🎯',coins:500,tier:2},
-    {id:'score_5000',name:'Punkte-Legende',desc:'Knacke 5000 Punkte in einem Lauf.',icon:'💎',coins:1000,tier:3},
-    {id:'coins_run_30',name:'Goldrausch',desc:'Sammle 30 Münzen in einem einzigen Lauf.',icon:'🤑',coins:300,tier:2},
-    {id:'excuse_5',name:'Silberzunge',desc:'Rede dich 5-mal in einem Lauf richtig heraus.',icon:'🗣️',coins:400,tier:2},
-    {id:'no_excuse_5',name:'Sauber unterwegs',desc:'Erreiche Viertel 5, ohne erwischt zu werden.',icon:'🕊️',coins:500,tier:3},
-    {id:'bribe_1',name:'Schmiergeld',desc:'Besteche die Menge zum ersten Mal.',icon:'🤝',coins:150,tier:1},
-    {id:'listen_1',name:'Lauscher',desc:'Belausche die Menge zum ersten Mal.',icon:'👂',coins:150,tier:1},
-    {id:'mini_win_1',name:'Straßenkämpfer',desc:'Gewinne dein erstes Minigame.',icon:'🥇',coins:200,tier:2},
-    {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 4 Minigames mindestens einmal.',icon:'👾',coins:800,tier:3},
-    {id:'items_run_5',name:'Staubsauger',desc:'Sammle 5 Power-ups in einem Lauf.',icon:'🧹',coins:300,tier:2},
-    {id:'buy_skin_1',name:'Neuer Look',desc:'Kaufe deinen ersten Skin im Shop.',icon:'🛍️',coins:150,tier:1},
-    {id:'skins_10',name:'Kleiderschrank',desc:'Besitze 10 Skins.',icon:'👗',coins:500,tier:3},
-    {id:'rich_1000',name:'Sparschwein',desc:'Habe 1000 Münzen gleichzeitig.',icon:'🐖',coins:200,tier:1},
-    {id:'rich_5000',name:'Dagobert',desc:'Habe 5000 Münzen gleichzeitig.',icon:'💰',coins:800,tier:3},
-    {id:'upgrade_1',name:'Tuning',desc:'Kaufe dein erstes Item-Upgrade.',icon:'🔧',coins:200,tier:1},
-    {id:'upgrade_max',name:'Vollausbau',desc:'Bringe ein Item-Upgrade auf Maximum.',icon:'⚙️',coins:600,tier:3},
-    {id:'weather_run',name:'Wetterfest',desc:'Erlebe Regen, Schnee und Nebel in einem Lauf.',icon:'🌦️',coins:400,tier:2},
-    {id:'death_5',name:'Stehaufmännchen',desc:'Werde insgesamt 5-mal geschnappt.',icon:'🎢',coins:250,tier:1}
+    {id:'first_special',name:'Im Rampenlicht',desc:'Erlebe dein erstes Special-Event.',icon:'sparkle',coins:150,tier:1},
+    {id:'survive_special',name:'Cool geblieben',desc:'Überstehe ein Special-Event mit der richtigen Ausrede.',icon:'cool',skin:'star',coins:300,tier:2},
+    {id:'specials_3',name:'Chaos-Sammler',desc:'Erlebe 3 verschiedene Special-Typen.',icon:'die',coins:200,tier:2},
+    {id:'specials_6',name:'Magnet für Ärger',desc:'Erlebe 6 verschiedene Special-Typen.',icon:'magnet',coins:400,tier:3},
+    {id:'all_specials',name:'Pech-Legende',desc:'Erlebe alle Special-Typen – das gesamte Chaos.',icon:'crown',skin:'legend',coins:1500,tier:5},
+    {id:'district_5',name:'Stadtbummler',desc:'Erreiche Viertel 5 in einem Lauf.',icon:'city',coins:200,tier:1},
+    {id:'district_10',name:'Pech-Marathon',desc:'Erreiche Viertel 10 in einem Lauf.',icon:'runner',skin:'goldhut',coins:600,tier:2},
+    {id:'score_1000',name:'Punktejäger',desc:'Knacke 1000 Punkte in einem Lauf.',icon:'hundred',coins:300,tier:1},
+    {id:'coins_run',name:'Münzmagnet',desc:'Sammle 15 Münzen in einem einzigen Lauf.',icon:'coin',coins:150,tier:1},
+    {id:'close_call',name:'Auf der Kippe',desc:'Treibe den Verdacht über 90% und überlebe.',icon:'nervous',coins:200,tier:2},
+    {id:'district_15',name:'Stadtflucht',desc:'Erreiche Viertel 15 in einem Lauf.',icon:'rocket',coins:800,tier:3},
+    {id:'district_20',name:'Unaufhaltbar',desc:'Erreiche Viertel 20 in einem Lauf.',icon:'tornado',coins:1200,tier:5},
+    {id:'score_2500',name:'Punkte-Profi',desc:'Knacke 2500 Punkte in einem Lauf.',icon:'target',coins:500,tier:2},
+    {id:'score_5000',name:'Punkte-Legende',desc:'Knacke 5000 Punkte in einem Lauf.',icon:'gem',coins:1000,tier:3},
+    {id:'coins_run_30',name:'Goldrausch',desc:'Sammle 30 Münzen in einem einzigen Lauf.',icon:'rich-face',coins:300,tier:2},
+    {id:'excuse_5',name:'Silberzunge',desc:'Rede dich 5-mal in einem Lauf richtig heraus.',icon:'speak',coins:400,tier:2},
+    {id:'no_excuse_5',name:'Sauber unterwegs',desc:'Erreiche Viertel 5, ohne erwischt zu werden.',icon:'dove',coins:500,tier:3},
+    {id:'bribe_1',name:'Schmiergeld',desc:'Besteche die Menge zum ersten Mal.',icon:'handshake',coins:150,tier:1},
+    {id:'listen_1',name:'Lauscher',desc:'Belausche die Menge zum ersten Mal.',icon:'ear',coins:150,tier:1},
+    {id:'mini_win_1',name:'Straßenkämpfer',desc:'Gewinne dein erstes Minigame.',icon:'medal',coins:200,tier:2},
+    {id:'mini_all',name:'Arcade-König',desc:'Gewinne alle 4 Minigames mindestens einmal.',icon:'invader',coins:800,tier:3},
+    {id:'items_run_5',name:'Staubsauger',desc:'Sammle 5 Power-ups in einem Lauf.',icon:'broom',coins:300,tier:2},
+    {id:'buy_skin_1',name:'Neuer Look',desc:'Kaufe deinen ersten Skin im Shop.',icon:'bags',coins:150,tier:1},
+    {id:'skins_10',name:'Kleiderschrank',desc:'Besitze 10 Skins.',icon:'dress',coins:500,tier:3},
+    {id:'rich_1000',name:'Sparschwein',desc:'Habe 1000 Münzen gleichzeitig.',icon:'pig',coins:200,tier:1},
+    {id:'rich_5000',name:'Dagobert',desc:'Habe 5000 Münzen gleichzeitig.',icon:'moneybag',coins:800,tier:3},
+    {id:'upgrade_1',name:'Tuning',desc:'Kaufe dein erstes Item-Upgrade.',icon:'wrench',coins:200,tier:1},
+    {id:'upgrade_max',name:'Vollausbau',desc:'Bringe ein Item-Upgrade auf Maximum.',icon:'gear',coins:600,tier:3},
+    {id:'weather_run',name:'Wetterfest',desc:'Erlebe Regen, Schnee und Nebel in einem Lauf.',icon:'weather',coins:400,tier:2},
+    {id:'death_5',name:'Stehaufmännchen',desc:'Werde insgesamt 5-mal geschnappt.',icon:'coaster',coins:250,tier:1}
   ];
 
   // ---------- Special-Event-Katalog (Event + Achievement + Belohnungs-Skin + Death-Stil) ----------
   // mob = Anzahl Figuren in der Cinematic, mini = Minigame-Typ, death = Death-Animationsstil
   const SPECIAL_DEFS=[
-    {key:'mafia', mob:5, death:'jail',  ach:{name:'Schutzgeld',desc:'Triff die Mafia.',icon:'🕴️'},      skin:{name:'Mafioso',body:'#1f1f27',cap:'#E63946',acc:'tophat',pat:'tie',patCol:'#E63946'}},
-    {key:'car',   death:'crush', ach:{name:'Fast platt',desc:'Werde fast überfahren.',icon:'🚗'},        skin:{name:'Raser',body:'#E63946',cap:'#1A1A2E',pat:'vstripes',patCol:'#FFF6E5'}},
-    {key:'ufo',   death:'abduct',ach:{name:'Entführt',desc:'Triff das UFO.',icon:'🛸'},                  skin:{name:'Marsmensch',body:'#7CFF8E',cap:'#5C8AA6',glow:'#7CFF8E',pat:'spots',patCol:'#5C8AA6'}},
-    {key:'cop',   death:'jail',  ach:{name:'Festgenommen',desc:'Triff den Polizisten.',icon:'👮'},       skin:{name:'Streife',body:'#2a3d66',cap:'#FFD23F',pat:'belt',patCol:'#1A1A2E'}},
-    {key:'reporter',death:'wasted',ach:{name:'Schlagzeile',desc:'Triff die Reporterin.',icon:'🎤'},      skin:{name:'Star-Reporter',body:'#7C5CFF',cap:'#FF3B30',acc:'glasses',pat:'tie',patCol:'#FF3B30'}},
-    {key:'ghost', death:'spook', ach:{name:'Spukhaft',desc:'Triff den Geist.',icon:'👻'},                skin:{name:'Gespenst',body:'#EFEFF6',cap:'#B388FF',glow:'#FFFFFF',pat:'spots',patCol:'#B388FF'}},
-    {key:'tornado',death:'sweep',ach:{name:'Vom Winde verweht',desc:'Triff den Tornado.',icon:'🌪️'},     skin:{name:'Sturmjäger',body:'#9aa0a6',cap:'#19C3C3',pat:'vstripes',patCol:'#19C3C3'}},
-    {key:'dino',  death:'eaten', ach:{name:'Ausgestorben',desc:'Triff den Dino.',icon:'🦖'},             skin:{name:'Urzeit',body:'#2ECC40',cap:'#1ca233',acc:'horns',pat:'spots',patCol:'#1ca233'}},
-    {key:'robot', death:'crush', ach:{name:'Aussortiert',desc:'Triff den Roboter.',icon:'🤖'},           skin:{name:'Android',body:'#9aa0a6',cap:'#FF3B30',glow:'#FF3B30',pat:'stripes',patCol:'#FF3B30'}},
-    {key:'zombie',death:'eaten', ach:{name:'Infiziert',desc:'Triff den Zombie.',icon:'🧟'},              skin:{name:'Untoter',body:'#7a9b5e',cap:'#9bbe78',pat:'stripes',patCol:'#3d5a2a'}},
+    {key:'mafia', mob:5, death:'jail',  ach:{name:'Schutzgeld',desc:'Triff die Mafia.',icon:'suit'},      skin:{name:'Mafioso',body:'#1f1f27',cap:'#E63946',acc:'tophat',pat:'tie',patCol:'#E63946'}},
+    {key:'car',   death:'crush', ach:{name:'Fast platt',desc:'Werde fast überfahren.',icon:'car'},        skin:{name:'Raser',body:'#E63946',cap:'#1A1A2E',pat:'vstripes',patCol:'#FFF6E5'}},
+    {key:'ufo',   death:'abduct',ach:{name:'Entführt',desc:'Triff das UFO.',icon:'ufo'},                  skin:{name:'Marsmensch',body:'#7CFF8E',cap:'#5C8AA6',glow:'#7CFF8E',pat:'spots',patCol:'#5C8AA6'}},
+    {key:'cop',   death:'jail',  ach:{name:'Festgenommen',desc:'Triff den Polizisten.',icon:'cop'},       skin:{name:'Streife',body:'#2a3d66',cap:'#FFD23F',pat:'belt',patCol:'#1A1A2E'}},
+    {key:'reporter',death:'wasted',ach:{name:'Schlagzeile',desc:'Triff die Reporterin.',icon:'mic'},      skin:{name:'Star-Reporter',body:'#7C5CFF',cap:'#FF3B30',acc:'glasses',pat:'tie',patCol:'#FF3B30'}},
+    {key:'ghost', death:'spook', ach:{name:'Spukhaft',desc:'Triff den Geist.',icon:'ghost'},                skin:{name:'Gespenst',body:'#EFEFF6',cap:'#B388FF',glow:'#FFFFFF',pat:'spots',patCol:'#B388FF'}},
+    {key:'tornado',death:'sweep',ach:{name:'Vom Winde verweht',desc:'Triff den Tornado.',icon:'tornado'},     skin:{name:'Sturmjäger',body:'#9aa0a6',cap:'#19C3C3',pat:'vstripes',patCol:'#19C3C3'}},
+    {key:'dino',  death:'eaten', ach:{name:'Ausgestorben',desc:'Triff den Dino.',icon:'dino'},             skin:{name:'Urzeit',body:'#2ECC40',cap:'#1ca233',acc:'horns',pat:'spots',patCol:'#1ca233'}},
+    {key:'robot', death:'crush', ach:{name:'Aussortiert',desc:'Triff den Roboter.',icon:'robot'},           skin:{name:'Android',body:'#9aa0a6',cap:'#FF3B30',glow:'#FF3B30',pat:'stripes',patCol:'#FF3B30'}},
+    {key:'zombie',death:'eaten', ach:{name:'Infiziert',desc:'Triff den Zombie.',icon:'zombie'},              skin:{name:'Untoter',body:'#7a9b5e',cap:'#9bbe78',pat:'stripes',patCol:'#3d5a2a'}},
     // --- neue Specials ---
     {key:'bodybuilder',mini:'armwrestle',death:'ko',
       label:'Ein Bodybuilder fordert dich zum Armdrücken!',kind:'sport',boom:'GRRR!',vis:'bodybuilder',snd:'sting',
       subText:'Ein riesiger Bodybuilder knallt seinen Arm auf den Tisch.',
-      ach:{name:'Muckis',desc:'Gewinne das Armdrücken.',icon:'💪'}, skin:{name:'Muskelprotz',body:'#FF7A45',cap:'#1A1A2E',glow:'#FF7A45',pat:'belt',patCol:'#1A1A2E'}},
+      ach:{name:'Muckis',desc:'Gewinne das Armdrücken.',icon:'biceps'}, skin:{name:'Muskelprotz',body:'#FF7A45',cap:'#1A1A2E',glow:'#FF7A45',pat:'belt',patCol:'#1A1A2E'}},
     {key:'shark', death:'eaten',
       label:'Ein Hai schnappt mitten auf der Straße nach dir!',kind:'animal',boom:'CHOMP!',vis:'shark',snd:'sting',
       subText:'Ein Hai gleitet durch eine Pfütze direkt auf dich zu.',
-      ach:{name:'Landhai',desc:'Triff den Hai.',icon:'🦈'}, skin:{name:'Hai-Alarm',body:'#5C8AA6',cap:'#EFEFF6',pat:'vstripes',patCol:'#EFEFF6'}},
+      ach:{name:'Landhai',desc:'Triff den Hai.',icon:'shark'}, skin:{name:'Hai-Alarm',body:'#5C8AA6',cap:'#EFEFF6',pat:'vstripes',patCol:'#EFEFF6'}},
     {key:'clown', death:'spook',
       label:'Ein Horror-Clown taucht direkt vor dir auf!',kind:'spooky',boom:'HIHIHI!',vis:'clown',snd:'spooky',
       subText:'Ein grinsender Clown starrt dich aus toten Augen an...',
-      ach:{name:'Spaßbremse',desc:'Triff den Clown.',icon:'🤡'}, skin:{name:'Clownerie',body:'#FF5DA2',cap:'#39FF14',acc:'party',pat:'spots',patCol:'#39FF14'}},
+      ach:{name:'Spaßbremse',desc:'Triff den Clown.',icon:'clown'}, skin:{name:'Clownerie',body:'#FF5DA2',cap:'#39FF14',acc:'party',pat:'spots',patCol:'#39FF14'}},
     {key:'ninja', death:'wasted',
       label:'Ein Ninja springt aus dem Schatten!',kind:'crime',boom:'HYAH!',vis:'ninja',snd:'siren',
       subText:'Ein vermummter Ninja zückt blitzschnell seine Klinge.',
-      ach:{name:'Schattenkrieger',desc:'Triff den Ninja.',icon:'🥷'}, skin:{name:'Ninja',body:'#2b2b33',cap:'#FF3B30',pat:'belt',patCol:'#FF3B30'}},
+      ach:{name:'Schattenkrieger',desc:'Triff den Ninja.',icon:'ninja'}, skin:{name:'Ninja',body:'#2b2b33',cap:'#FF3B30',pat:'belt',patCol:'#FF3B30'}},
     {key:'bear',  death:'eaten',
       label:'Ein Bär stellt sich brüllend vor dir auf!',kind:'animal',boom:'GROAR!',vis:'bear',snd:'spooky',
       subText:'Ein riesiger Bär richtet sich auf und brüllt dich an.',
-      ach:{name:'Bärenstark',desc:'Triff den Bären.',icon:'🐻'}, skin:{name:'Grizzly',body:'#8B5A2B',cap:'#3e2f20',acc:'horns',pat:'belt',patCol:'#3e2f20'}},
+      ach:{name:'Bärenstark',desc:'Triff den Bären.',icon:'bear'}, skin:{name:'Grizzly',body:'#8B5A2B',cap:'#3e2f20',acc:'horns',pat:'belt',patCol:'#3e2f20'}},
     {key:'dragon',death:'crush',
       label:'Ein Drache landet krachend vor dir!',kind:'fire',boom:'FAUCH!',vis:'dragon',snd:'zap',
       subText:'Ein Drache faltet die Flügel zusammen und mustert dich hungrig.',
-      ach:{name:'Drachenzähmer',desc:'Triff den Drachen.',icon:'🐉'}, skin:{name:'Drache',body:'#2ECC40',cap:'#FF3B30',glow:'#2ECC40',pat:'spots',patCol:'#1ca233'}},
+      ach:{name:'Drachenzähmer',desc:'Triff den Drachen.',icon:'dragon'}, skin:{name:'Drache',body:'#2ECC40',cap:'#FF3B30',glow:'#2ECC40',pat:'spots',patCol:'#1ca233'}},
     {key:'pirate',death:'wasted',
       label:'Ein Pirat entert die Straße!',kind:'crime',boom:'ARRR!',vis:'pirate',snd:'siren',
       subText:'Ein Pirat fuchtelt mit dem Säbel: „Wo ist mein Gold?!“',
-      ach:{name:'Landratte',desc:'Triff den Piraten.',icon:'🏴‍☠️'}, skin:{name:'Freibeuter',body:'#8C7B6B',cap:'#1A1A2E',acc:'tophat',pat:'stripes',patCol:'#1A1A2E'}},
+      ach:{name:'Landratte',desc:'Triff den Piraten.',icon:'pirate'}, skin:{name:'Freibeuter',body:'#8C7B6B',cap:'#1A1A2E',acc:'tophat',pat:'stripes',patCol:'#1A1A2E'}},
     {key:'reaper',death:'spook',
       label:'Der Sensenmann winkt dich zu sich!',kind:'spooky',boom:'…',vis:'reaper',snd:'spooky',
       subText:'Eine knochige Hand zeigt direkt auf dich.',
-      ach:{name:'Dem Tod entkommen',desc:'Triff den Sensenmann.',icon:'💀'}, skin:{name:'Sensenmann',body:'#12122a',cap:'#EFEFF6',glow:'#B388FF',pat:'star',patCol:'#B388FF'}},
+      ach:{name:'Dem Tod entkommen',desc:'Triff den Sensenmann.',icon:'skull'}, skin:{name:'Sensenmann',body:'#12122a',cap:'#EFEFF6',glow:'#B388FF',pat:'star',patCol:'#B388FF'}},
     {key:'tank',  death:'crush',
       label:'Ein Panzer rollt auf dich zu!',kind:'tech',boom:'BRRRM!',vis:'tank',snd:'zap',
       subText:'Ein Panzer richtet seinen Lauf genau auf dich.',
-      ach:{name:'Schwer bewaffnet',desc:'Triff den Panzer.',icon:'🪖'}, skin:{name:'Kommandant',body:'#6B8E7F',cap:'#3e2f20',pat:'spots',patCol:'#3e2f20'}},
+      ach:{name:'Schwer bewaffnet',desc:'Triff den Panzer.',icon:'helmet'}, skin:{name:'Kommandant',body:'#6B8E7F',cap:'#3e2f20',pat:'spots',patCol:'#3e2f20'}},
     {key:'demon', death:'spook',
       label:'Ein Dämon steigt aus dem Asphalt!',kind:'spooky',boom:'RAAAH!',vis:'demon',snd:'spooky',
       subText:'Der Boden reißt auf und ein Dämon klettert heraus.',
-      ach:{name:'Höllisch',desc:'Triff den Dämon.',icon:'😈'}, skin:{name:'Dämon',body:'#E63946',cap:'#1A1A2E',acc:'horns',glow:'#FF3B30',pat:'bolt',patCol:'#1A1A2E'}},
+      ach:{name:'Höllisch',desc:'Triff den Dämon.',icon:'devil'}, skin:{name:'Dämon',body:'#E63946',cap:'#1A1A2E',acc:'horns',glow:'#FF3B30',pat:'bolt',patCol:'#1A1A2E'}},
     // --- Minigame-Specials wie der Bodybuilder ---
     {key:'sprinter',mini:'race',death:'wasted',
       label:'Ein Sprinter fordert dich zum Wettrennen!',kind:'sport',boom:'ZISCH!',vis:'sprinter',snd:'sting',
       subText:'Ein Sprinter dehnt sich neben dir: „Bis zur Laterne. Jetzt.“',
-      ach:{name:'Zielfoto',desc:'Gewinne das Wettrennen gegen den Sprinter.',icon:'🏁'}, skin:{name:'Sprinter',body:'#19C3C3',cap:'#FF3B30',pat:'vstripes',patCol:'#FFF6E5'}},
+      ach:{name:'Zielfoto',desc:'Gewinne das Wettrennen gegen den Sprinter.',icon:'flag'}, skin:{name:'Sprinter',body:'#19C3C3',cap:'#FF3B30',pat:'vstripes',patCol:'#FFF6E5'}},
     {key:'oma',mini:'tug',death:'ko',
       label:'Eine Kraft-Oma fordert dich zum Tauziehen!',kind:'sport',boom:'HAU-RUCK!',vis:'oma',snd:'sting',
       subText:'Eine Oma spuckt in die Hände und hebt das Seil auf.',
-      ach:{name:'Hau-Ruck',desc:'Gewinne das Tauziehen gegen die Oma.',icon:'🧓'}, skin:{name:'Kraft-Oma',body:'#B5838D',cap:'#EFEFF6',acc:'glasses',pat:'scarf',patCol:'#EFEFF6'}},
+      ach:{name:'Hau-Ruck',desc:'Gewinne das Tauziehen gegen die Oma.',icon:'grandma'}, skin:{name:'Kraft-Oma',body:'#B5838D',cap:'#EFEFF6',acc:'glasses',pat:'scarf',patCol:'#EFEFF6'}},
     {key:'sheriff',mini:'duel',death:'jail',
       label:'Der Sheriff fordert dich zum Blick-Duell!',kind:'crime',boom:'PENG!',vis:'sheriff',snd:'siren',
       subText:'High Noon: Der Sheriff starrt dich an. Keiner blinzelt.',
-      ach:{name:'Schneller Finger',desc:'Gewinne das Duell gegen den Sheriff.',icon:'🤠'}, skin:{name:'Sheriff',body:'#8B5A2B',cap:'#C8956A',acc:'cowboy',pat:'star',patCol:'#FFD23F'}}
+      ach:{name:'Schneller Finger',desc:'Gewinne das Duell gegen den Sheriff.',icon:'cowboy'}, skin:{name:'Sheriff',body:'#8B5A2B',cap:'#C8956A',acc:'cowboy',pat:'star',patCol:'#FFD23F'}}
   ];
   function setupSpecials(){
     for(const d of SPECIAL_DEFS){
@@ -1007,7 +1110,7 @@
     achShowing=true; const a=achQueue.shift();
     const t=document.getElementById('achToast');
     if(!t){ achShowing=false; return; }
-    document.getElementById('achToastIcon').textContent=a.icon;
+    document.getElementById('achToastIcon').innerHTML=ic(a.icon);
     document.getElementById('achToastName').textContent=a.name;
     const rw=[];
     if(a.coins) rw.push('+'+a.coins+' Münzen');
@@ -1028,6 +1131,8 @@
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
+  // Zeichnet ein Symbol aus dem Icon-Sprite. Ersetzt ueberall die frueheren Emojis.
+  function ic(name,cls){ return '<svg class="ic'+(cls?' '+cls:'')+'"><use href="#i-'+name+'"/></svg>'; }
   function rand(a,b){return a+Math.random()*(b-a);}
   function pick(a){return a[(Math.random()*a.length)|0];}
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
@@ -1376,7 +1481,7 @@
       const wrongIdx=[]; excuseSet.forEach((e,i)=>{ if(!e.ok) wrongIdx.push(i); });
       const reveal=Math.min(hintCharges,wrongIdx.length-1); // mind. 1 falsche bleibt verdeckt
       for(let r=0;r<reveal;r++){ const k=(Math.random()*wrongIdx.length)|0, idx=wrongIdx.splice(k,1)[0];
-        btns[idx].classList.add('wrong'); btns[idx].textContent='🚫 '+btns[idx].textContent; }
+        btns[idx].classList.add('wrong'); btns[idx].insertAdjacentHTML('afterbegin',ic('ban')+' '); }
       hintCharges-=reveal; updateHintHUD();
     }
     document.getElementById('caughtSub').textContent=specialMode
@@ -1398,11 +1503,11 @@
       // nur die Buchstaben-Anzahl verraten \u2013 Wortl\u00e4nge muss eindeutig sein
       const hw=cands.find(w=>!wrongLens.has(w.length));
       if(hw){
-        pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit einem Wort mit <b>'+hw.length+' Buchstaben</b> \u2026\u201c';
+        pendingHint=ic('speech')+' Jemand aus der Menge fl\u00fcstert: \u201eSag was mit einem Wort mit <b>'+hw.length+' Buchstaben</b> \u2026\u201c';
       } else {
         // Fallback: eindeutiges Wort, dann Anfangsbuchstabe + L\u00e4nge
         const fw=cands.find(w=>!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(w.toLowerCase())>=0));
-        if(fw) pendingHint='\ud83d\udcac Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+fw[0]+'\u2026\u2018 ('+fw.length+' Buchstaben)</b> \u2026\u201c';
+        if(fw) pendingHint=ic('speech')+' Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+fw[0]+'\u2026\u2018 ('+fw.length+' Buchstaben)</b> \u2026\u201c';
       }
       const lb=document.getElementById('listenBtn');
       lb.disabled=!pendingHint;
@@ -1442,8 +1547,8 @@
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
     SND.setTrack('game');
-    const r=bribed?['Geschmiert! 💰','Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']:pick(REACTIONS);
-    document.getElementById('reactTitle').textContent=r[0];
+    const r=bribed?['Geschmiert! '+ic('moneybag'),'Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']:pick(REACTIONS);
+    document.getElementById('reactTitle').innerHTML=r[0];
     document.getElementById('reactText').textContent=r[1];
     show('reaction'); state=ST.REACT; reactTimer=1.5;
     endAlarm(); chaosTimer=Math.max(2.5,diff().chaosInterval*0.6); updateHUD();
@@ -1452,18 +1557,18 @@
   const MINI_DEFS={
     armwrestle:{ mode:'spam', title:'ARMDRÜCKEN!', desc:'Spam-klicke so schnell du kannst, um den Bodybuilder wegzudrücken!', btn:'DRÜCKEN!',
       start:0.55, time:7.5, decay:0.26, gain:0.068,
-      winT:'BUFF! 💪', winX:'Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.',
+      winT:'BUFF! '+ic('biceps'), winX:'Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.',
       loseMsg:'Der Bodybuilder hat dich plattgemacht.' },
     race:{ mode:'spam', title:'WETTRENNEN!', desc:'Tippe so schnell du kannst und erreiche das Ziel vor dem Sprinter!', btn:'RENNEN!',
       start:0.35, time:5.5, decay:0.34, gain:0.048,
-      winT:'ZIELFOTO! 🏁', winX:'Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.',
+      winT:'ZIELFOTO! '+ic('flag'), winX:'Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.',
       loseMsg:'Der Sprinter hat dich stehen lassen.' },
     tug:{ mode:'spam', title:'TAUZIEHEN!', desc:'Zieh! Aber Vorsicht: Die Oma reißt immer wieder kräftig am Seil!', btn:'ZIEHEN!',
       start:0.58, time:8.0, decay:0.19, gain:0.066, yank:true,
-      winT:'HAU-RUCK! 💪', winX:'Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.',
+      winT:'HAU-RUCK! '+ic('biceps'), winX:'Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.',
       loseMsg:'Die Oma hat dich quer über die Straße geschleift.' },
     duel:{ mode:'duel', title:'BLICK-DUELL!', desc:'Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.', btn:'WARTEN…',
-      winT:'BLITZSCHNELL! ⚡', winX:'Du warst schneller als der Sheriff! Er tippt anerkennend an den Hut. +40s Speed-Boost.',
+      winT:'BLITZSCHNELL! '+ic('bolt'), winX:'Du warst schneller als der Sheriff! Er tippt anerkennend an den Hut. +40s Speed-Boost.',
       loseMsg:'Der Sheriff war schneller als dein Schatten.',
       earlyMsg:'Zu früh gezuckt – der Sheriff grinst und legt dir Handschellen an.' }
   };
@@ -1530,7 +1635,7 @@
       if(!save.minisWon[mk]){ save.minisWon[mk]=true; persist(); }
       if(['armwrestle','race','tug','duel'].every(k=>save.minisWon[k])) unlockAch('mini_all'); }
     score+=200+streetsCleared*5; speedBuff=SPEED_BUFF_DUR; updateBuffHUD();
-    document.getElementById('reactTitle').textContent=mini.def.winT;
+    document.getElementById('reactTitle').innerHTML=mini.def.winT;
     document.getElementById('reactText').textContent=mini.def.winX;
     show('reaction'); state=ST.REACT; reactTimer=1.9;
     caughtWasSpecial=false; bumpCD=1.2; SND.setTrack('game');
@@ -1541,11 +1646,11 @@
     caughtWasSpecial=true; endGame(msg||mini.def.loseMsg);
   }
   function updateBuffHUD(){ const el=document.getElementById('buffChip'); if(!el) return;
-    el.classList.toggle('hidden',!(speedBuff>0)); if(speedBuff>0) el.textContent='⚡ '+Math.ceil(speedBuff)+'s'; }
+    el.classList.toggle('hidden',!(speedBuff>0)); if(speedBuff>0) el.innerHTML=ic('bolt')+' '+Math.ceil(speedBuff)+'s'; }
   function updateMagnetHUD(){ const el=document.getElementById('magnetChip'); if(!el) return;
-    el.classList.toggle('hidden',!(magnetTime>0)); if(magnetTime>0) el.textContent='🧲 '+Math.ceil(magnetTime)+'s'; }
+    el.classList.toggle('hidden',!(magnetTime>0)); if(magnetTime>0) el.innerHTML=ic('magnet')+' '+Math.ceil(magnetTime)+'s'; }
   function updateHintHUD(){ const el=document.getElementById('hintChip'); if(!el) return;
-    el.classList.toggle('hidden',!(hintCharges>0)); if(hintCharges>0) el.textContent='🔍 '+hintCharges; }
+    el.classList.toggle('hidden',!(hintCharges>0)); if(hintCharges>0) el.innerHTML=ic('search')+' '+hintCharges; }
   function addPickFx(x,y,txt,col){ pickFx.push({x,y,txt,col,t:0}); if(pickFx.length>12) pickFx.shift(); }
   function applyItem(it){
     const def=ITEMS[it.type]; SND.play('powerup');
@@ -1635,7 +1740,7 @@
     for(const u of UPGRADES){
       const lvl=upLvl(u.key), val=u.base+lvl*u.step, maxed=lvl>=u.max;
       const row=document.createElement('div'); row.className='pwr';
-      const ico=document.createElement('div'); ico.className='pico'; ico.textContent=u.icon; row.appendChild(ico);
+      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic(u.icon); row.appendChild(ico);
       const info=document.createElement('div'); info.className='pinfo';
       let dots=''; for(let d=0;d<u.max;d++) dots+='<span class="ud'+(d<lvl?' on':'')+'"></span>';
       info.innerHTML='<div class="pname">'+u.name+'</div><div class="pdesc">'+u.desc+' &middot; jetzt <b>'+val+u.unit+'</b></div><div class="upBar">'+dots+'</div>';
@@ -1643,9 +1748,9 @@
       const btn=document.createElement('button'); btn.className='pbtn';
       if(maxed){ btn.textContent='MAX'; btn.classList.add('cant'); }
       else { const cost=upCost(lvl);
-        if(save.coins>=cost){ btn.textContent=cost+' 🪙'; btn.onclick=()=>{ if(save.coins<cost) return; save.coins-=cost; save.upgrades[u.key]=lvl+1; persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup');
+        if(save.coins>=cost){ btn.innerHTML=cost+' '+ic('coin'); btn.onclick=()=>{ if(save.coins<cost) return; save.coins-=cost; save.upgrades[u.key]=lvl+1; persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup');
           unlockAch('upgrade_1'); if(lvl+1>=u.max) unlockAch('upgrade_max'); }; }
-        else { btn.textContent=cost+' 🪙'; btn.classList.add('cant'); } }
+        else { btn.innerHTML=cost+' '+ic('coin'); btn.classList.add('cant'); } }
       row.appendChild(btn); wrap.appendChild(row);
     }
   }
@@ -1655,7 +1760,7 @@
     if(pw){
       pw.innerHTML='';
       const row=document.createElement('div'); row.className='pwr';
-      const ico=document.createElement('div'); ico.className='pico'; ico.textContent='🎫'; row.appendChild(ico);
+      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic('ticket'); row.appendChild(ico);
       const info=document.createElement('div'); info.className='pinfo';
       info.innerHTML='<div class="pname">Spezial-Ticket</div><div class="pdesc">Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.</div>'
         +(save.specialTokens>0?'<div class="pown">Im Vorrat: '+save.specialTokens+'</div>':'');
@@ -1680,7 +1785,7 @@
       const btn=document.createElement('button'); btn.className='sbtn';
       if(sel){ btn.textContent='Ausgew\u00e4hlt'; btn.classList.add('sel'); }
       else if(owned){ btn.textContent='Ausw\u00e4hlen'; btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderSkins(); }; }
-      else if(sk.unlock){ btn.textContent='\ud83d\udd12 Erfolg'; btn.classList.add('cant'); nm.textContent=sk.name+' \ud83d\udd12'; }
+      else if(sk.unlock){ btn.innerHTML=ic('lock')+' Erfolg'; btn.classList.add('cant'); nm.innerHTML=sk.name+' '+ic('lock'); }
       else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI();
         unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }; }
       else { btn.textContent=sk.price+' M\u00fcnzen'; btn.classList.add('cant'); }
@@ -1689,7 +1794,7 @@
   }
   let achSel='';
   function achRewardText(a){
-    const rw=[]; if(a.coins) rw.push(a.coins+' 🪙');
+    const rw=[]; if(a.coins) rw.push(a.coins+' '+ic('coin'));
     const sk=a.skin?(SKINS.find(s=>s.id===a.skin)||{}).name:'';
     if(sk) rw.push('Skin „'+sk+'“');
     return rw.join(' + ');
@@ -1705,10 +1810,10 @@
     const rw=achRewardText(a);
     el.className='achDetail on'+(got?'':' locked');
     el.style.setProperty('--tc',t.col);
-    el.innerHTML='<div class="adIco">'+a.icon+'</div><div class="adTxt">'
+    el.innerHTML='<div class="adIco">'+ic(a.icon)+'</div><div class="adTxt">'
       +'<div class="adName">'+a.name+'</div><div class="adDesc">'+a.desc+'</div>'
       +(rw?'<div class="adRw">Belohnung: '+rw+'</div>':'')
-      +'</div><div class="adStat">'+(got?'✅':'🔒')+'</div>';
+      +'</div><div class="adStat">'+ic(got?'check':'lock')+'</div>';
   }
   // Fredoka ist nicht auf jedem Gerät verfügbar, und die Ersatzschrift ist breiter. Namen,
   // deren längstes Wort nicht in die Kachel passt, werden deshalb gemessen und verkleinert –
@@ -1762,9 +1867,9 @@
       for(const a of items){ if(save.achievements&&save.achievements[a.id]){ done++; earned+=a.coins||0; } }
       doneAll+=done; total+=items.length;
       const sec=document.createElement('div'); sec.className='achTier t'+t.tier; sec.style.setProperty('--tc',t.col);
-      sec.innerHTML='<div class="tierHead"><span class="tierIco">'+t.icon+'</span>'
+      sec.innerHTML='<div class="tierHead"><span class="tierIco">'+ic(t.icon)+'</span>'
         +'<span class="tierName">'+t.name+'</span>'
-        +'<span class="tierStars">'+'★'.repeat(t.tier)+'☆'.repeat(5-t.tier)+'</span>'
+        +'<span class="tierStars">'+ic('star').repeat(t.tier)+ic('star-o').repeat(5-t.tier)+'</span>'
         +'<span class="tierCount">'+done+'/'+items.length+'</span></div>'
         +'<div class="tierBar"><i data-w="'+Math.round(done/items.length*100)+'" style="width:0%"></i></div>'
         +'<div class="tierHint">'+t.hint+'</div>';
@@ -1777,10 +1882,10 @@
         if(!reduceMotion){ b.style.animationDelay=(0.04+Math.min(idx,13)*0.03)+'s';
           b.style.setProperty('--sd',(idx%9)*0.62+'s'); }
         idx++;
-        b.innerHTML='<div class="aico">'+a.icon+'</div><div class="aname">'+a.name+'</div>'
-          +(a.coins?'<div class="arw">'+a.coins+' 🪙</div>':'')
-          +'<div class="astat">'+(got?'✅':'🔒')+'</div>'
-          +(a.skin?'<div class="askin">👕</div>':'');
+        b.innerHTML='<div class="aico">'+ic(a.icon)+'</div><div class="aname">'+a.name+'</div>'
+          +(a.coins?'<div class="arw">'+a.coins+' '+ic('coin')+'</div>':'')
+          +'<div class="astat">'+ic(got?'check':'lock')+'</div>'
+          +(a.skin?'<div class="askin">'+ic('shirt')+'</div>':'');
         b.onclick=()=>{
           const prev=list.querySelector('.ach.sel'); if(prev) prev.classList.remove('sel');
           if(achSel===a.id){ achSel=''; showAchDetail(null); }
@@ -1794,7 +1899,7 @@
     const sum=document.getElementById('achSummary');
     if(sum) sum.innerHTML='<div class="asRow"><span class="asBig">'+doneAll+'</span>'
       +'<span class="asOf">von '+total+' Erfolgen</span>'
-      +'<span class="asCoins">'+earned+' 🪙 kassiert</span></div>'
+      +'<span class="asCoins">'+earned+' '+ic('coin')+' kassiert</span></div>'
       +'<div class="asBar"><i data-w="'+(total?Math.round(doneAll/total*100):0)+'" style="width:0%"></i></div>';
     showAchDetail(null);
     fitAchNames(list);
@@ -3085,10 +3190,10 @@
   }
   function setAmbientHUD(){
     const el=document.getElementById('ambientChip'); if(!el) return;
-    const di=dayClock<0.44?'☀️':(dayClock<0.6?'🌇':(dayClock<0.9?'🌙':'🌅'));
-    const wi=weatherIntensity>0.18?({rain:'🌧️',snow:'❄️',fog:'🌫️'}[weatherType]||''):'';
-    const txt=di+(wi?(' '+wi):'');
-    if(txt!==ambientLast){ ambientLast=txt; el.textContent=txt; }
+    const di=dayClock<0.44?'sun':(dayClock<0.6?'sunset':(dayClock<0.9?'moon':'sunrise'));
+    const wi=weatherIntensity>0.18?({rain:'rain',snow:'snow',fog:'fog'}[weatherType]||''):'';
+    const txt=di+(wi?('|'+wi):'');
+    if(txt!==ambientLast){ ambientLast=txt; el.innerHTML=ic(di)+(wi?' '+ic(wi):''); }
   }
   function drawShield(){
     const t=performance.now()/1000, r=27+Math.sin(t*6)*2.2, px=player.x, py=player.y-2;
@@ -3098,11 +3203,21 @@
     ctx.beginPath(); ctx.arc(px,py,r,0,6.283); ctx.stroke();
     ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=2;
     for(let i=0;i<3;i++){ const a=t*2+i*2.094; ctx.beginPath(); ctx.arc(px,py,r,a,a+0.5); ctx.stroke(); }
-    const sec=Math.max(1,Math.ceil(spawnProtect));
-    ctx.font='800 15px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.lineWidth=3.5; ctx.lineJoin='round'; ctx.strokeStyle=INK; ctx.strokeText('🛡 '+sec,px,py-r-12);
-    ctx.fillStyle='#BFE3FF'; ctx.fillText('🛡 '+sec,px,py-r-12);
-    ctx.restore();
+    const sec=Math.max(1,Math.ceil(spawnProtect)), ty=py-r-12;
+    ctx.font='800 15px Fredoka,sans-serif'; ctx.textBaseline='middle';
+    ctx.textAlign='left'; ctx.lineJoin='round';
+    const tw=ctx.measureText(''+sec).width, gw=13, gx=px-(gw+4+tw)/2, tx=gx+gw+4;
+    ctx.lineWidth=2.6; ctx.strokeStyle=INK;
+    shieldShape(gx+gw/2,ty,gw,15); ctx.fillStyle='#3A86FF'; ctx.fill(); ctx.stroke();
+    ctx.lineWidth=3.5; ctx.strokeText(''+sec,tx,ty); ctx.fillStyle='#BFE3FF'; ctx.fillText(''+sec,tx,ty);
+    ctx.textAlign='center'; ctx.restore();
+  }
+  // Wappen-Umriss fuer das Schild-Symbol auf der Canvas-Ebene
+  function shieldShape(cx,cy,w,h){
+    const l=cx-w/2, r2=cx+w/2, t=cy-h/2, b=cy+h/2;
+    ctx.beginPath(); ctx.moveTo(cx,t); ctx.lineTo(r2,t+h*0.17); ctx.lineTo(r2,cy+h*0.05);
+    ctx.quadraticCurveTo(r2,b,cx,b); ctx.quadraticCurveTo(l,b,l,cy+h*0.05);
+    ctx.lineTo(l,t+h*0.17); ctx.closePath();
   }
   const KIND_COL={crime:'#FF5D5D',accident:'#FF7A45',media:'#FFD23F',spooky:'#B388FF',alien:'#7CFF8E',nature:'#19C3C3',tech:'#9aa0a6',animal:'#C77DFF',fire:'#FF7A45',sport:'#FFB300'};
   // einzigartige Hintergrund-Effekte pro Special-Event
@@ -3328,7 +3443,10 @@
     const ts=0.92+0.08*Math.sin(now/110); ctx.scale(ts,ts);
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.font='800 13px Fredoka,sans-serif'; ctx.fillStyle=col;
-    ctx.fillText('★  SPECIAL EVENT  ★',0,-26);
+    ctx.fillText('SPECIAL EVENT',0,-26);
+    const lw=ctx.measureText('SPECIAL EVENT').width/2+13;
+    ctx.lineWidth=2; ctx.strokeStyle=col;
+    starShape(-lw,-26,5.5); starShape(lw,-26,5.5);
     ctx.font='800 20px Fredoka,sans-serif'; ctx.lineWidth=5; ctx.lineJoin='round';
     ctx.strokeStyle='#0a0a14'; ctx.strokeText(currentEvent.label,0,2);
     ctx.fillStyle='#FFF6E5'; ctx.fillText(currentEvent.label,0,2);
@@ -3517,7 +3635,7 @@
 
   const muteBtn=document.getElementById('muteBtn'), muteBtn2=document.getElementById('muteBtn2');
   function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted);
-    if(muteBtn2) muteBtn2.textContent=save.muted?'🔇':'🔊'; }
+    if(muteBtn2) muteBtn2.innerHTML=ic(save.muted?'sound-off':'sound-on'); }
   function toggleMute(){ save.muted=!save.muted; persist(); refreshMute(); if(!save.muted){ SND.ensure(); SND.play('click'); } }
   muteBtn.onclick=toggleMute; if(muteBtn2) muteBtn2.onclick=toggleMute;
 
