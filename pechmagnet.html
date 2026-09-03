@@ -69,6 +69,8 @@
   @keyframes cardOut{ to{opacity:0; transform:translateY(14px) scale(.97);} }
   @media (prefers-reduced-motion: reduce){
     .screen.pop, .screen.pop>*, .screen.closing, .screen.closing>*{ animation:none !important; }
+    .tierHead, .tierIco, .tierStars, .tierBar i, .asBar i::after, .ach, .ach .aico, .ach::after,
+    .achDetail, .achDetail .adIco{ animation:none !important; }
   }
   .card{ background:var(--cream); border:4px solid var(--ink); border-radius:22px; box-shadow:8px 8px 0 var(--ink);
     padding:22px 20px; width:100%; max-width:360px; }
@@ -258,49 +260,116 @@
   .asBar{ height:9px; margin-top:6px; background:rgba(255,255,255,.10);
     border:2px solid rgba(255,255,255,.18); border-radius:7px; overflow:hidden; }
   .asBar i{ display:block; height:100%; border-radius:5px 0 0 5px;
-    background:linear-gradient(90deg,var(--safe),var(--gold)); transition:width .35s ease; }
+    background-color:var(--gold); background-image:linear-gradient(90deg,var(--safe),var(--gold));
+    transition:width .7s cubic-bezier(.2,.9,.3,1); position:relative; overflow:hidden; }
+  .asBar i::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+    background-size:52px 100%; background-repeat:no-repeat; animation:barSheen 2.6s linear infinite; }
 
   .achTier{ margin-top:18px; }
-  /* Kapitel-Balken wie ein aufgeschlagenes Register: Linie drueber, Linie drunter */
-  .tierHead{ display:flex; align-items:center; gap:7px; padding:6px 2px; text-align:left;
-    border-top:3px solid var(--tc); border-bottom:3px solid var(--tc); }
-  .tierIco{ font-size:18px; line-height:1; }
+  /* Kapitel-Balken wie ein Absperrband: Linie drueber, Linie drunter, schraffierter Grund,
+     der ganz langsam durchlaeuft. */
+  .tierHead{ display:flex; align-items:center; gap:7px; padding:6px 4px; text-align:left;
+    border-top:3px solid var(--tc); border-bottom:3px solid var(--tc);
+    background-image:linear-gradient(90deg, rgba(255,255,255,.09), transparent 62%),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,.028) 0 8px, transparent 8px 16px);
+    background-size:100% 100%, 22.7px 22.7px;
+    animation:tapeDrift 7s linear infinite; }
+  @keyframes tapeDrift{ from{background-position:0 0,0 0;} to{background-position:0 0,22.7px 0;} }
+  /* jede Stufe hat ihr eigenes Zappeln im Symbol */
+  .tierIco{ font-size:18px; line-height:1; display:inline-block; transform-origin:50% 85%; }
+  .achTier.t1 .tierIco{ animation:tSway 3.4s ease-in-out infinite; }
+  .achTier.t2 .tierIco{ animation:tZap 2.4s steps(1,end) infinite; }
+  .achTier.t3 .tierIco{ animation:tFlame 1.4s ease-in-out infinite alternate; }
+  .achTier.t4 .tierIco{ animation:tPulse 2.1s ease-in-out infinite; }
+  .achTier.t5 .tierIco{ animation:tCrown 2.9s ease-in-out infinite; }
+  @keyframes tSway{ 0%,100%{transform:rotate(-10deg);} 50%{transform:rotate(10deg);} }
+  @keyframes tZap{ 0%,86%{opacity:1;} 88%{opacity:.2;} 90%{opacity:1;} 93%{opacity:.35;} 95%,100%{opacity:1;} }
+  @keyframes tFlame{ from{transform:scale(1) translateY(0);} to{transform:scale(1.16) translateY(-2px);} }
+  @keyframes tPulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.18);} }
+  @keyframes tCrown{ 0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-3px) rotate(5deg);} }
   .tierName{ font-size:12.5px; font-weight:700; letter-spacing:1.4px; color:var(--tc); }
   .tierStars{ font-size:9.5px; letter-spacing:.5px; color:var(--tc); opacity:.7; }
+  .achTier.t5 .tierStars{ animation:starTwinkle 1.8s ease-in-out infinite alternate; }
+  @keyframes starTwinkle{ from{opacity:.45;} to{opacity:1; text-shadow:0 0 6px var(--tc);} }
   .tierCount{ margin-left:auto; font-size:11px; font-weight:700; color:var(--cream);
     background:rgba(255,255,255,.08); border:2px solid var(--tc); border-radius:9px; padding:1px 7px; }
   .tierBar{ height:5px; margin:6px 0 3px; background:rgba(255,255,255,.10); border-radius:4px; overflow:hidden; }
-  .tierBar i{ display:block; height:100%; background:var(--tc); transition:width .3s ease; }
+  /* Balken laeuft beim Oeffnen auf und bekommt einen wandernden Lichtschein */
+  .tierBar i{ display:block; height:100%; background:var(--tc); transition:width .55s cubic-bezier(.2,.9,.3,1);
+    background-image:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+    background-size:44px 100%; background-repeat:no-repeat; animation:barSheen 2.6s linear infinite; }
+  @keyframes barSheen{ from{background-position:-50px 0;} to{background-position:calc(100% + 50px) 0;} }
   .tierHint{ font-size:10.5px; color:var(--cream); opacity:.55; text-align:left; margin-bottom:8px; }
 
   .achGrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .ach{ position:relative; pointer-events:auto; cursor:pointer; font-family:inherit; overflow:hidden;
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:2px;
     min-height:104px; padding:13px 4px 8px; text-align:center;
-    background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.16); border-radius:14px;
-    transition:transform .06s, border-color .12s, background .12s; }
+    background-color:rgba(255,255,255,.07);
+    /* feines Diagonalgewebe, damit die Flaeche nicht tot wirkt */
+    background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 6px, transparent 6px 13px);
+    border:2px solid rgba(255,255,255,.16); border-radius:14px;
+    transition:transform .06s, border-color .12s, background-color .12s;
+    animation:achIn .34s cubic-bezier(.2,1.5,.4,1) backwards; }
+  @keyframes achIn{ from{opacity:0; transform:translateY(14px) scale(.86);} to{opacity:1; transform:none;} }
   /* Farbkante oben zeigt, zu welcher Stufe die Kachel gehoert */
-  .ach::before{ content:''; position:absolute; left:0; right:0; top:0; height:5px; background:var(--tc); }
+  .ach::before{ content:''; position:absolute; left:0; right:0; top:0; height:5px; background:var(--tc); z-index:1; }
   .ach .aico{ font-size:27px; line-height:1.05; }
   .ach .aname{ font-size:10px; font-weight:700; line-height:1.15; color:var(--cream);
     hyphens:auto; overflow-wrap:break-word; max-width:100%; }
   .ach .arw{ font-size:9.5px; font-weight:700; color:var(--gold); margin-top:auto; }
-  .ach .astat{ position:absolute; top:8px; right:5px; font-size:10px; line-height:1; }
-  .ach .askin{ position:absolute; top:8px; left:5px; font-size:10px; line-height:1; }
+  .ach .astat{ position:absolute; top:8px; right:5px; font-size:10px; line-height:1; z-index:1; }
+  .ach .askin{ position:absolute; top:8px; left:5px; font-size:10px; line-height:1; z-index:1; }
   .ach:active{ transform:translate(1px,1px); }
-  .ach.locked{ background:rgba(255,255,255,.03); }
+  .ach.locked{ background-color:rgba(255,255,255,.03); }
   .ach.locked::before{ opacity:.35; }
   .ach.locked .aico{ filter:grayscale(1); opacity:.4; }
   .ach.locked .aname{ opacity:.5; }
   .ach.locked .arw{ opacity:.45; }
-  .ach.got{ background:rgba(255,255,255,.12); border-color:var(--tc); }
-  .ach.sel{ border-color:var(--cream); background:rgba(255,246,229,.18); box-shadow:0 0 0 2px rgba(255,246,229,.35); }
+  /* Freigeschaltet: Kachel glimmt in der Stufenfarbe, das Symbol wippt ... */
+  .ach.got{ background-color:rgba(255,255,255,.12); border-color:var(--tc);
+    box-shadow:inset 0 0 22px -8px var(--tc); }
+  .ach.got .aico{ animation:achBob 2.8s ease-in-out infinite; }
+  @keyframes achBob{ 0%,100%{transform:translateY(0) rotate(-4deg);} 50%{transform:translateY(-2.5px) rotate(4deg);} }
+  /* ... und ein Glanzstreifen wandert wie ueber einen Sticker darueber */
+  .ach.got::after{ content:''; position:absolute; top:-30%; bottom:-30%; left:-55%; width:42%;
+    pointer-events:none; background:linear-gradient(100deg, transparent, rgba(255,255,255,.32), transparent);
+    transform:skewX(-18deg) translateX(0);
+    animation-name:achShine; animation-duration:6s; animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite; animation-delay:var(--sd,0s); }
+  @keyframes achShine{ 0%,74%{transform:skewX(-18deg) translateX(0);} 93%,100%{transform:skewX(-18deg) translateX(390%);} }
+  .ach.sel{ border-color:var(--cream); background-color:rgba(255,246,229,.18);
+    animation:achSel 1.1s ease-in-out infinite alternate; }
+  @keyframes achSel{ from{outline:2px solid rgba(255,246,229,.5); outline-offset:0;}
+                     to{outline:2px solid rgba(255,246,229,.12); outline-offset:3px;} }
+  .ach.locked.sel .astat{ display:inline-block; animation:lockShake .5s ease; }
+  @keyframes lockShake{ 0%,100%{transform:rotate(0);} 25%{transform:rotate(-16deg);} 50%{transform:rotate(14deg);} 75%{transform:rotate(-8deg);} }
+
+  /* Textur je Stufe: von schlichtem Gewebe bis Sternenstaub in der Legenden-Stufe */
+  .achTier.t3 .ach{ background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 6px, transparent 6px 13px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.010) 0 6px, transparent 6px 13px); }
+  .achTier.t4 .ach{ background-image:radial-gradient(rgba(255,255,255,.035) 1px, transparent 1.2px);
+    background-size:10px 10px; }
+  .achTier.t5 .ach{ background-image:
+    radial-gradient(circle at 24% 20%, rgba(255,255,255,.10) 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 72% 64%, rgba(255,255,255,.08) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 50% 88%, rgba(255,255,255,.07) 0 .9px, transparent 1.3px),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 6px, transparent 6px 13px);
+    animation:achIn .34s cubic-bezier(.2,1.5,.4,1) backwards, dustDrift 9s linear infinite; }
+  @keyframes dustDrift{ from{background-position:0 0,0 0,0 0,0 0;} to{background-position:0 -34px,0 -26px,0 -30px,0 0;} }
 
   /* Details bleiben beim Scrollen unten stehen – auf der Kachel ist kein Platz dafuer */
-  .achDetail{ position:sticky; bottom:-2px; z-index:2; margin-top:14px;
+  .achDetail{ position:sticky; bottom:-2px; z-index:3; margin-top:14px;
     display:flex; align-items:center; gap:10px; text-align:left; min-height:52px;
-    background:#16162e; border:3px solid rgba(255,255,255,.18); border-radius:14px; padding:8px 10px; }
-  .achDetail.on{ border-color:var(--tc); }
+    background-color:#16162e;
+    background-image:repeating-linear-gradient(-45deg, rgba(255,255,255,.016) 0 6px, transparent 6px 13px);
+    border:3px solid rgba(255,255,255,.18); border-radius:14px; padding:8px 10px;
+    box-shadow:0 6px 14px rgba(0,0,0,.45); transition:border-color .2s; }
+  .achDetail.on{ border-color:var(--tc); animation:adPop .26s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes adPop{ from{transform:translateY(8px) scale(.97); opacity:.4;} to{transform:none; opacity:1;} }
+  .achDetail.on .adIco{ animation:adIco .5s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes adIco{ from{transform:scale(.4) rotate(-25deg);} to{transform:none;} }
   .achDetail .adHint{ font-size:11px; color:var(--cream); opacity:.55; line-height:1.25; }
   .achDetail .adIco{ font-size:26px; line-height:1; }
   .achDetail.on.locked .adIco{ filter:grayscale(1); opacity:.5; }
@@ -1654,12 +1723,33 @@
       let fs=10;
       while(fs>7){
         ctx.font='700 '+fs+'px '+fam;
-        if(words.every(w=>ctx.measureText(w).width<=maxW)) break;
+        if(words.every(w=>ctx.measureText(w).width<=maxW-2)) break;
         fs-=0.5;
       }
       if(fs<10) n.style.fontSize=fs+'px';
     }
     ctx.restore();
+  }
+  // Balken von 0 auflaufen lassen und die grosse Zahl hochzaehlen – sonst steht die
+  // Uebersicht beim Oeffnen einfach fertig da.
+  function animateAchBars(list,doneAll){
+    const bars=[...list.querySelectorAll('.tierBar i')], sum=document.querySelector('.asBar i');
+    const num=document.querySelector('.asBig');
+    if(reduceMotion){
+      for(const b of bars) b.style.width=b.dataset.w+'%';
+      if(sum) sum.style.width=sum.dataset.w+'%';
+      return;
+    }
+    if(num){ num.textContent='0';
+      const t0=performance.now();
+      (function step(now){ const k=Math.min(1,(now-t0)/700);
+        num.textContent=Math.round(doneAll*(1-Math.pow(1-k,3)));
+        if(k<1) requestAnimationFrame(step); })(t0);
+    }
+    requestAnimationFrame(()=>{
+      if(sum) sum.style.width=sum.dataset.w+'%';
+      bars.forEach((b,i)=>{ b.style.transitionDelay=(0.14+i*0.1)+'s'; b.style.width=b.dataset.w+'%'; });
+    });
   }
   function renderAchievements(){
     const list=document.getElementById('achList'); if(!list) return;
@@ -1671,17 +1761,22 @@
       let done=0;
       for(const a of items){ if(save.achievements&&save.achievements[a.id]){ done++; earned+=a.coins||0; } }
       doneAll+=done; total+=items.length;
-      const sec=document.createElement('div'); sec.className='achTier'; sec.style.setProperty('--tc',t.col);
+      const sec=document.createElement('div'); sec.className='achTier t'+t.tier; sec.style.setProperty('--tc',t.col);
       sec.innerHTML='<div class="tierHead"><span class="tierIco">'+t.icon+'</span>'
         +'<span class="tierName">'+t.name+'</span>'
         +'<span class="tierStars">'+'★'.repeat(t.tier)+'☆'.repeat(5-t.tier)+'</span>'
         +'<span class="tierCount">'+done+'/'+items.length+'</span></div>'
-        +'<div class="tierBar"><i style="width:'+Math.round(done/items.length*100)+'%"></i></div>'
+        +'<div class="tierBar"><i data-w="'+Math.round(done/items.length*100)+'" style="width:0%"></i></div>'
         +'<div class="tierHint">'+t.hint+'</div>';
       const grid=document.createElement('div'); grid.className='achGrid';
+      let idx=0;
       for(const a of items){
         const got=!!(save.achievements&&save.achievements[a.id]);
         const b=document.createElement('button'); b.type='button'; b.className='ach '+(got?'got':'locked');
+        // Kacheln poppen versetzt herein, die Glanzstreifen laufen zeitversetzt durch
+        if(!reduceMotion){ b.style.animationDelay=(0.04+Math.min(idx,13)*0.03)+'s';
+          b.style.setProperty('--sd',(idx%9)*0.62+'s'); }
+        idx++;
         b.innerHTML='<div class="aico">'+a.icon+'</div><div class="aname">'+a.name+'</div>'
           +(a.coins?'<div class="arw">'+a.coins+' 🪙</div>':'')
           +'<div class="astat">'+(got?'✅':'🔒')+'</div>'
@@ -1700,9 +1795,10 @@
     if(sum) sum.innerHTML='<div class="asRow"><span class="asBig">'+doneAll+'</span>'
       +'<span class="asOf">von '+total+' Erfolgen</span>'
       +'<span class="asCoins">'+earned+' 🪙 kassiert</span></div>'
-      +'<div class="asBar"><i style="width:'+(total?Math.round(doneAll/total*100):0)+'%"></i></div>';
+      +'<div class="asBar"><i data-w="'+(total?Math.round(doneAll/total*100):0)+'" style="width:0%"></i></div>';
     showAchDetail(null);
     fitAchNames(list);
+    animateAchBars(list,doneAll);
   }
   function updateZoneHUD(){ const z=currentZone(player.y); if(z&&z.name!==lastZoneName){ document.getElementById('scene').textContent=z.name; lastZoneName=z.name; } }
   function setSusBar(){ const f=document.getElementById('susFill'); f.style.width=suspicion+'%';
