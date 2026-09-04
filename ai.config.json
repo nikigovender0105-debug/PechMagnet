@@ -1,0 +1,8 @@
+{
+  "_hinweis": "Bewertung der selbst getippten Ausreden. Ohne erreichbaren Endpunkt bewertet das Spiel lokal weiter - es bleibt also immer spielbar.",
+  "enabled": true,
+  "mode": "anthropic",
+  "endpoint": "https://api.anthropic.com/v1/messages",
+  "model": "claude-sonnet-4-6",
+  "timeoutMs": 6000
+}
