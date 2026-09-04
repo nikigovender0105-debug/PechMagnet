@@ -6,13 +6,15 @@
   "scripts": {
     "copy": "node scripts/copy-web.js",
     "build": "npm run copy",
-    "sync": "npm run build && cap sync",
+    "sync": "npm run build && cap sync && npm run admob",
     "open:android": "npm run sync && cap open android",
     "open:ios": "npm run sync && cap open ios",
-    "add:android": "npm run build && cap add android",
-    "add:ios": "npm run build && cap add ios"
+    "add:android": "npm run build && cap add android && npm run admob",
+    "add:ios": "npm run build && cap add ios && npm run admob",
+    "admob": "node scripts/patch-admob.js"
   },
   "dependencies": {
+    "@capacitor-community/admob": "^6.0.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/core": "^6.0.0",
     "@capacitor/ios": "^6.0.0"

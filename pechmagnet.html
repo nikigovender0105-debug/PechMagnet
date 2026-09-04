@@ -48,6 +48,11 @@
   .screen{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:16px; padding:24px; text-align:center; background:rgba(14,14,26,.35); backdrop-filter:blur(2px); }
   .hidden{ display:none !important; }
+  /* Werbebanner (nur native App): schiebt die Menue-Inhalte um seine Hoehe nach oben */
+  :root{ --adH:0px; }
+  #menu, #shop, #skins, #achievements{ padding-bottom:calc(24px + var(--adH)); }
+  .btn.adBtn{ background:var(--teal); color:var(--ink); font-size:17px; padding:10px 18px; }
+  .btn.adBtn:disabled{ opacity:.6; cursor:default; }
   /* ---- Screen-Wechsel-Animationen ---- */
   .screen.pop{ animation:screenIn .22s ease; }
   @keyframes screenIn{ from{opacity:0;} to{opacity:1;} }
@@ -113,6 +118,7 @@
   /* ---- Survivor.io-Lobby ---- */
   #menu.lobby{ justify-content:flex-end; gap:10px; padding:12px;
     background:linear-gradient(rgba(14,14,26,.20), rgba(14,14,26,.30) 55%, rgba(14,14,26,.62)); }
+  #menu.lobby{ padding-bottom:calc(12px + var(--adH)); }   /* Platz fuer das Werbebanner */
   .topbar{ position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; z-index:2; }
   .plate{ display:flex; align-items:center; gap:6px; background:rgba(18,18,38,.92); border:3px solid var(--ink);
     border-radius:14px; padding:4px 10px; color:var(--cream); font-weight:700; box-shadow:0 3px 0 rgba(0,0,0,.4); }
@@ -666,6 +672,9 @@
         <div id="board" class="board"></div>
       </div>
     </div>
+    <div class="btnrow hidden" id="rewardRow">
+      <button class="btn adBtn" id="rewardBtn"></button>
+    </div>
     <div class="btnrow">
       <button class="btn go" id="retryBtn">NOCHMAL</button>
       <button class="btn" id="homeBtn">MEN&Uuml;</button>
@@ -681,6 +690,116 @@
   </button>
 </div>
 
+<!--ADMOB_CONFIG-->
+<script>
+/* ---------- Werbung: Google AdMob ----------
+   Laeuft ausschliesslich in der nativen App (Capacitor + @capacitor-community/admob).
+   Im Browser gibt es kein Capacitor -> alles ist ein stiller No-Op, damit pechmagnet.html
+   weiterhin einfach per Doppelklick spielbar bleibt.
+   IDs, Frequenz und Belohnung stehen in admob.config.json und werden beim Build injiziert. */
+window.ADS=(function(){
+  const cfg=window.ADMOB_CONFIG||{};
+  const cap=window.Capacitor;
+  const plat=(cap&&cap.getPlatform)?cap.getPlatform():'web';
+  const plugin=(cap&&cap.isNativePlatform&&cap.isNativePlatform()&&cap.Plugins)?cap.Plugins.AdMob:null;
+  const testing=cfg.testing!==false;
+  const MENUS=['menu','shop','skins','achievements'];   // hier laeuft das Banner
+  let initP=null, banner=false, bannerMade=false, interReady=false, rewardReady=false;
+  let overs=0, rewarded=false, lastH=0, syncT=null;
+  const readyCbs=[];
+
+  function unit(kind){ const u=(cfg.adUnits||{})[kind]; return u?(u[plat]||u.android||null):null; }
+
+  // Jeder Plugin-Aufruf ist gekapselt: Werbung darf das Spiel niemals zum Absturz bringen.
+  function call(name,opts){
+    try{
+      if(!plugin||typeof plugin[name]!=='function') return Promise.resolve(null);
+      return Promise.resolve(plugin[name](opts||{})).catch(()=>null);
+    }catch(e){ return Promise.resolve(null); }
+  }
+  function setAdHeight(px){
+    const h=Math.max(0,parseInt(px,10)||0);
+    if(h) lastH=h;                                // Hoehe merken: beim Wiedereinblenden meldet das Banner sie nicht erneut
+    document.documentElement.style.setProperty('--adH',h+'px');
+  }
+  function fireReady(){ for(const cb of readyCbs){ try{ cb(); }catch(e){} } }
+
+  async function prepInter(){
+    const adId=unit('interstitial'); if(!adId) return;
+    interReady=!!(await call('prepareInterstitial',{adId,isTesting:testing}));
+  }
+  async function prepReward(){
+    const adId=unit('rewarded'); if(!adId) return;
+    rewardReady=!!(await call('prepareRewardVideoAd',{adId,isTesting:testing}));
+    if(rewardReady) fireReady();
+  }
+
+  function init(){ return initP||(initP=doInit()); }   // genau ein Anlauf, auch bei Fehlern
+
+  async function doInit(){
+    if(!plugin) return;
+    await call('initialize',{initializeForTesting:testing});
+    // Einwilligung: in der EU (DSGVO) Pflicht, sonst darf nicht personalisiert ausgeliefert werden.
+    const consent=await call('requestConsentInfo');
+    if(plat==='ios'){
+      const t=await call('trackingAuthorizationStatus');
+      if(t&&t.status==='notDetermined') await call('requestTrackingAuthorization');
+    }
+    if(consent&&consent.isConsentFormAvailable&&consent.status==='REQUIRED') await call('showConsentForm');
+    try{ plugin.addListener('bannerAdSizeChanged',s=>setAdHeight(s&&s.height)); }catch(e){}
+    try{ plugin.addListener('onRewardedVideoAdReward',()=>{ rewarded=true; }); }catch(e){}
+    prepInter(); prepReward();
+  }
+
+  // Banner nur in den Menue-Screens – nie waehrend eines Laufs.
+  // Gebuendelt, weil ein Screen-Wechsel hide()+show() direkt hintereinander aufruft.
+  function syncBanner(){
+    if(!plugin) return;
+    if(syncT) clearTimeout(syncT);
+    syncT=setTimeout(()=>{ syncT=null; applyBanner(); },60);
+  }
+  async function applyBanner(){
+    const want=MENUS.some(id=>{ const e=document.getElementById(id);
+      return e&&!e.classList.contains('hidden')&&!e.classList.contains('closing'); });
+    if(want===banner) return;
+    banner=want;                                  // vor dem await setzen: verhindert doppelte Aufrufe
+    if(!want){ await call('hideBanner'); setAdHeight(0); return; }
+    const adId=unit('banner'); if(!adId){ banner=false; return; }
+    await init();                                 // niemals Werbung vor der Einwilligung anfordern
+    if(!banner) return;                           // in der Zwischenzeit ist das Menue schon wieder weg
+    if(bannerMade){ await call('resumeBanner'); setAdHeight(lastH); return; }
+    const res=await call('showBanner',{adId,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:testing});
+    bannerMade=(res!==null);
+  }
+
+  // Vollbild-Anzeige nach dem Game-Over – nur bei jedem n-ten Lauf, sonst nervt es.
+  function onGameOver(){
+    if(!plugin) return;
+    overs++;
+    const every=Math.max(1,cfg.interstitialEveryNthGameOver||1);
+    if(overs%every!==0) return;
+    if(!interReady){ prepInter(); return; }
+    interReady=false;
+    setTimeout(async()=>{ await call('showInterstitial'); prepInter(); },700);  // kurz warten: Punkte erst lesen lassen
+  }
+
+  function rewardAvailable(){ return !!plugin&&rewardReady&&!!unit('rewarded')&&(cfg.rewardedCoins||0)>0; }
+
+  // Freiwilliges Video. Liefert true, wenn die Belohnung wirklich verdient wurde.
+  async function showReward(){
+    if(!rewardAvailable()) return false;
+    rewardReady=false; rewarded=false;
+    const timeout=new Promise(r=>setTimeout(()=>r(null),180000));   // Notbremse, falls nichts zurueckkommt
+    const item=await Promise.race([call('showRewardVideoAd'),timeout]);
+    prepReward();
+    return rewarded||!!(item&&(item.amount||item.type));
+  }
+
+  return { init, syncBanner, onGameOver, rewardAvailable, showReward,
+           coins:()=>cfg.rewardedCoins||0,
+           onReady:cb=>{ readyCbs.push(cb); } };
+})();
+</script>
 <script>
 "use strict";
 (function(){
@@ -1718,6 +1837,7 @@
     renderBoard(document.getElementById('board'),entry); renderBoard(document.getElementById('boardMenu'),entry);
     updateCoinUI();
     hide('dialog'); hide('reaction'); show('gameover');
+    rewardTaken=false; syncRewardBtn(); ADS.onGameOver();
   }
 
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
@@ -3689,17 +3809,42 @@
     el.classList.remove('closing','hidden');
     el.classList.remove('pop'); void el.offsetWidth;   // Reflow, damit die Animation neu startet
     el.classList.add('pop');
+    ADS.syncBanner();
   }
   function hide(id){
     const el=document.getElementById(id); if(!el) return;
     if(el.classList.contains('hidden')) return;
-    if(reduceMotion){ el.classList.add('hidden'); el.classList.remove('pop','closing'); return; }
+    if(reduceMotion){ el.classList.add('hidden'); el.classList.remove('pop','closing'); ADS.syncBanner(); return; }
     el.classList.add('closing');
+    ADS.syncBanner();
     if(el._hideT) clearTimeout(el._hideT);
     el._hideT=setTimeout(()=>{ el.classList.add('hidden'); el.classList.remove('closing','pop'); el._hideT=null; },170);
   }
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
+  // ---------- Rewarded-Video: freiwillig Muenzen verdienen ----------
+  let rewardTaken=false;
+  function syncRewardBtn(){
+    const row=document.getElementById('rewardRow'), btn=document.getElementById('rewardBtn');
+    if(!row||!btn) return;
+    const ok=ADS.rewardAvailable()&&!rewardTaken;
+    row.classList.toggle('hidden',!ok);
+    if(ok){ btn.disabled=false; btn.innerHTML=ic('play')+' VIDEO: +'+ADS.coins()+' M\u00dcNZEN'; }
+  }
+  ADS.onReady(()=>{ const go=document.getElementById('gameover');
+    if(go&&!go.classList.contains('hidden')) syncRewardBtn(); });
+  document.getElementById('rewardBtn').onclick=async()=>{
+    const btn=document.getElementById('rewardBtn');
+    if(rewardTaken||btn.disabled) return;
+    SND.play('click'); btn.disabled=true; btn.innerHTML='VIDEO L\u00c4DT \u2026';
+    const ok=await ADS.showReward();
+    if(!ok){ syncRewardBtn(); return; }
+    rewardTaken=true;
+    const n=ADS.coins(); save.coins+=n; persist(); updateCoinUI(); SND.play('coin');
+    const gc=document.getElementById('goCoins'); if(gc) gc.textContent=gc.textContent+' +'+n;
+    btn.innerHTML=ic('coin')+' +'+n+' ERHALTEN';
+    setTimeout(()=>{ const r=document.getElementById('rewardRow'); if(r) r.classList.add('hidden'); },1400);
+  };
   document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
@@ -3728,6 +3873,7 @@
     }
     const nm=document.getElementById('meSkinName'); if(nm) nm.textContent=curSkin.name;
   }
+  ADS.init();
   loadSave(); applySkin(); refreshMute(); SND.setTrack('menu');
   highscore=save.scores.length?save.scores[0].score:0;
   updateHUD(); updateCoinUI(); renderBoard(document.getElementById('boardMenu'),null);

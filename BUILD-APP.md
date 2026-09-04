@@ -24,6 +24,9 @@ npx cap add android    # legt das Android-Projekt an
 npx cap add ios        # legt das iOS-Projekt an (nur auf dem Mac nötig)
 ```
 
+> Für Werbung vorher die IDs in `admob.config.json` eintragen – siehe **Abschnitt 6**.
+> Ohne Änderung läuft die App mit Google-Testanzeigen.
+
 ---
 
 ## 3. Android-App bauen
@@ -64,7 +67,83 @@ Dann in Android Studio / Xcode erneut bauen.
 
 ---
 
-## 6. In die Stores hochladen
+## 6. Werbung (Google AdMob)
+
+Das Spiel bringt AdMob über das Plugin `@capacitor-community/admob` mit. **Im Browser
+passiert nichts** – Werbung läuft nur in der gebauten App. `pechmagnet.html` bleibt also
+weiterhin einfach per Doppelklick spielbar.
+
+### Was eingebaut ist
+
+| Format | Wo | Verhalten |
+|--------|----|-----------|
+| **Banner** | Menü, Shop, Skins, Erfolge | Unten angedockt; die Menüs machen automatisch Platz. Nie während eines Laufs. |
+| **Interstitial** | nach dem Game-Over | Nur bei jedem **3.** Lauf, mit kurzer Verzögerung, damit die Punkte zuerst lesbar sind. |
+| **Rewarded** | Game-Over-Screen | Freiwilliger Button „VIDEO: +100 MÜNZEN". Erscheint nur, wenn wirklich ein Video geladen ist. |
+
+Einwilligung (**DSGVO/UMP**) und **App-Tracking-Transparency** (iOS) werden beim App-Start
+automatisch abgefragt, bevor die erste Anzeige angefordert wird.
+
+### Einrichten
+
+1. Konto auf https://apps.admob.com anlegen, dort **App registrieren** (Android und iOS
+   sind zwei getrennte Apps) und je **Anzeigenblock** für Banner, Interstitial und Rewarded
+   erstellen.
+2. Die IDs in **`admob.config.json`** eintragen – das ist die **einzige** Stelle dafür:
+
+   ```json
+   {
+     "testing": false,
+     "appId": {
+       "android": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
+       "ios":     "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"
+     },
+     "adUnits": {
+       "banner":       { "android": "ca-app-pub-…/…", "ios": "ca-app-pub-…/…" },
+       "interstitial": { "android": "ca-app-pub-…/…", "ios": "ca-app-pub-…/…" },
+       "rewarded":     { "android": "ca-app-pub-…/…", "ios": "ca-app-pub-…/…" }
+     },
+     "interstitialEveryNthGameOver": 3,
+     "rewardedCoins": 100
+   }
+   ```
+
+3. Plugin installieren und synchronisieren:
+
+   ```bash
+   npm install
+   npm run sync
+   ```
+
+`npm run sync` erledigt danach alles selbst: Spiel nach `www/` kopieren, die IDs in die
+Seite injizieren, `cap sync`, und über `scripts/patch-admob.js` die **App-ID in
+`AndroidManifest.xml` und `Info.plist`** schreiben (inkl. `AD_ID`-Berechtigung für
+Android 13+ und `NSUserTrackingUsageDescription` für iOS). Das Script ist idempotent und
+läuft auch nach einem neuen `npx cap add android` wieder mit.
+
+### `testing`-Schalter
+
+- `"testing": true` (Standard) → **immer Google-Testanzeigen**, egal welche IDs eingetragen sind.
+- `"testing": false` → echte Anzeigen. Erst kurz vor der Store-Veröffentlichung umstellen.
+
+> ⚠️ **Niemals mit echten IDs selbst auf die eigenen Anzeigen klicken** – das gilt als
+> Klickbetrug und führt zur Sperrung des AdMob-Kontos. Zum Testen immer `testing: true`.
+
+### Fürs Veröffentlichen nötig
+
+- **Play Store:** Im Store-Eintrag „Enthält Werbung" angeben, Datenschutzerklärung
+  verlinken und im Data-Safety-Formular die Werbe-ID deklarieren.
+- **App Store:** Unter „App Privacy" die Datenerfassung für Werbung angeben.
+- Eine **Datenschutzerklärung ist mit Werbung Pflicht** – ohne sie wird die App abgelehnt.
+
+### Werbung wieder abschalten
+
+`admob.config.json` löschen (oder umbenennen) und `npm run build` – dann wird ohne
+Werbe-Konfiguration gebaut und alle Anzeigen-Aufrufe laufen ins Leere.
+
+---
+
+## 7. In die Stores hochladen
 
 | Store | Konto | Datei | Hinweis |
 |------|-------|-------|---------|
