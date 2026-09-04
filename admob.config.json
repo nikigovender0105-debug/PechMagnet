@@ -28,8 +28,14 @@
   "interstitialEveryNthGameOver": 3,
   "_interstitialEveryNthGameOver": "Vollbild-Anzeige nur bei jedem n-ten Game-Over (1 = jedes Mal).",
 
-  "rewardedCoins": 100,
-  "_rewardedCoins": "Muenzen fuer ein freiwillig angesehenes Rewarded-Video.",
+  "doubleRunCoins": true,
+  "_doubleRunCoins": "Game-Over: freiwilliges Video verdoppelt die im Lauf gesammelten Muenzen.",
+
+  "shopAdCoins": 250,
+  "_shopAdCoins": "Muenzen fuer die Werbe-Aktion im Shop.",
+
+  "shopAdMinSeconds": 30,
+  "_shopAdMinSeconds": "So viele Sekunden Werbung muessen dafuer zusammenkommen. Kuerzere Videos werden addiert.",
 
   "iosTrackingMessage": "Wir nutzen deine Daten, um dir passendere Werbung zu zeigen."
 }

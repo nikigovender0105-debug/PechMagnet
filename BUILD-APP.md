@@ -79,7 +79,17 @@ weiterhin einfach per Doppelklick spielbar.
 |--------|----|-----------|
 | **Banner** | Menü, Shop, Skins, Erfolge | Unten angedockt; die Menüs machen automatisch Platz. Nie während eines Laufs. |
 | **Interstitial** | nach dem Game-Over | Nur bei jedem **3.** Lauf, mit kurzer Verzögerung, damit die Punkte zuerst lesbar sind. |
-| **Rewarded** | Game-Over-Screen | Freiwilliger Button „VIDEO: +100 MÜNZEN". Erscheint nur, wenn wirklich ein Video geladen ist. |
+| **Rewarded 1** | Game-Over-Screen | Button „MÜNZEN VERDOPPELN: +X" – **verdoppelt die im Lauf gesammelten Münzen**. Nur wenn es überhaupt etwas zu verdoppeln gibt. |
+| **Rewarded 2** | Shop, Abschnitt „GRATIS MÜNZEN" | „Werbe-Video" für **250 Münzen**, sobald **mindestens 30 Sekunden** Werbung zusammengekommen sind. |
+
+Beide Rewarded-Buttons erscheinen nur, wenn wirklich ein Video geladen ist.
+
+**Zur 30-Sekunden-Regel:** Wie lang ein Video ist, bestimmt Google – das lässt sich nicht
+anfordern. Das Spiel misst deshalb die **tatsächlich angesehene Zeit** und zählt sie
+zusammen: zwei 15-Sekunden-Videos ergeben also auch die Belohnung, und übrige Sekunden
+bleiben für den nächsten Anlauf stehen (im Shop als „Angesehen: 15 / 30 Sek." sichtbar).
+Ein **abgebrochenes** Video bringt keine Sekunden – gezählt wird nur, was AdMob als
+verdiente Belohnung bestätigt.
 
 Einwilligung (**DSGVO/UMP**) und **App-Tracking-Transparency** (iOS) werden beim App-Start
 automatisch abgefragt, bevor die erste Anzeige angefordert wird.
@@ -104,7 +114,9 @@ automatisch abgefragt, bevor die erste Anzeige angefordert wird.
        "rewarded":     { "android": "ca-app-pub-…/…", "ios": "ca-app-pub-…/…" }
      },
      "interstitialEveryNthGameOver": 3,
-     "rewardedCoins": 100
+     "doubleRunCoins": true,
+     "shopAdCoins": 250,
+     "shopAdMinSeconds": 30
    }
    ```
 
@@ -120,6 +132,15 @@ Seite injizieren, `cap sync`, und über `scripts/patch-admob.js` die **App-ID in
 `AndroidManifest.xml` und `Info.plist`** schreiben (inkl. `AD_ID`-Berechtigung für
 Android 13+ und `NSUserTrackingUsageDescription` für iOS). Das Script ist idempotent und
 läuft auch nach einem neuen `npx cap add android` wieder mit.
+
+### Stellschrauben
+
+| Schlüssel | Bedeutung |
+|-----------|-----------|
+| `interstitialEveryNthGameOver` | Vollbild-Anzeige nur bei jedem n-ten Game-Over (`1` = jedes Mal). |
+| `doubleRunCoins` | `false` schaltet das Verdoppeln nach dem Lauf ab. |
+| `shopAdCoins` | Münzen für die Werbe-Aktion im Shop (`0` blendet sie aus). |
+| `shopAdMinSeconds` | Nötige Werbesekunden dafür. |
 
 ### `testing`-Schalter
 

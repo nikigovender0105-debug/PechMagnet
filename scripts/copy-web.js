@@ -20,7 +20,9 @@ function adsConfigScript() {
     testing: cfg.testing !== false,
     adUnits: cfg.adUnits || {},
     interstitialEveryNthGameOver: cfg.interstitialEveryNthGameOver || 1,
-    rewardedCoins: cfg.rewardedCoins || 0
+    doubleRunCoins: cfg.doubleRunCoins !== false,
+    shopAdCoins: cfg.shopAdCoins || 0,
+    shopAdMinSeconds: cfg.shopAdMinSeconds || 0
   };
   // "<" maskieren, damit der JSON-Inhalt das <script>-Tag nicht vorzeitig beenden kann
   const json = JSON.stringify(client).replace(/</g, '\\u003c');
