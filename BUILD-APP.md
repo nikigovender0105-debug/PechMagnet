@@ -80,7 +80,7 @@ weiterhin einfach per Doppelklick spielbar.
 | **Banner** | Menü, Shop, Skins, Erfolge | Unten angedockt; die Menüs machen automatisch Platz. Nie während eines Laufs. |
 | **Interstitial** | nach dem Game-Over | Nur bei jedem **3.** Lauf, mit kurzer Verzögerung, damit die Punkte zuerst lesbar sind. |
 | **Rewarded 1** | Game-Over-Screen | Button „MÜNZEN VERDOPPELN: +X" – **verdoppelt die im Lauf gesammelten Münzen**. Nur wenn es überhaupt etwas zu verdoppeln gibt. |
-| **Rewarded 2** | Shop: Werbe-Kachel in der Fußleiste **und** das grüne „+" an der Münzanzeige | Beide starten dasselbe Video: **250 Münzen**, sobald **mindestens 30 Sekunden** Werbung zusammengekommen sind. Das „+" erscheint nur, wenn ein Video bereitsteht. |
+| **Rewarded 2** | Shop: quadratische Werbe-Kachel unter dem Spezial-Ticket **und** das grüne „+" an der Münzanzeige | Beide starten dasselbe Video: **250 Münzen**, sobald **mindestens 30 Sekunden** Werbung zusammengekommen sind. Das „+" erscheint nur, wenn ein Video bereitsteht. |
 
 Beide Rewarded-Buttons erscheinen nur, wenn wirklich ein Video geladen ist.
 
