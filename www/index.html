@@ -50,7 +50,7 @@
   .hidden{ display:none !important; }
   /* Werbebanner (nur native App): schiebt die Menue-Inhalte um seine Hoehe nach oben */
   :root{ --adH:0px; }
-  #menu, #shop, #skins, #achievements{ padding-bottom:calc(24px + var(--adH)); }
+  #menu, #skins, #achievements{ padding-bottom:calc(24px + var(--adH)); }
   .btn.adBtn{ background:var(--teal); color:var(--ink); font-size:17px; padding:10px 18px; }
   .btn.adBtn:disabled{ opacity:.6; cursor:default; }
   /* ---- Screen-Wechsel-Animationen ---- */
@@ -92,20 +92,129 @@
     background:repeating-linear-gradient(-35deg, rgba(255,210,63,.07) 0 26px, rgba(124,92,255,.07) 26px 52px);
     animation:stripeMove 4.5s linear infinite; }
   /* ---- Untermenüs im Lobby-Look ---- */
-  #shop, #skins, #achievements{ background:linear-gradient(rgba(14,14,26,.55), rgba(14,14,26,.72)); }
-  #shop .card, #skins .card, #achievements .card{
+  #skins, #achievements{ background:linear-gradient(rgba(14,14,26,.55), rgba(14,14,26,.72)); }
+  #skins .card, #achievements .card{
     position:relative; z-index:1; background:rgba(16,16,34,.94); border-color:var(--ink);
     box-shadow:0 5px 0 rgba(0,0,0,.45); color:var(--cream); }
   .mtitle{ font-size:24px; color:var(--gold); letter-spacing:1.5px; margin-bottom:4px; }
   #shop .shopSecTitle{ color:var(--teal); }
-  #shop .pwr, #skins .skin{
-    background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); box-shadow:none; }
-  #shop .pwr .pname, #skins .skin .sname{ color:var(--cream); }
-  #shop .pwr .pdesc{ color:var(--cream); opacity:.72; }
+  #skins .skin{ background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); box-shadow:none; }
+  #skins .skin .sname{ color:var(--cream); }
+
+  /* ================= SHOP: Marktbude ================= */
+  #shop{ padding:0; gap:0; justify-content:flex-start; overflow:hidden;
+    background:
+      radial-gradient(130% 55% at 50% 0%, rgba(124,92,255,.30), rgba(14,14,26,0) 72%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 3px, rgba(0,0,0,0) 3px 52px),   /* Dielen */
+      linear-gradient(rgba(14,14,26,.62), rgba(20,14,40,.88)); }
+  /* Markise als Kopfband */
+  .shopHead{ position:relative; z-index:3; flex-shrink:0; width:100%;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:calc(9px + env(safe-area-inset-top)) 14px 11px;
+    background:repeating-linear-gradient(90deg, var(--danger) 0 26px, var(--cream) 26px 52px);
+    border-bottom:4px solid var(--ink); box-shadow:0 5px 0 rgba(0,0,0,.4); }
+  .shopHead::after{ content:''; position:absolute; left:0; right:0; bottom:-13px; height:13px;
+    background:radial-gradient(circle at 13px 0, var(--ink) 12px, rgba(0,0,0,0) 13px) 0 0/26px 26px repeat-x; }
+  .shopTitle{ display:flex; align-items:center; gap:7px; font-size:22px; font-weight:700; letter-spacing:2px;
+    color:var(--gold); background:var(--ink); border:3px solid var(--ink); border-radius:12px; padding:5px 13px;
+    box-shadow:0 3px 0 rgba(0,0,0,.45); }
+  .shopTitle .ic{ width:22px; height:22px; }
+  .shopPurse{ display:flex; align-items:center; gap:6px; font-size:19px; font-weight:700; color:var(--gold);
+    background:var(--ink); border:3px solid var(--ink); border-radius:999px; padding:5px 13px 5px 9px;
+    box-shadow:0 3px 0 rgba(0,0,0,.45); }
+  .shopPurse .ic{ width:21px; height:21px; animation:coinFlip 3.4s ease-in-out infinite; }
+  @keyframes coinFlip{ 0%,68%{transform:rotateY(0);} 84%{transform:rotateY(180deg) scaleX(.6);} 100%{transform:rotateY(360deg);} }
+  .shopPurse.bump{ animation:purseBump .5s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes purseBump{ 0%{transform:scale(1);} 35%{transform:scale(1.16);} 100%{transform:scale(1);} }
+  /* Scrollbereich */
+  .shopScroll{ position:relative; z-index:1; flex:1; width:100%; overflow-y:auto; touch-action:pan-y;
+    padding:16px 12px 14px; display:flex; flex-direction:column; gap:9px; }
+  .shopTab{ align-self:stretch; text-align:left; font-size:12px; font-weight:700; letter-spacing:2.5px; color:var(--ink);
+    background:linear-gradient(90deg, var(--gold), var(--warn));
+    border:3px solid var(--ink); border-radius:12px; padding:6px 14px; box-shadow:4px 4px 0 var(--ink); }
+  .shopRule{ height:4px; margin:8px 2px 4px; border-radius:4px; flex-shrink:0;
+    background:repeating-linear-gradient(90deg, var(--ink) 0 12px, rgba(0,0,0,0) 12px 20px); opacity:.7; }
+  /* Warenzeilen: Papier mit Schraffur-Textur */
+  #shop .pwr{ position:relative; overflow:hidden; background:linear-gradient(180deg,#fffdf3,#f0e6cf);
+    border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); }
+  #shop .pwr.slide{ animation:rowIn .34s cubic-bezier(.2,1.35,.4,1) backwards; animation-delay:calc(var(--i,0) * 45ms); }
+  #shop .pwr::before{ content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(-45deg, rgba(26,26,46,.055) 0 5px, rgba(0,0,0,0) 5px 11px); }
+  #shop .pwr>*{ position:relative; z-index:1; }
+  @keyframes rowIn{ from{opacity:0; transform:translateX(-26px) rotate(-1deg);} to{opacity:1; transform:none;} }
+  #shop .pwr.flash{ animation:rowFlash .6s ease; }
+  @keyframes rowFlash{ 0%{box-shadow:4px 4px 0 var(--ink), 0 0 0 0 rgba(255,179,0,.9);}
+    40%{box-shadow:4px 4px 0 var(--ink), 0 0 0 12px rgba(255,179,0,0); background:#fff6d8;}
+    100%{box-shadow:4px 4px 0 var(--ink), 0 0 0 0 rgba(255,179,0,0);} }
+  #shop .pwr .pico{ width:34px; text-align:center; }
+  #shop .pwr .pico .ic{ width:28px; height:28px; }
+  .pbtn.buy{ animation:btnPulse 1.2s ease-in-out infinite alternate; }
+  .pbtn.nope{ animation:nope .32s ease; }
+  @keyframes nope{ 0%,100%{transform:none;} 20%{transform:translateX(-5px);} 60%{transform:translateX(5px);} }
+  /* Spezial-Kasten */
+  #shop .specialBox{ position:relative; overflow:hidden; display:flex; align-items:center; gap:11px; padding:12px;
+    border:4px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
+    background:linear-gradient(135deg,#4b2fb8,#8f6bff 46%,#4b2fb8);
+    animation:specGlow 2.6s ease-in-out infinite alternate; }
+  @keyframes specGlow{ from{filter:drop-shadow(0 0 0 rgba(255,179,0,0));} to{filter:drop-shadow(0 0 10px rgba(255,179,0,.55));} }
+  #shop .specialBox::before{ content:''; position:absolute; inset:-60%; pointer-events:none;
+    background:conic-gradient(from 0deg, rgba(255,255,255,.18) 0 10deg, rgba(255,255,255,0) 10deg 34deg);
+    animation:specSpin 11s linear infinite; }
+  #shop .specialBox::after{ content:''; position:absolute; top:0; bottom:0; left:-45%; width:38%; pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.38), rgba(255,255,255,0));
+    animation:sheen 3.6s ease-in-out infinite; }
+  @keyframes specSpin{ to{transform:rotate(360deg);} }
+  @keyframes sheen{ 0%{left:-45%;} 55%,100%{left:115%;} }
+  #shop .specialBox>*{ position:relative; z-index:1; }
+  #shop .specialBox .pico .ic{ width:38px; height:38px; }
+  #shop .specialBox .pname{ font-size:15.5px; color:var(--gold); letter-spacing:.5px; padding-right:54px; }
+  #shop .specialBox .pdesc{ font-size:11.5px; color:var(--cream); opacity:.9; line-height:1.25; }
+  #shop .specialBox .pown{ font-size:11px; color:var(--warn); font-weight:700; margin-top:2px; }
+  #shop .specialBox .pbtn{ background:var(--ink); color:var(--gold); border-color:var(--ink); border-width:3px; }
+  #shop .specialBox .specTag{ position:absolute; top:0; right:0; z-index:2; font-size:8.5px; font-weight:700;
+    letter-spacing:1px; color:var(--ink); background:var(--warn); padding:2px 7px 2px 8px;
+    border-bottom-left-radius:9px; border-left:3px solid var(--ink); border-bottom:3px solid var(--ink); }
+  /* Fussleiste mit Werbe-Kachel */
+  .shopFoot{ position:relative; z-index:3; flex-shrink:0; width:100%; display:flex; align-items:center; gap:11px;
+    padding:10px 14px calc(10px + var(--adH)) 64px;
+    background:linear-gradient(rgba(14,14,26,.35), rgba(14,14,26,.9)); border-top:3px solid var(--ink); }
+  .shopFoot .btn.go{ flex:1; font-size:18px; padding:11px 18px; }
+  .adTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex-shrink:0; position:relative; overflow:hidden;
+    width:72px; height:72px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    background:linear-gradient(180deg,#20d5d5,#12a3a3); color:var(--ink); border:3px solid var(--ink);
+    border-radius:14px; box-shadow:3px 3px 0 var(--ink); padding:4px 3px 6px;
+    animation:tilePop .4s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes tilePop{ from{transform:scale(.6); opacity:0;} to{transform:none; opacity:1;} }
+  .adTile:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
+  .adTile.ready{ animation:tileGlow 1.5s ease-in-out infinite alternate; }
+  @keyframes tileGlow{ from{box-shadow:3px 3px 0 var(--ink);} to{box-shadow:3px 3px 0 var(--ink), 0 0 12px rgba(25,195,195,.85);} }
+  .adTile .ic{ width:20px; height:20px; }
+  .adTile .atCap{ font-size:8px; font-weight:700; letter-spacing:1px; opacity:.85; }
+  .adTile .atVal{ font-size:13px; font-weight:700; }
+  .adTile .atBar{ width:46px; height:5px; border:2px solid var(--ink); border-radius:4px; background:rgba(26,26,46,.25); overflow:hidden; }
+  .adTile .atBar i{ display:block; height:100%; background:var(--gold); }
+  .adTile.busy{ background:linear-gradient(180deg,#8d8d99,#6f6f7a); animation:none; }
+  /* Kurznachricht ueber der Fussleiste */
+  .shopToast{ position:absolute; left:12px; right:12px; bottom:calc(96px + var(--adH)); z-index:4; pointer-events:none;
+    text-align:center; font-size:12.5px; font-weight:700; color:var(--ink); background:var(--warn);
+    border:3px solid var(--ink); border-radius:12px; padding:7px 10px; box-shadow:3px 3px 0 var(--ink);
+    animation:toastIn .3s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes toastIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
+  /* Fliegende Muenzen beim Kauf */
+  .flyCoin{ position:absolute; z-index:50; pointer-events:none; width:22px; height:22px;
+    transition:transform .55s cubic-bezier(.4,-.3,.6,1), opacity .55s ease; }
+  .flyCoin .ic{ width:22px; height:22px; }
+  #shop.pop .shopHead{ animation:topIn .32s cubic-bezier(.2,1.2,.4,1) backwards; }
+  #shop.pop .shopFoot{ animation:navIn .3s cubic-bezier(.2,1.2,.4,1) backwards; }
+  @media (prefers-reduced-motion: reduce){
+    #shop .pwr.slide, .adTile, .specialBox, .specialBox::before, .specialBox::after, .shopPurse .ic,
+    .pbtn.buy, .adTile.ready, .shopToast{ animation:none !important; }
+  }
+  #shop .pwr .pdesc{ color:var(--ink); opacity:.75; }
   #achievements .lead{ color:var(--cream); opacity:.8; }
   #skins .skin.sel{ background:rgba(255,210,63,.14); border-color:var(--gold); }
-  #shop .upBar .ud{ background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); }
-  #shop .upBar .ud.on{ background:var(--gold); border-color:var(--gold); }
+  .upBar .ud.pop{ animation:udPop .45s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes udPop{ 0%{transform:scale(1);} 45%{transform:scale(1.9,1.5);} 100%{transform:scale(1);} }
   #shop .stat, #skins .stat{ background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.14); }
   #shop .stat .k, #skins .stat .k{ color:var(--cream); opacity:.75; }
   @keyframes stripeMove{ from{transform:translateY(0);} to{transform:translateY(63.5px);} }
@@ -254,7 +363,7 @@
   .asCoins .ic, .adRw .ic, .pbtn .ic{ width:1.2em; height:1.2em; vertical-align:-.28em; }
   .coinDot{ width:15px; height:15px; border-radius:50%; background:var(--gold); border:2px solid var(--ink); display:inline-block; }
   .btnrow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
-  #shop .card, #skins .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
+  #skins .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
   .shopSecTitle{ font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--purple); margin:14px 0 6px; text-align:left; }
   .pwr{ display:flex; align-items:center; gap:10px; background:#fff; border:3px solid var(--ink); border-radius:14px; padding:10px; box-shadow:3px 3px 0 var(--ink); }
   .pwr .pico{ font-size:30px; line-height:1; }
@@ -566,16 +675,20 @@
   </div>
 
   <div id="shop" class="screen hidden">
-    <div class="card">
-      <h2 class="mtitle"><svg class="ic"><use href="#i-cart"/></svg> SHOP</h2>
-      <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsShop">0</div></div></div>
-      <div id="adShop" class="hidden"></div>
-      <div class="shopSecTitle">POWER-UPS</div>
-      <div id="powerups"></div>
-      <div class="shopSecTitle">ITEM-UPGRADES</div>
-      <div id="upgrades"></div>
+    <div class="shopHead">
+      <div class="shopTitle"><svg class="ic"><use href="#i-cart"/></svg> SHOP</div>
+      <div class="shopPurse" id="purse"><svg class="ic"><use href="#i-coin"/></svg><span id="coinsShop">0</span></div>
     </div>
-    <button class="btn go" id="shopBack">ZUR&Uuml;CK</button>
+    <div class="shopScroll" id="shopScroll">
+      <div class="shopTab">ITEMS</div>
+      <div id="upgrades"></div>
+      <div class="shopRule"></div>
+      <div id="powerups"></div>
+    </div>
+    <div class="shopFoot">
+      <div id="adShop" class="hidden"></div>
+      <button class="btn go" id="shopBack">ZUR&Uuml;CK</button>
+    </div>
   </div>
 
   <div id="skins" class="screen hidden">
@@ -1410,7 +1523,11 @@ window.ADS=(function(){
       spooky(){ tone(220,0.5,'sine',0.22,0,150); tone(330,0.5,'sine',0.14,0.12,220); noise(0.4,0.12,800,0.05); },
       achieve(){ tone(659.25,0.1,'square',0.26,0); tone(830.61,0.1,'square',0.26,0.1); tone(987.77,0.12,'square',0.26,0.2); tone(1318.51,0.22,'square',0.26,0.32); },
       sting(){ noise(0.5,0.45,500); tone(110,0.5,'sawtooth',0.34,0,55); tone(220,0.4,'square',0.2,0.05,110); },
-      powerup(){ tone(523.25,0.08,'triangle',0.26,0); tone(783.99,0.08,'triangle',0.26,0.07); tone(1046.5,0.16,'triangle',0.26,0.14); }
+      powerup(){ tone(523.25,0.08,'triangle',0.26,0); tone(783.99,0.08,'triangle',0.26,0.07); tone(1046.5,0.16,'triangle',0.26,0.14); },
+      // Shop: Kasse, Absage und Vorhang
+      buy(){ tone(1046.5,0.05,'square',0.2,0); tone(1396.9,0.06,'square',0.2,0.05); tone(2093,0.18,'triangle',0.17,0.11); noise(0.05,0.09,5000,0.01); },
+      denied(){ tone(196,0.09,'square',0.24,0); tone(147,0.17,'square',0.24,0.09); },
+      swoosh(){ noise(0.24,0.13,1600); tone(280,0.19,'sine',0.07,0,880); }
     };
     return { ensure, play(n){ ensure(); if(S[n]) S[n](); }, setTrack, setMuted(m){ muted=!!m; if(musicGain) musicGain.gain.value=muted?0:0.7; if(muted) stopMusic(); else if(ctx&&trk) startMusic(); }, isMuted(){ return muted; } };
   })();
@@ -1848,7 +1965,41 @@ window.ADS=(function(){
   }
 
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
-  function updateCoinUI(){ const m=document.getElementById('coinsMenu'); if(m) m.textContent=save.coins; const s=document.getElementById('coinsShop'); if(s) s.textContent=save.coins;
+  // Shop-Geldbeutel zaehlt hoch statt zu springen
+  let purseRaf=null;
+  function setPurse(v){
+    const el=document.getElementById('coinsShop'); if(!el) return;
+    const from=parseInt(el.textContent,10)||0;
+    if(purseRaf){ cancelAnimationFrame(purseRaf); purseRaf=null; }
+    if(from===v||reduceMotion){ el.textContent=v; return; }
+    const p=document.getElementById('purse');
+    if(p){ p.classList.remove('bump'); void p.offsetWidth; p.classList.add('bump'); }
+    const t0=performance.now(), dur=Math.min(750,240+Math.abs(v-from)*2.5);
+    const step=now=>{ const k=Math.min(1,(now-t0)/dur);
+      el.textContent=Math.round(from+(v-from)*(1-Math.pow(1-k,3)));
+      if(k<1) purseRaf=requestAnimationFrame(step); else { el.textContent=v; purseRaf=null; } };
+    purseRaf=requestAnimationFrame(step);
+  }
+  // Muenzen fliegen vom Kauf-Knopf in den Geldbeutel
+  function coinBurst(fromEl,count){
+    const shop=document.getElementById('shop'), purse=document.getElementById('purse');
+    if(!shop||!purse||!fromEl||reduceMotion) return;
+    const a=fromEl.getBoundingClientRect(), b=purse.getBoundingClientRect(), r=shop.getBoundingClientRect();
+    const dx=(b.left+b.width/2)-(a.left+a.width/2), dy=(b.top+b.height/2)-(a.top+a.height/2);
+    for(let i=0;i<(count||6);i++){
+      const el=document.createElement('div'); el.className='flyCoin'; el.innerHTML=ic('coin');
+      el.style.left=(a.left-r.left+a.width/2-11+(Math.random()*26-13))+'px';
+      el.style.top=(a.top-r.top+a.height/2-11+(Math.random()*14-7))+'px';
+      shop.appendChild(el);
+      const d=i*45;
+      requestAnimationFrame(()=>{ el.style.transitionDelay=d+'ms';
+        el.style.transform='translate('+dx+'px,'+dy+'px) scale(.45) rotate(300deg)'; el.style.opacity='0'; });
+      setTimeout(()=>{ if(el.parentNode) el.remove(); },800+d);
+    }
+  }
+  // Zu wenig Muenzen: kurzes Wackeln statt stiller Nichtreaktion
+  function nopeBtn(btn){ SND.play('denied'); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope'); }
+  function updateCoinUI(){ const m=document.getElementById('coinsMenu'); if(m) m.textContent=save.coins; setPurse(save.coins);
     const k=document.getElementById('coinsSkins'); if(k) k.textContent=save.coins;
     if(save.coins>=1000) unlockAch('rich_1000'); if(save.coins>=5000) unlockAch('rich_5000'); }
   function renderBoard(el,latest){
@@ -1859,45 +2010,58 @@ window.ADS=(function(){
     ).join('');
   }
   const SPECIAL_PRICE=100;
+  let upFlash='';                                  // gerade gekauftes Upgrade: Zeile blinkt nach dem Neuzeichnen
+  let shopEnter=false;                             // Einflug-Animation nur beim Betreten, nicht nach jedem Kauf
   function renderUpgrades(){
     const wrap=document.getElementById('upgrades'); if(!wrap) return; wrap.innerHTML='';
     if(!save.upgrades) save.upgrades={};
+    let i=0;
     for(const u of UPGRADES){
       const lvl=upLvl(u.key), val=u.base+lvl*u.step, maxed=lvl>=u.max;
-      const row=document.createElement('div'); row.className='pwr';
+      const row=document.createElement('div'); row.className='pwr'+(shopEnter?' slide':''); row.style.setProperty('--i',i++);
       const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic(u.icon); row.appendChild(ico);
       const info=document.createElement('div'); info.className='pinfo';
-      let dots=''; for(let d=0;d<u.max;d++) dots+='<span class="ud'+(d<lvl?' on':'')+'"></span>';
+      const fresh=(upFlash===u.key)?lvl-1:-1;       // der zuletzt gefuellte Punkt darf aufpoppen
+      let dots=''; for(let d=0;d<u.max;d++) dots+='<span class="ud'+(d<lvl?' on':'')+(d===fresh?' pop':'')+'"></span>';
       info.innerHTML='<div class="pname">'+u.name+'</div><div class="pdesc">'+u.desc+' &middot; jetzt <b>'+val+u.unit+'</b></div><div class="upBar">'+dots+'</div>';
       row.appendChild(info);
       const btn=document.createElement('button'); btn.className='pbtn';
-      if(maxed){ btn.textContent='MAX'; btn.classList.add('cant'); }
-      else { const cost=upCost(lvl);
-        if(save.coins>=cost){ btn.innerHTML=cost+' '+ic('coin'); btn.onclick=()=>{ if(save.coins<cost) return; save.coins-=cost; save.upgrades[u.key]=lvl+1; persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup');
-          unlockAch('upgrade_1'); if(lvl+1>=u.max) unlockAch('upgrade_max'); }; }
-        else { btn.innerHTML=cost+' '+ic('coin'); btn.classList.add('cant'); } }
+      if(maxed){ btn.textContent='MAX'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
+      else { const cost=upCost(lvl); btn.innerHTML=cost+' '+ic('coin');
+        if(save.coins>=cost){ btn.classList.add('buy');
+          btn.onclick=()=>{ if(save.coins<cost) return;
+            coinBurst(btn); save.coins-=cost; save.upgrades[u.key]=lvl+1; upFlash=u.key;
+            persist(); renderUpgrades(); updateCoinUI(); SND.play('powerup'); SND.play('buy');
+            unlockAch('upgrade_1'); if(lvl+1>=u.max) unlockAch('upgrade_max'); }; }
+        else btn.classList.add('cant'), btn.onclick=()=>nopeBtn(btn); }
       row.appendChild(btn); wrap.appendChild(row);
+      if(upFlash===u.key){ row.classList.add('flash'); }
     }
+    upFlash='';
   }
   function renderShop(){
-    document.getElementById('coinsShop').textContent=save.coins;
+    setPurse(save.coins);
     const pw=document.getElementById('powerups');
     if(pw){
       pw.innerHTML='';
-      const row=document.createElement('div'); row.className='pwr';
-      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic('ticket'); row.appendChild(ico);
+      const box=document.createElement('div'); box.className='pwr specialBox';
+      const tag=document.createElement('div'); tag.className='specTag'; tag.textContent='SPEZIAL'; box.appendChild(tag);
+      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic('ticket'); box.appendChild(ico);
       const info=document.createElement('div'); info.className='pinfo';
       info.innerHTML='<div class="pname">Spezial-Ticket</div><div class="pdesc">Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.</div>'
         +(save.specialTokens>0?'<div class="pown">Im Vorrat: '+save.specialTokens+'</div>':'');
-      row.appendChild(info);
-      const btn=document.createElement('button'); btn.className='pbtn';
-      if(save.coins>=SPECIAL_PRICE){ btn.textContent=SPECIAL_PRICE+' Münzen';
-        btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return; save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI(); SND.play('correct'); }; }
-      else { btn.textContent=SPECIAL_PRICE+' Münzen'; btn.classList.add('cant'); }
-      row.appendChild(btn); pw.appendChild(row);
+      box.appendChild(info);
+      const btn=document.createElement('button'); btn.className='pbtn'; btn.innerHTML=SPECIAL_PRICE+' '+ic('coin');
+      if(save.coins>=SPECIAL_PRICE){ btn.classList.add('buy');
+        btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return;
+          coinBurst(btn); save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI();
+          SND.play('correct'); SND.play('buy'); }; }
+      else btn.classList.add('cant'), btn.onclick=()=>nopeBtn(btn);
+      box.appendChild(btn); pw.appendChild(box);
     }
     renderAdShop();
     renderUpgrades();
+    shopEnter=false;
   }
   function renderSkins(){
     const cs=document.getElementById('coinsSkins'); if(cs) cs.textContent=save.coins;
@@ -3861,40 +4025,52 @@ window.ADS=(function(){
   // ---------- Rewarded-Video 2: Muenzen im Shop ----------
   // Die Belohnung gibt es erst, wenn genug Werbesekunden zusammengekommen sind.
   // Videos sind oft kuerzer als die Vorgabe, deshalb werden angesehene Sekunden addiert.
-  let adShopMsg='', adShopMsgT=null;
+  let adShopMsgT=null, adTileSeen=false;
   function renderAdShop(){
     const box=document.getElementById('adShop'); if(!box) return;
     const min=ADS.shopMinSeconds(), reward=ADS.shopCoins();
-    if(!ADS.rewardAvailable()||min<=0||reward<=0){ box.classList.add('hidden'); box.innerHTML=''; return; }
+    const ready=ADS.rewardAvailable();
+    if(min<=0||reward<=0||(!ready&&!adTileSeen)){ box.classList.add('hidden'); box.innerHTML=''; return; }
     box.classList.remove('hidden');
-    const done=Math.min(save.adSec||0,min), rest=min-done;
-    box.innerHTML='<div class="shopSecTitle">GRATIS M\u00dcNZEN</div>'
-      +'<div class="pwr"><div class="pico">'+ic('play')+'</div>'
-      +'<div class="pinfo"><div class="pname">Werbe-Video</div>'
-      +'<div class="pdesc">Mindestens '+min+' Sek. Werbung ansehen \u2013 daf\u00fcr '+reward
-        +' M\u00fcnzen. K\u00fcrzere Videos werden addiert.</div>'
-      +(adShopMsg?'<div class="pown">'+adShopMsg+'</div>'
-        :(done>0?'<div class="pown">Angesehen: '+done+' / '+min+' Sek.</div>':''))
-      +'</div><button class="pbtn" id="adShopBtn">'+(done>0?'Weiter ('+rest+'s)':'Ansehen')+'</button></div>';
+    const done=Math.min(save.adSec||0,min), pct=Math.round(done/min*100);
+    // Direkt nach einem Video ist kurz keins geladen – die Kachel bleibt sichtbar, aber gesperrt
+    if(!ready){
+      box.innerHTML='<button class="adTile busy" id="adShopBtn" disabled>'+ic('play')
+        +'<div class="atCap">L\u00c4DT \u2026</div><div class="atBar"><i style="width:'+pct+'%"></i></div></button>';
+      return;
+    }
+    adTileSeen=true;
+    const tip='Mindestens '+min+' Sek. Werbung ansehen \u2013 daf\u00fcr '+reward
+      +' M\u00fcnzen. K\u00fcrzere Videos werden addiert.'+(done>0?' Angesehen: '+done+'/'+min+' Sek.':'');
+    box.innerHTML='<button class="adTile ready" id="adShopBtn" title="'+tip+'">'
+      +ic('play')+'<div class="atVal">+'+reward+'</div><div class="atCap">WERBUNG</div>'
+      +'<div class="atBar"><i style="width:'+pct+'%"></i></div></button>';
     document.getElementById('adShopBtn').onclick=watchShopAd;
   }
+  // Kurznachricht ueber der Fussleiste – auf der kleinen Kachel ist kein Platz dafuer
   function flashAdShopMsg(txt){
-    adShopMsg=txt;
+    const shop=document.getElementById('shop'); if(!shop) return;
+    let t=document.getElementById('shopToast');
+    if(t) t.remove();
+    t=document.createElement('div'); t.id='shopToast'; t.className='shopToast'; t.textContent=txt;
+    shop.appendChild(t);
     if(adShopMsgT) clearTimeout(adShopMsgT);
-    adShopMsgT=setTimeout(()=>{ adShopMsg=''; adShopMsgT=null; renderAdShop(); },4000);
+    adShopMsgT=setTimeout(()=>{ const e=document.getElementById('shopToast'); if(e) e.remove(); adShopMsgT=null; },4000);
   }
   async function watchShopAd(){
     const btn=document.getElementById('adShopBtn');
     if(!btn||btn.disabled) return;
     SND.play('click');
-    btn.disabled=true; btn.classList.add('cant'); btn.textContent='L\u00e4uft \u2026';
+    btn.disabled=true; btn.classList.remove('ready'); btn.classList.add('busy');
+    btn.innerHTML=ic('play')+'<div class="atCap">L\u00c4UFT \u2026</div>';
     const res=await ADS.showReward();
     const min=ADS.shopMinSeconds();
     if(!res.ok){ flashAdShopMsg('Video abgebrochen \u2013 keine M\u00fcnzen.'); renderAdShop(); return; }
     save.adSec=(save.adSec||0)+res.seconds;
     if(save.adSec>=min){
       save.adSec=Math.min(save.adSec-min,min-1);                  // Rest bleibt stehen, bleibt aber unter der Vorgabe
-      save.coins+=ADS.shopCoins(); SND.play('coin');
+      save.coins+=ADS.shopCoins(); SND.play('coin'); SND.play('buy');
+      coinBurst(btn,8);                                           // noch von der alten Kachel aus
       flashAdShopMsg('+'+ADS.shopCoins()+' M\u00fcnzen erhalten!');
     } else {
       flashAdShopMsg(res.seconds+' Sek. angesehen \u2013 noch '+(min-save.adSec)+' Sek.');
@@ -3904,8 +4080,11 @@ window.ADS=(function(){
   document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
-  document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderShop(); hide('menu'); show('shop'); };
-  document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('shop'); updateCoinUI(); updateMenuSkin(); show('menu'); };
+  document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.play('swoosh'); SND.setTrack('menu');
+    shopEnter=true; renderShop(); hide('menu'); show('shop'); };
+  document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.play('swoosh'); SND.setTrack('menu'); hide('shop');
+    const t=document.getElementById('shopToast'); if(t) t.remove();
+    updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };
   document.getElementById('skinsBack').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('skins'); updateCoinUI(); updateMenuSkin(); show('menu'); };
   // erst einblenden, dann rendern: fitAchNames() braucht die echte Kachelbreite
