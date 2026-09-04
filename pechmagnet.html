@@ -264,6 +264,17 @@
   .adTile .atBar{ width:56px; height:6px; border-radius:3px; background:rgba(11,59,59,.3); overflow:hidden; }
   .adTile .atBar i{ display:block; height:100%; background:#FFD866; }
   .adTile.busy{ background:linear-gradient(#b9c3cf,#8e9aa8); box-shadow:0 4px 0 #6d7784; animation:none; }
+  /* Echtgeld-Kaeufe */
+  #iapShop{ display:flex; flex-direction:column; gap:9px; }
+  #shop .pwr .pico{ position:relative; }
+  #shop .iapTag{ position:absolute; top:-5px; left:-5px; z-index:2; font-size:8px; font-weight:700; letter-spacing:.6px;
+    color:#5a3600; background:linear-gradient(#FFE066,#F5B518); padding:2px 6px; border-radius:9px 4px 9px 4px;
+    box-shadow:0 2px 0 #b07d00; white-space:nowrap; }
+  #shop .pbtn.real{ background:linear-gradient(var(--shBlue), var(--shBlue2)); box-shadow:0 4px 0 rgba(6,26,74,.6); }
+  #shop .pbtn.real:active{ box-shadow:0 1px 0 rgba(6,26,74,.6); }
+  .iapRestore{ align-self:center; margin:1px 0 2px; padding:4px 8px; background:none; border:none; font-family:inherit;
+    font-size:12px; font-weight:700; color:var(--shTitle); opacity:.75; text-decoration:underline;
+    cursor:pointer; pointer-events:auto; }
   /* Kurznachricht */
   .shopToast{ position:absolute; left:14px; right:14px; bottom:calc(92px + var(--adH)); z-index:6; pointer-events:none;
     text-align:center; font-size:13px; font-weight:700; color:var(--shTitle); background:#fff;
@@ -766,6 +777,7 @@
       <div class="shopRule"></div>
       <div id="powerups"></div>
       <div id="adShop" class="hidden"></div>
+      <div id="iapShop" class="hidden"></div>
     </div>
     <div class="shopFoot">
       <button class="btn go" id="shopBack"><svg class="ic"><use href="#i-play"/></svg> ZUR&Uuml;CK</button>
@@ -903,7 +915,7 @@ window.ADS=(function(){
   const testing=cfg.testing!==false;
   const MENUS=['menu','shop','skins','achievements'];   // hier laeuft das Banner
   let initP=null, banner=false, bannerMade=false, interReady=false, rewardReady=false;
-  let overs=0, rewarded=false, lastH=0, syncT=null;
+  let overs=0, rewarded=false, lastH=0, syncT=null, noAds=false;
   const readyCbs=[];
 
   function unit(kind){ const u=(cfg.adUnits||{})[kind]; return u?(u[plat]||u.android||null):null; }
@@ -957,7 +969,7 @@ window.ADS=(function(){
     syncT=setTimeout(()=>{ syncT=null; applyBanner(); },60);
   }
   async function applyBanner(){
-    const want=MENUS.some(id=>{ const e=document.getElementById(id);
+    const want=!noAds&&MENUS.some(id=>{ const e=document.getElementById(id);
       return e&&!e.classList.contains('hidden')&&!e.classList.contains('closing'); });
     if(want===banner) return;
     banner=want;                                  // vor dem await setzen: verhindert doppelte Aufrufe
@@ -972,7 +984,7 @@ window.ADS=(function(){
 
   // Vollbild-Anzeige nach dem Game-Over – nur bei jedem n-ten Lauf, sonst nervt es.
   function onGameOver(){
-    if(!plugin) return;
+    if(!plugin||noAds) return;                    // gekaufte Werbefreiheit: keine Vollbild-Anzeige
     overs++;
     const every=Math.max(1,cfg.interstitialEveryNthGameOver||1);
     if(overs%every!==0) return;
@@ -998,10 +1010,99 @@ window.ADS=(function(){
   }
 
   return { init, syncBanner, onGameOver, rewardAvailable, showReward,
+           setNoAds(v){ noAds=!!v; if(noAds){ banner=false; call('hideBanner'); setAdHeight(0); } else syncBanner(); },
            doubleRun:()=>cfg.doubleRunCoins!==false,
            shopCoins:()=>cfg.shopAdCoins||0,
            shopMinSeconds:()=>cfg.shopAdMinSeconds||0,
            onReady:cb=>{ readyCbs.push(cb); } };
+})();
+</script>
+<!--IAP_CONFIG-->
+<script>
+/* ---------- In-App-Kaeufe: Google Play ----------
+   Nutzt cordova-plugin-purchase (globales CdvPurchase), das Capacitor in der App
+   bereitstellt. Im Browser fehlt das Plugin -> alles ist ein stiller No-Op,
+   damit pechmagnet.html weiterhin per Doppelklick spielbar bleibt.
+   Produkte, Preise und Gutschriften: iap.config.json (wird beim Build injiziert). */
+window.IAP=(function(){
+  const cfg=window.IAP_CONFIG||{products:[]};
+  const cap=window.Capacitor;
+  const native=!!(cap&&cap.isNativePlatform&&cap.isNativePlatform());
+  let store=null, started=false, loaded=false, grantFn=null, busy='';
+  const changeCbs=[];
+
+  function products(){ return cfg.products||[]; }
+  function def(id){ return products().find(p=>p.id===id)||null; }
+  function fire(){ for(const cb of changeCbs){ try{ cb(); }catch(e){} } }
+
+  // Das Plugin meldet sich erst nach 'deviceready' – kurz darauf warten.
+  function waitForPlugin(){
+    return new Promise(res=>{
+      if(!native) return res(null);
+      if(window.CdvPurchase) return res(window.CdvPurchase);
+      let tries=0;
+      const t=setInterval(()=>{
+        if(window.CdvPurchase||++tries>60){ clearInterval(t); res(window.CdvPurchase||null); }
+      },100);                                            // hoechstens 6 Sekunden
+      document.addEventListener('deviceready',()=>{ if(window.CdvPurchase){ clearInterval(t); res(window.CdvPurchase); } },{once:true});
+    });
+  }
+
+  // grant(id) wird vom Spiel gestellt – nur das Spiel kennt den Spielstand.
+  async function init(grant){
+    grantFn=grant;
+    if(started||!native) return;
+    started=true;
+    const CP=await waitForPlugin();
+    if(!CP||!CP.store||!products().length) return;
+    store=CP.store;
+    try{
+      store.register(products().map(p=>({
+        id:p.id,
+        type:p.type==='consumable'?CP.ProductType.CONSUMABLE:CP.ProductType.NON_CONSUMABLE,
+        platform:CP.Platform.GOOGLE_PLAY
+      })));
+      store.when()
+        .approved(t=>{ store.finish(t); })               // ohne Server-Pruefung: direkt abschliessen
+        .finished(t=>{                                   // Play liefert offene Kaeufe auch nach Neustart hier
+          busy='';
+          for(const it of (t.products||[])) if(grantFn) grantFn(it.id);
+          fire();
+        })
+        .productUpdated(()=>{ loaded=true; fire(); });
+      await store.initialize([CP.Platform.GOOGLE_PLAY]);
+      loaded=true; fire();
+    }catch(e){ store=null; }
+  }
+
+  function available(){ return !!store&&loaded; }
+  function price(id){                                    // lokalisierter Preis aus dem Store
+    if(!store) return '';
+    try{ const pr=store.get(id); const of=pr&&pr.getOffer&&pr.getOffer();
+      const ph=of&&of.pricingPhases&&of.pricingPhases[0];
+      return (ph&&ph.price)||''; }catch(e){ return ''; }
+  }
+  function owned(id){ try{ return !!store&&store.owned(id); }catch(e){ return false; } }
+  function pending(){ return busy; }
+
+  async function buy(id){
+    if(!store||busy) return false;
+    try{
+      const pr=store.get(id), of=pr&&pr.getOffer&&pr.getOffer();
+      if(!of) return false;
+      busy=id; fire();
+      const err=await of.order();
+      if(err){ busy=''; fire(); return false; }          // abgebrochen oder abgelehnt
+      return true;                                       // Gutschrift laeuft ueber .finished
+    }catch(e){ busy=''; fire(); return false; }
+  }
+  async function restore(){
+    if(!store) return false;
+    try{ await store.restorePurchases(); fire(); return true; }catch(e){ return false; }
+  }
+
+  return { init, available, price, owned, buy, restore, pending, products, def,
+           onChange:cb=>{ changeCbs.push(cb); } };
 })();
 </script>
 <script>
@@ -1447,8 +1548,9 @@ window.ADS=(function(){
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0 };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.adSec!=='number'||save.adSec<0) save.adSec=0; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.adSec!=='number'||save.adSec<0) save.adSec=0;
+        if(!save.iap||typeof save.iap!=='object') save.iap={}; save.noAds=!!save.noAds; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -2154,6 +2256,7 @@ window.ADS=(function(){
       pw.appendChild(box);
     }
     renderAdShop();
+    renderIapShop();
     renderUpgrades();
     // Das Plus an den Muenzen fuehrt zum Werbe-Video – nur wenn wirklich eines bereitsteht
     const cp=document.getElementById('coinPlus');
@@ -4168,6 +4271,61 @@ window.ADS=(function(){
     if(adShopMsgT) clearTimeout(adShopMsgT);
     adShopMsgT=setTimeout(()=>{ const e=document.getElementById('shopToast'); if(e) e.remove(); adShopMsgT=null; },4000);
   }
+  // ---------- In-App-Kaeufe ----------
+  // Wird vom IAP-Modul aufgerufen, sobald Google Play einen Kauf abgeschlossen hat.
+  // Einmalkaeufe liefert Play bei jedem Start erneut – deshalb nur einmal gutschreiben.
+  function grantIAP(id){
+    const p=IAP.def(id); if(!p) return;
+    if(!save.iap) save.iap={};
+    if(p.type!=='consumable'&&save.iap[id]) return;
+    const got=[];
+    if(p.coins){ save.coins+=p.coins; got.push('+'+p.coins+' M\u00fcnzen'); }
+    if(p.tickets){ save.specialTokens=(save.specialTokens||0)+p.tickets; got.push('+'+p.tickets+' Spezial-Tickets'); }
+    if(p.skins&&p.skins.length){
+      let n=0; for(const sk of p.skins) if(save.owned.indexOf(sk)<0){ save.owned.push(sk); n++; }
+      if(n){ got.push('+'+n+' Skins'); unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }
+    }
+    if(p.noAds&&!save.noAds){ save.noAds=true; ADS.setNoAds(true); got.push('Werbung entfernt'); }
+    save.iap[id]=true;
+    persist(); updateCoinUI();
+    const sh=document.getElementById('shop');
+    if(sh&&!sh.classList.contains('hidden')){
+      SND.play('buy'); renderShop();
+      if(got.length) flashAdShopMsg(p.name+': '+got.join(', '));
+    }
+  }
+  function renderIapShop(){
+    const box=document.getElementById('iapShop'); if(!box) return;
+    const list=IAP.products();
+    if(!IAP.available()||!list.length){ box.classList.add('hidden'); box.innerHTML=''; return; }
+    box.classList.remove('hidden');
+    box.innerHTML='<div class="shopTab">M\u00dcNZEN &amp; PAKETE</div>';
+    for(const p of list){
+      const einmal=p.type!=='consumable';
+      const hat=einmal&&(IAP.owned(p.id)||!!(save.iap&&save.iap[p.id]));
+      const preis=IAP.price(p.id), laeuft=IAP.pending()===p.id;
+      const row=document.createElement('div'); row.className='pwr';
+      const ico=document.createElement('div'); ico.className='pico';
+      const col=p.tile||[]; ico.style.setProperty('--c1',col[0]||'#5AA6F7'); ico.style.setProperty('--c2',col[1]||'#1A6FD0');
+      ico.innerHTML=ic(p.icon||'coin')+(p.tag&&!hat?'<div class="iapTag">'+p.tag+'</div>':'');
+      row.appendChild(ico);
+      const info=document.createElement('div'); info.className='pinfo';
+      info.innerHTML='<div class="pname">'+p.name+'</div><div class="pdesc">'+p.desc+'</div>';
+      row.appendChild(info);
+      const btn=document.createElement('button'); btn.className='pbtn';
+      if(hat){ btn.textContent='GEKAUFT'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
+      else if(laeuft){ btn.textContent='\u2026'; btn.classList.add('cant'); btn.disabled=true; }
+      else if(!preis){ btn.textContent='\u2026'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
+      else { btn.textContent=preis; btn.classList.add('real');
+        btn.onclick=()=>{ SND.play('click'); IAP.buy(p.id); }; }
+      row.appendChild(btn); box.appendChild(row);
+    }
+    const rb=document.createElement('button'); rb.className='iapRestore'; rb.textContent='K\u00e4ufe wiederherstellen';
+    rb.onclick=async()=>{ SND.play('click'); rb.textContent='Wird gepr\u00fcft \u2026';
+      await IAP.restore(); renderShop(); };
+    box.appendChild(rb);
+  }
+
   async function watchShopAd(){
     const btn=document.getElementById('adShopBtn');
     if(!btn||btn.disabled) return;
@@ -4232,6 +4390,10 @@ window.ADS=(function(){
   }
   ADS.init();
   loadSave(); applySkin(); refreshMute(); SND.setTrack('menu');
+  if(save.noAds) ADS.setNoAds(true);
+  IAP.init(grantIAP);
+  IAP.onChange(()=>{ const sh=document.getElementById('shop');
+    if(sh&&!sh.classList.contains('hidden')) renderIapShop(); });
   highscore=save.scores.length?save.scores[0].score:0;
   updateHUD(); updateCoinUI(); renderBoard(document.getElementById('boardMenu'),null);
   resetWorld(); setBanner('hide'); youHint=0;  // Stadt als lebendige Menü-Kulisse

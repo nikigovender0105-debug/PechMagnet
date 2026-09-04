@@ -1,4 +1,4 @@
-// Traegt die AdMob-App-ID aus admob.config.json in die nativen Projekte ein.
+// Traegt die AdMob-App-ID in die nativen Projekte ein und hebt die Android-Mindestversion an.
 // Laeuft automatisch nach "cap sync" / "cap add" (siehe package.json) und ist idempotent:
 // mehrfaches Ausfuehren aendert nichts. Fehlt android/ oder ios/, wird der Teil uebersprungen.
 const fs = require('fs');
@@ -64,8 +64,23 @@ function patchIos() {
   return `Info.plist aktualisiert (App-ID ${appId})`;
 }
 
-console.log('AdMob-Patch:');
-for (const step of [patchAndroid, patchIos]) {
+// Google Play Billing 9 (cordova-plugin-purchase) verlangt minSdkVersion 23,
+// Capacitor legt Projekte mit 22 an -> sonst schlaegt der Android-Build fehl.
+const MIN_SDK = 23;
+function patchMinSdk() {
+  const file = path.join(root, 'android', 'variables.gradle');
+  if (!fs.existsSync(file)) return 'android/variables.gradle fehlt – uebersprungen';
+  const txt = fs.readFileSync(file, 'utf8');
+  const m = txt.match(/minSdkVersion\s*=\s*(\d+)/);
+  if (!m) return 'kein minSdkVersion-Eintrag gefunden – bitte selbst auf ' + MIN_SDK + ' setzen';
+  const cur = parseInt(m[1], 10);
+  if (cur >= MIN_SDK) return 'minSdkVersion ist ' + cur + ' – passt';
+  fs.writeFileSync(file, txt.replace(m[0], 'minSdkVersion = ' + MIN_SDK));
+  return 'minSdkVersion von ' + cur + ' auf ' + MIN_SDK + ' angehoben (Google Play Billing)';
+}
+
+console.log('Nativer Patch:');
+for (const step of [patchAndroid, patchMinSdk, patchIos]) {
   try {
     console.log('  - ' + step());
   } catch (e) {
