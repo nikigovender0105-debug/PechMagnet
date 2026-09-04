@@ -569,6 +569,7 @@
     <div class="card">
       <h2 class="mtitle"><svg class="ic"><use href="#i-cart"/></svg> SHOP</h2>
       <div class="row-stats"><div class="stat"><div class="k">DEINE M&Uuml;NZEN</div><div class="v" id="coinsShop">0</div></div></div>
+      <div id="adShop" class="hidden"></div>
       <div class="shopSecTitle">POWER-UPS</div>
       <div id="powerups"></div>
       <div class="shopSecTitle">ITEM-UPGRADES</div>
@@ -690,7 +691,7 @@
   </button>
 </div>
 
-<script>window.ADMOB_CONFIG={"testing":true,"adUnits":{"banner":{"android":"ca-app-pub-3940256099942544/6300978111","ios":"ca-app-pub-3940256099942544/2934735716"},"interstitial":{"android":"ca-app-pub-3940256099942544/1033173712","ios":"ca-app-pub-3940256099942544/4411468910"},"rewarded":{"android":"ca-app-pub-3940256099942544/5224354917","ios":"ca-app-pub-3940256099942544/1712485313"}},"interstitialEveryNthGameOver":3,"rewardedCoins":100};</script>
+<script>window.ADMOB_CONFIG={"testing":true,"adUnits":{"banner":{"android":"ca-app-pub-3940256099942544/6300978111","ios":"ca-app-pub-3940256099942544/2934735716"},"interstitial":{"android":"ca-app-pub-3940256099942544/1033173712","ios":"ca-app-pub-3940256099942544/4411468910"},"rewarded":{"android":"ca-app-pub-3940256099942544/5224354917","ios":"ca-app-pub-3940256099942544/1712485313"}},"interstitialEveryNthGameOver":3,"doubleRunCoins":true,"shopAdCoins":250,"shopAdMinSeconds":30};</script>
 <script>
 /* ---------- Werbung: Google AdMob ----------
    Laeuft ausschliesslich in der nativen App (Capacitor + @capacitor-community/admob).
@@ -783,20 +784,26 @@ window.ADS=(function(){
     setTimeout(async()=>{ await call('showInterstitial'); prepInter(); },700);  // kurz warten: Punkte erst lesen lassen
   }
 
-  function rewardAvailable(){ return !!plugin&&rewardReady&&!!unit('rewarded')&&(cfg.rewardedCoins||0)>0; }
+  function rewardAvailable(){ return !!plugin&&rewardReady&&!!unit('rewarded'); }
 
-  // Freiwilliges Video. Liefert true, wenn die Belohnung wirklich verdient wurde.
+  // Freiwilliges Video. Liefert, ob die Belohnung verdient wurde und wie lange das Video lief.
+  // Die Sekunden zaehlen nur bei verdienter Belohnung – abgebrochene Videos bringen nichts.
   async function showReward(){
-    if(!rewardAvailable()) return false;
+    if(!rewardAvailable()) return {ok:false,seconds:0};
     rewardReady=false; rewarded=false;
+    const t0=Date.now();
     const timeout=new Promise(r=>setTimeout(()=>r(null),180000));   // Notbremse, falls nichts zurueckkommt
     const item=await Promise.race([call('showRewardVideoAd'),timeout]);
+    const secs=Math.round((Date.now()-t0)/1000);
     prepReward();
-    return rewarded||!!(item&&(item.amount||item.type));
+    const ok=rewarded||!!(item&&(item.amount||item.type));
+    return {ok:ok,seconds:ok?secs:0};
   }
 
   return { init, syncBanner, onGameOver, rewardAvailable, showReward,
-           coins:()=>cfg.rewardedCoins||0,
+           doubleRun:()=>cfg.doubleRunCoins!==false,
+           shopCoins:()=>cfg.shopAdCoins||0,
+           shopMinSeconds:()=>cfg.shopAdMinSeconds||0,
            onReady:cb=>{ readyCbs.push(cb); } };
 })();
 </script>
@@ -1243,8 +1250,8 @@ window.ADS=(function(){
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0 };
-  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; } } }catch(e){} }
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0 };
+  function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.adSec!=='number'||save.adSec<0) save.adSec=0; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -1837,7 +1844,7 @@ window.ADS=(function(){
     renderBoard(document.getElementById('board'),entry); renderBoard(document.getElementById('boardMenu'),entry);
     updateCoinUI();
     hide('dialog'); hide('reaction'); show('gameover');
-    rewardTaken=false; syncRewardBtn(); ADS.onGameOver();
+    lastEarned=earned; rewardTaken=false; syncRewardBtn(); ADS.onGameOver();
   }
 
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
@@ -1889,6 +1896,7 @@ window.ADS=(function(){
       else { btn.textContent=SPECIAL_PRICE+' Münzen'; btn.classList.add('cant'); }
       row.appendChild(btn); pw.appendChild(row);
     }
+    renderAdShop();
     renderUpgrades();
   }
   function renderSkins(){
@@ -3822,29 +3830,77 @@ window.ADS=(function(){
   }
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
-  // ---------- Rewarded-Video: freiwillig Muenzen verdienen ----------
-  let rewardTaken=false;
+  // ---------- Rewarded-Video 1: Lauf-Muenzen verdoppeln ----------
+  let rewardTaken=false, lastEarned=0;
   function syncRewardBtn(){
     const row=document.getElementById('rewardRow'), btn=document.getElementById('rewardBtn');
     if(!row||!btn) return;
-    const ok=ADS.rewardAvailable()&&!rewardTaken;
+    const ok=ADS.rewardAvailable()&&ADS.doubleRun()&&lastEarned>0&&!rewardTaken;   // ohne Beute nichts zu verdoppeln
     row.classList.toggle('hidden',!ok);
-    if(ok){ btn.disabled=false; btn.innerHTML=ic('play')+' VIDEO: +'+ADS.coins()+' M\u00dcNZEN'; }
+    if(ok){ btn.disabled=false; btn.innerHTML=ic('play')+' M\u00dcNZEN VERDOPPELN: +'+lastEarned; }
   }
-  ADS.onReady(()=>{ const go=document.getElementById('gameover');
-    if(go&&!go.classList.contains('hidden')) syncRewardBtn(); });
+  ADS.onReady(()=>{
+    const go=document.getElementById('gameover');
+    if(go&&!go.classList.contains('hidden')) syncRewardBtn();
+    const sh=document.getElementById('shop');
+    if(sh&&!sh.classList.contains('hidden')) renderAdShop();
+  });
   document.getElementById('rewardBtn').onclick=async()=>{
     const btn=document.getElementById('rewardBtn');
     if(rewardTaken||btn.disabled) return;
     SND.play('click'); btn.disabled=true; btn.innerHTML='VIDEO L\u00c4DT \u2026';
-    const ok=await ADS.showReward();
-    if(!ok){ syncRewardBtn(); return; }
+    const res=await ADS.showReward();
+    if(!res.ok){ syncRewardBtn(); return; }                       // abgebrochen: Button bleibt nutzbar
     rewardTaken=true;
-    const n=ADS.coins(); save.coins+=n; persist(); updateCoinUI(); SND.play('coin');
-    const gc=document.getElementById('goCoins'); if(gc) gc.textContent=gc.textContent+' +'+n;
-    btn.innerHTML=ic('coin')+' +'+n+' ERHALTEN';
-    setTimeout(()=>{ const r=document.getElementById('rewardRow'); if(r) r.classList.add('hidden'); },1400);
+    save.coins+=lastEarned; persist(); updateCoinUI(); SND.play('coin');
+    const gc=document.getElementById('goCoins'); if(gc) gc.textContent='+'+(lastEarned*2)+' (\u00d72)';
+    btn.innerHTML=ic('coin')+' VERDOPPELT: +'+(lastEarned*2);
+    setTimeout(()=>{ const r=document.getElementById('rewardRow'); if(r) r.classList.add('hidden'); },1600);
   };
+
+  // ---------- Rewarded-Video 2: Muenzen im Shop ----------
+  // Die Belohnung gibt es erst, wenn genug Werbesekunden zusammengekommen sind.
+  // Videos sind oft kuerzer als die Vorgabe, deshalb werden angesehene Sekunden addiert.
+  let adShopMsg='', adShopMsgT=null;
+  function renderAdShop(){
+    const box=document.getElementById('adShop'); if(!box) return;
+    const min=ADS.shopMinSeconds(), reward=ADS.shopCoins();
+    if(!ADS.rewardAvailable()||min<=0||reward<=0){ box.classList.add('hidden'); box.innerHTML=''; return; }
+    box.classList.remove('hidden');
+    const done=Math.min(save.adSec||0,min), rest=min-done;
+    box.innerHTML='<div class="shopSecTitle">GRATIS M\u00dcNZEN</div>'
+      +'<div class="pwr"><div class="pico">'+ic('play')+'</div>'
+      +'<div class="pinfo"><div class="pname">Werbe-Video</div>'
+      +'<div class="pdesc">Mindestens '+min+' Sek. Werbung ansehen \u2013 daf\u00fcr '+reward
+        +' M\u00fcnzen. K\u00fcrzere Videos werden addiert.</div>'
+      +(adShopMsg?'<div class="pown">'+adShopMsg+'</div>'
+        :(done>0?'<div class="pown">Angesehen: '+done+' / '+min+' Sek.</div>':''))
+      +'</div><button class="pbtn" id="adShopBtn">'+(done>0?'Weiter ('+rest+'s)':'Ansehen')+'</button></div>';
+    document.getElementById('adShopBtn').onclick=watchShopAd;
+  }
+  function flashAdShopMsg(txt){
+    adShopMsg=txt;
+    if(adShopMsgT) clearTimeout(adShopMsgT);
+    adShopMsgT=setTimeout(()=>{ adShopMsg=''; adShopMsgT=null; renderAdShop(); },4000);
+  }
+  async function watchShopAd(){
+    const btn=document.getElementById('adShopBtn');
+    if(!btn||btn.disabled) return;
+    SND.play('click');
+    btn.disabled=true; btn.classList.add('cant'); btn.textContent='L\u00e4uft \u2026';
+    const res=await ADS.showReward();
+    const min=ADS.shopMinSeconds();
+    if(!res.ok){ flashAdShopMsg('Video abgebrochen \u2013 keine M\u00fcnzen.'); renderAdShop(); return; }
+    save.adSec=(save.adSec||0)+res.seconds;
+    if(save.adSec>=min){
+      save.adSec=Math.min(save.adSec-min,min-1);                  // Rest bleibt stehen, bleibt aber unter der Vorgabe
+      save.coins+=ADS.shopCoins(); SND.play('coin');
+      flashAdShopMsg('+'+ADS.shopCoins()+' M\u00fcnzen erhalten!');
+    } else {
+      flashAdShopMsg(res.seconds+' Sek. angesehen \u2013 noch '+(min-save.adSec)+' Sek.');
+    }
+    persist(); updateCoinUI(); renderShop();   // kompletter Shop: die neuen Muenzen gelten sofort auch fuer Kaeufe
+  }
   document.getElementById('retryBtn').onclick=()=>{ SND.play('click'); SND.setTrack('game'); hide('gameover'); score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); armGuaranteed(); updateHUD(); state=ST.PLAY; lastT=performance.now(); };
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
