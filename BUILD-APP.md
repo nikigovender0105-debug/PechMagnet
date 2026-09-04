@@ -179,11 +179,25 @@ ausgeblendet.
 | `coins_large` | Verbrauchsartikel | 20.000 Münzen |
 | `no_ads` | Einmalkauf | Banner und Vollbild-Anzeigen aus (freiwillige Videos bleiben) |
 | `skin_pack` | Einmalkauf | Neon-Geist, Galaxie, Der König, Zauberer, Regenbogen |
-| `starter_pack` | Einmalkauf | 3.000 Münzen + 3 Spezial-Tickets + werbefrei |
+| `starter_pack` | Einmalkauf | 3.000 Münzen + 3 Spezial-Tickets + werbefrei — **nur 7 Tage lang kaufbar** |
 
 Was ein Kauf gutschreibt, steht in **`iap.config.json`** – dort lassen sich Beträge,
 Skins und Texte ändern, ohne den Spielcode anzufassen. **Preise kommen aus der Play
 Console**, nicht aus dieser Datei; der Shop zeigt immer den echten, lokalisierten Preis.
+
+### Darstellung im Shop
+
+Das Feld `slot` in `iap.config.json` bestimmt, wo ein Produkt landet:
+
+| `slot` | Darstellung |
+|--------|-------------|
+| `coins` | Quadratische Kachel in der Reihe neben der Werbe-Kachel |
+| `starter` | Großes Banner mit Ablauf-Timer; `offerDays` legt die Laufzeit fest (Standard 7 Tage) |
+| `special` | Eigene farbige Karte darunter, mit Merkmalsliste aus `feats` |
+
+Der Starter-Timer startet beim **ersten Shop-Besuch** (gespeichert als `starterEnd` im
+Spielstand) und läuft sekündlich. Danach verschwindet das Banner – das Produkt bleibt in
+der Play Console aktiv, die App bietet es nur nicht mehr an.
 
 ### Einrichten
 

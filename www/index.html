@@ -184,7 +184,18 @@
     border:2px solid rgba(255,255,255,.6);
     box-shadow:inset 0 -5px 0 rgba(0,0,0,.16), inset 0 3px 0 rgba(255,255,255,.32), 0 2px 4px rgba(30,70,130,.2); }
   #shop .pwr .pico .ic{ width:44px; height:44px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.28)); }
-  #shop .pwr .pname{ font-size:19px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--shTitle); }
+  #shop .pwr .pname{ font-size:19px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--shTitle);
+    overflow-wrap:break-word; hyphens:auto; }
+  #shop .pwr .pinfo{ min-width:0; }   /* sonst schiebt ein langer Name den Preisknopf aus der Karte */
+  /* Schmale Geraete: Kachel, Schrift und Knopf etwas kleiner */
+  @media (max-width:380px){
+    #shop .pwr{ gap:9px; padding:7px 8px 7px 7px; }
+    #shop .pwr .pico{ width:58px; height:58px; border-radius:13px; }
+    #shop .pwr .pico .ic{ width:36px; height:36px; }
+    #shop .pwr .pname{ font-size:16.5px; letter-spacing:.2px; }
+    #shop .pwr .pdesc{ font-size:11px; }
+    #shop .pbtn{ min-width:66px; font-size:14px; padding:10px 9px; }
+  }
   #shop .pwr .pdesc{ font-size:12px; color:var(--shDesc); opacity:1; line-height:1.25; }
   #shop .upBar{ gap:4px; margin-top:5px; }
   #shop .upBar .ud{ width:16px; height:8px; border:none; border-radius:4px; background:#cddbea;
@@ -247,11 +258,15 @@
     box-shadow:inset 0 2px 0 rgba(255,255,255,.16); }
   .footIco:active{ transform:translateY(2px); }
   .footIco .ic{ width:24px; height:24px; }
-  /* Werbe-Kachel: quadratisch, links unter dem Angebot */
-  #adShop{ align-self:flex-start; }
-  .adTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex:none; position:relative; overflow:hidden;
-    width:88px; height:88px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    padding:6px 5px 7px; color:#0b3b3b; border:3px solid rgba(255,255,255,.6); border-radius:18px;
+  /* Werbe-Kachel und Muenzpakete: eine Reihe quadratischer Kacheln */
+  /* flex-start, weil stretch die Kacheln in die Hoehe zieht und das Quadrat zerstoert */
+  .coinRow{ display:flex; gap:8px; align-items:flex-start; }
+  #adShop, #coinPacks{ display:flex; gap:8px; min-width:0; align-items:flex-start; }
+  #adShop{ flex:1 1 0; }
+  #coinPacks{ flex:3 1 0; }
+  .adTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex:1 1 0; position:relative; overflow:hidden;
+    width:100%; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    padding:7px 4px 15px; color:#0b3b3b; border:3px solid rgba(255,255,255,.6); border-radius:18px;
     background:linear-gradient(#4BE3D2,#12A8A8); box-shadow:0 4px 0 #0a7373, 0 7px 14px rgba(18,110,110,.28);
     animation:tilePop .4s cubic-bezier(.2,1.5,.4,1); }
   @keyframes tilePop{ from{transform:scale(.6); opacity:0;} to{transform:none; opacity:1;} }
@@ -262,7 +277,9 @@
   .adTile .ic{ width:26px; height:26px; }
   .adTile .atCap{ font-size:9px; font-weight:700; letter-spacing:1px; opacity:.9; }
   .adTile .atVal{ font-size:18px; font-weight:700; line-height:1; }
-  .adTile .atBar{ width:56px; height:6px; border-radius:3px; background:rgba(11,59,59,.3); overflow:hidden; }
+  /* Balken als Band unten, sonst wird er auf kleinen Kacheln abgeschnitten */
+  .adTile .atBar{ position:absolute; left:6px; right:6px; bottom:5px; height:6px; border-radius:3px;
+    background:rgba(11,59,59,.3); overflow:hidden; }
   .adTile .atBar i{ display:block; height:100%; background:#FFD866; }
   .adTile.busy{ background:linear-gradient(#b9c3cf,#8e9aa8); box-shadow:0 4px 0 #6d7784; animation:none; }
   /* Echtgeld-Kaeufe */
@@ -276,6 +293,122 @@
   .iapRestore{ align-self:center; margin:1px 0 2px; padding:4px 8px; background:none; border:none; font-family:inherit;
     font-size:12px; font-weight:700; color:var(--shTitle); opacity:.75; text-decoration:underline;
     cursor:pointer; pointer-events:auto; }
+  /* ---- Muenzpaket als Quadrat ---- */
+  /* Fahne oben, Preis als Band unten - dazwischen nur Symbol und Betrag, damit es in jedes Quadrat passt */
+  .coinTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex:1 1 0; min-width:0; position:relative;
+    overflow:hidden; width:100%; aspect-ratio:1/1; padding:7px 4px 21px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    color:#fff; border:3px solid rgba(255,255,255,.6); border-radius:18px;
+    background:linear-gradient(160deg, var(--c1,#5AA6F7), var(--c2,#1A6FD0));
+    box-shadow:0 4px 0 rgba(6,26,74,.45), 0 7px 14px rgba(30,70,130,.24);
+    animation:tilePop .4s cubic-bezier(.2,1.5,.4,1); }
+  .coinTile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(6,26,74,.45); }
+  .coinTile::after{ content:''; position:absolute; top:0; bottom:0; left:-50%; width:40%; pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.4), rgba(255,255,255,0));
+    animation:sheen 4.2s ease-in-out infinite; }
+  .coinTile>*{ position:relative; z-index:1; }
+  .coinTile .ctIco{ width:24px; height:24px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.28)); }
+  .coinTile .ctAmt{ font-size:16px; font-weight:700; line-height:1.05; text-shadow:0 2px 0 rgba(10,30,70,.3); }
+  .coinTile .ctPrice{ position:absolute; left:5px; right:5px; bottom:5px; text-align:center;
+    font-size:10.5px; font-weight:700; color:#123A8C;
+    background:rgba(255,255,255,.93); border-radius:8px; padding:2px 3px; box-shadow:0 2px 0 rgba(6,26,74,.3); }
+  /* Kopfband ueber die ganze Breite - eine Ecke wuerde das Symbol ueberdecken */
+  .coinTile .ctTag{ position:absolute; top:0; left:0; right:0; z-index:2; text-align:center;
+    font-size:7.5px; font-weight:700; letter-spacing:.6px; color:#5a3600;
+    background:linear-gradient(#FFE066,#F5B518); padding:1px 4px 2px; box-shadow:0 2px 0 rgba(176,125,0,.5); }
+  .coinTile.tagged{ padding-top:16px; }
+  .coinTile.busy{ background:linear-gradient(160deg,#c3ccd6,#8e9aa8); box-shadow:0 4px 0 #6d7784; }
+  .coinTile.busy::after{ animation:none; opacity:0; }
+  #shop .starterTimer{ white-space:nowrap; }
+  /* ---- Starter-Paket: grosses Banner mit Ablauf-Timer ---- */
+  #shop .starterBox{ position:relative; overflow:hidden; display:flex; align-items:center; gap:9px;
+    padding:20px 12px 13px; border:none; border-radius:20px;
+    background:linear-gradient(115deg,#FF6BC4,#FFB020 26%,#FFE24A 45%,#3BE0A0 66%,#3AA6FF 86%,#A15BFF);
+    background-size:280% 100%; animation:startFlow 9s linear infinite;
+    box-shadow:0 4px 0 rgba(120,40,10,.5), 0 10px 22px rgba(120,60,10,.34); }
+  @keyframes startFlow{ from{background-position:0% 50%;} to{background-position:280% 50%;} }
+  #shop .starterBox::before{ content:''; position:absolute; inset:-60%; pointer-events:none;
+    background:conic-gradient(from 0deg, rgba(255,255,255,.3) 0 7deg, rgba(255,255,255,0) 7deg 26deg);
+    animation:specSpin 8s linear infinite; }
+  #shop .starterBox::after{ content:''; position:absolute; top:0; bottom:0; left:-45%; width:34%; pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
+    animation:sheen 2.8s ease-in-out infinite; }
+  #shop .starterBox>*{ position:relative; z-index:1; }
+  #shop .starterBox .pinfo{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+  #shop .starterBox .pname{ font-size:22px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+    color:#fff; -webkit-text-stroke:4px #7a3200; paint-order:stroke fill; line-height:1.05; }
+  #shop .starterFeats{ display:flex; flex-wrap:wrap; gap:4px; }
+  #shop .starterFeats span{ font-size:10.5px; font-weight:700; color:#5a3600;
+    background:rgba(255,255,255,.9); border-radius:7px; padding:2px 7px; box-shadow:0 2px 0 rgba(120,60,10,.28); }
+  #shop .starterTimer{ display:flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:#fff;
+    background:rgba(90,25,10,.72); border-radius:9px; padding:3px 9px; box-shadow:inset 0 2px 0 rgba(255,255,255,.14); }
+  #shop .starterTimer b{ font-variant-numeric:tabular-nums; letter-spacing:.5px; }
+  #shop .starterTimer.eilig{ background:rgba(200,20,20,.85); animation:eiligPuls .9s ease-in-out infinite alternate; }
+  @keyframes eiligPuls{ from{transform:scale(1);} to{transform:scale(1.05);} }
+  #shop .starterBox .pbtn{ background:linear-gradient(#FFF6C0,#FFD24A); color:#5a3600;
+    box-shadow:0 4px 0 #b07d00; font-size:16px; padding:12px 14px;
+    animation:btnPulse 1.1s ease-in-out infinite alternate; }
+  #shop .starterBox .pbtn:active{ box-shadow:0 1px 0 #b07d00; }
+  #shop .starterArt{ position:relative; flex:none; width:96px; height:96px; display:flex; align-items:center; justify-content:center; }
+  #shop .starterArt::before{ content:''; position:absolute; inset:0;
+    background:radial-gradient(closest-side, rgba(255,255,255,.6), rgba(255,255,255,0) 72%);
+    animation:artPulse 1.8s ease-in-out infinite alternate; }
+  #shop .starterArt .ic{ position:relative; width:70px; height:70px; filter:drop-shadow(0 3px 4px rgba(90,40,0,.45));
+    animation:rocketBob 1.6s ease-in-out infinite alternate; }
+  @keyframes rocketBob{ from{transform:translateY(3px) rotate(-6deg);} to{transform:translateY(-4px) rotate(6deg);} }
+  /* Funken auf dem Banner */
+  #shop .starterBox i.spark{ position:absolute; z-index:2; width:9px; height:9px; pointer-events:none;
+    background:radial-gradient(closest-side,#fff,rgba(255,255,255,0)); animation:sparkTwinkle 1.5s ease-in-out infinite; }
+  @keyframes sparkTwinkle{ 0%,100%{transform:scale(.3); opacity:.15;} 50%{transform:scale(1.25); opacity:1;} }
+  #shop .starterTag{ position:absolute; top:0; left:10px; z-index:3; font-size:10.5px; font-weight:700;
+    letter-spacing:1.2px; color:#6d4300; background:linear-gradient(#FFF6C0,#F5B518);
+    padding:3px 11px 4px; border-radius:0 0 10px 10px; box-shadow:0 2px 0 #b07d00; }
+  /* ---- Skin-Paket und Werbefrei: eigene Karten ---- */
+  #shop .featCard{ position:relative; overflow:hidden; display:flex; align-items:center; gap:10px;
+    padding:12px; border:none; border-radius:18px;
+    background:linear-gradient(135deg, var(--c1,#FF7FC8), var(--c2,#D6249F));
+    box-shadow:0 4px 0 rgba(40,10,60,.45), 0 8px 16px rgba(60,20,90,.26); }
+  #shop .featCard::after{ content:''; position:absolute; top:0; bottom:0; left:-45%; width:36%; pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.34), rgba(255,255,255,0));
+    animation:sheen 4.6s ease-in-out infinite; }
+  #shop .featCard>*{ position:relative; z-index:1; }
+  #shop .featCard .fcArt{ position:relative; flex:none; width:62px; height:62px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.2);
+    box-shadow:inset 0 -4px 0 rgba(0,0,0,.14), inset 0 3px 0 rgba(255,255,255,.28); }
+  #shop .featCard .fcArt .ic{ width:38px; height:38px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
+  #shop .featCard .pinfo{ display:flex; flex-direction:column; align-items:flex-start; gap:5px; }
+  #shop .featCard .pname{ font-size:16px; color:#fff; text-transform:uppercase; letter-spacing:.4px; line-height:1.1; }
+  #shop .featCard .fcFeats{ display:flex; flex-wrap:wrap; gap:4px; }
+  #shop .featCard .fcFeats span{ font-size:10px; font-weight:700; color:#3b1230;
+    background:rgba(255,255,255,.88); border-radius:7px; padding:2px 6px; }
+  #shop .featCard .pown{ font-size:10.5px; font-weight:700; color:#FFE9A8; }
+  #shop .featCard .pbtn{ background:rgba(255,255,255,.95); color:#123A8C; box-shadow:0 4px 0 rgba(20,10,40,.4); }
+  #shop .featCard .pbtn:active{ box-shadow:0 1px 0 rgba(20,10,40,.4); }
+  #shop .featCard .fcTag{ position:absolute; top:0; right:0; z-index:2; font-size:8.5px; font-weight:700;
+    letter-spacing:1px; color:#5a3600; background:linear-gradient(#FFE066,#F5B518); padding:2px 8px 3px;
+    border-bottom-left-radius:10px; box-shadow:0 2px 0 #b07d00; }
+  /* Schmale Geraete: Kachelinhalt und Timer kleiner, damit nichts abgeschnitten wird */
+  @media (max-width:380px){
+    .coinTile{ padding:5px 3px 18px; border-width:2px; }
+    .coinTile.tagged{ padding-top:13px; }
+    .coinTile .ctIco{ width:20px; height:20px; }
+    .coinTile .ctAmt{ font-size:13.5px; }
+    .coinTile .ctPrice{ font-size:9px; left:3px; right:3px; bottom:3px; }
+    .adTile{ padding:5px 3px 13px; }
+    .adTile .ic{ width:15px; height:15px; }
+    .adTile .atVal{ font-size:14px; }
+    .adTile .atCap{ font-size:7px; }
+    .adTile .atBar{ left:4px; right:4px; bottom:4px; height:5px; }
+    #shop .starterArt{ width:72px; height:72px; }
+    #shop .starterArt .ic{ width:54px; height:54px; }
+    #shop .starterTimer{ font-size:11px; padding:3px 7px; }
+    #shop .starterBox .pname{ font-size:19px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .coinTile, .coinTile::after, #shop .starterBox, #shop .starterBox::before, #shop .starterBox::after,
+    #shop .starterArt::before, #shop .starterArt .ic, #shop .starterBox i.spark, #shop .starterBox .pbtn,
+    #shop .starterTimer.eilig, #shop .featCard::after{ animation:none !important; }
+  }
   /* Kurznachricht */
   .shopToast{ position:absolute; left:14px; right:14px; bottom:calc(92px + var(--adH)); z-index:6; pointer-events:none;
     text-align:center; font-size:13px; font-weight:700; color:var(--shTitle); background:#fff;
@@ -971,7 +1104,11 @@
       <div id="upgrades"></div>
       <div class="shopRule"></div>
       <div id="powerups"></div>
-      <div id="adShop" class="hidden"></div>
+      <div class="shopTab hidden" id="iapTab">M&Uuml;NZEN &amp; PAKETE</div>
+      <div class="coinRow hidden" id="coinRow">
+        <div id="adShop" class="hidden"></div>
+        <div id="coinPacks"></div>
+      </div>
       <div id="iapShop" class="hidden"></div>
     </div>
     <div class="shopFoot">
@@ -1210,7 +1347,7 @@ window.ADS=(function(){
            onReady:cb=>{ readyCbs.push(cb); } };
 })();
 </script>
-<script>window.IAP_CONFIG={"products":[{"id":"coins_small","type":"consumable","icon":"coin","name":"Kleiner Beutel","desc":"1.000 Münzen sofort auf dein Konto.","coins":1000,"tile":["#5AA6F7","#1A6FD0"]},{"id":"coins_medium","type":"consumable","icon":"moneybag","name":"Prall gefüllt","desc":"6.000 Münzen – deutlich mehr fürs Geld.","coins":6000,"tag":"BELIEBT","tile":["#FFC94A","#EF8B00"]},{"id":"coins_large","type":"consumable","icon":"gem","name":"Tresor","desc":"20.000 Münzen – der beste Kurs.","coins":20000,"tag":"BESTER KURS","tile":["#BC90FF","#7A34E0"]},{"id":"no_ads","type":"non_consumable","icon":"ban","name":"Werbung entfernen","desc":"Keine Banner, keine Vollbild-Anzeigen. Freiwillige Videos für Münzen bleiben.","noAds":true,"tile":["#8ADB6E","#3F9E2E"]},{"id":"skin_pack","type":"non_consumable","icon":"shirt","name":"Skin-Paket","desc":"Fünf Premium-Skins auf einmal: Neon-Geist, Galaxie, Der König, Zauberer und Regenbogen.","skins":["neon","galaxie","koenig","zauberer","regenbogen"],"tag":"5 SKINS","tile":["#FF7FC8","#D6249F"]},{"id":"starter_pack","type":"non_consumable","icon":"rocket","name":"Starter-Paket","desc":"3.000 Münzen, 3 Spezial-Tickets und Werbung entfernt – alles in einem.","coins":3000,"tickets":3,"noAds":true,"tag":"NUR EINMAL","tile":["#FFD24A","#F0821A"]}]};</script>
+<script>window.IAP_CONFIG={"products":[{"id":"coins_small","type":"consumable","slot":"coins","icon":"coin","name":"Kleiner Beutel","desc":"1.000 Münzen sofort auf dein Konto.","coins":1000,"short":"1.000","tile":["#5AA6F7","#1A6FD0"]},{"id":"coins_medium","type":"consumable","slot":"coins","icon":"moneybag","name":"Prall gefüllt","desc":"6.000 Münzen – deutlich mehr fürs Geld.","coins":6000,"short":"6.000","tag":"BELIEBT","tile":["#FFC94A","#EF8B00"]},{"id":"coins_large","type":"consumable","slot":"coins","icon":"gem","name":"Tresor","desc":"20.000 Münzen – der beste Kurs.","coins":20000,"short":"20.000","tag":"TOP","tile":["#BC90FF","#7A34E0"]},{"id":"no_ads","type":"non_consumable","slot":"special","icon":"ban","name":"Werbung entfernen","desc":"Keine Banner, keine Vollbild-Anzeigen. Freiwillige Videos für Münzen bleiben.","noAds":true,"feats":["Kein Banner","Keine Vollbild-Anzeigen","Videos bleiben"],"tile":["#8ADB6E","#3F9E2E"]},{"id":"skin_pack","type":"non_consumable","slot":"special","icon":"shirt","name":"Skin-Paket","desc":"Fünf Premium-Skins auf einmal: Neon-Geist, Galaxie, Der König, Zauberer und Regenbogen.","skins":["neon","galaxie","koenig","zauberer","regenbogen"],"feats":["Neon-Geist","Galaxie","Der König","Zauberer","Regenbogen"],"tag":"5 SKINS","tile":["#FF7FC8","#D6249F"]},{"id":"starter_pack","type":"non_consumable","slot":"starter","icon":"rocket","name":"Starter-Paket","desc":"3.000 Münzen, 3 Spezial-Tickets und Werbung entfernt – alles in einem.","coins":3000,"tickets":3,"noAds":true,"offerDays":7,"feats":["3.000 Münzen","3 Spezial-Tickets","Werbung entfernt"],"tag":"NUR EINMAL","tile":["#FFD24A","#F0821A"]}]};</script>
 <script>
 /* ---------- In-App-Kaeufe: Google Play ----------
    Nutzt cordova-plugin-purchase (globales CdvPurchase), das Capacitor in der App
@@ -1510,7 +1647,8 @@ window.IAP=(function(){
   const UPGRADES=[
     {key:'shield',name:'Schild',icon:'shield',unit:'s',base:5,step:2,max:5,desc:'Unverwundbarkeit beim Aufsammeln'},
     {key:'boost', name:'Speed-Boost',icon:'bolt',unit:'s',base:12,step:3,max:5,desc:'Dauer des Tempo-Boosts'},
-    {key:'magnet',name:'Münzmagnet',icon:'magnet',unit:'s',base:10,step:3,max:5,desc:'Dauer der Münz-Anziehung'},
+    // weiches Trennzeichen: bricht auf schmalen Displays als "MUENZ-/MAGNET" statt mitten im Wort
+    {key:'magnet',name:'Münz\u00admagnet',icon:'magnet',unit:'s',base:10,step:3,max:5,desc:'Dauer der Münz-Anziehung'},
     {key:'hint',  name:'Spicker',icon:'search',unit:'×',base:1,step:1,max:5,desc:'Aufgedeckte Antworten pro Spicker'},
     {key:'coins', name:'Geldsack',icon:'moneybag',unit:' Mü.',base:10,step:5,max:5,desc:'Münzen pro Geldsack'}
   ];
@@ -1741,9 +1879,10 @@ window.IAP=(function(){
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false };
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false, starterEnd:0 };
   function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.adSec!=='number'||save.adSec<0) save.adSec=0;
-        if(!save.iap||typeof save.iap!=='object') save.iap={}; save.noAds=!!save.noAds; } } }catch(e){} }
+        if(!save.iap||typeof save.iap!=='object') save.iap={}; save.noAds=!!save.noAds;
+        if(typeof save.starterEnd!=='number') save.starterEnd=0; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -4475,8 +4614,8 @@ window.IAP=(function(){
     const box=document.getElementById('adShop'); if(!box) return;
     const min=ADS.shopMinSeconds(), reward=ADS.shopCoins();
     const ready=ADS.rewardAvailable();
-    if(min<=0||reward<=0||(!ready&&!adTileSeen)){ box.classList.add('hidden'); box.innerHTML=''; return; }
-    box.classList.remove('hidden');
+    if(min<=0||reward<=0||(!ready&&!adTileSeen)){ box.classList.add('hidden'); box.innerHTML=''; syncCoinRow(); return; }
+    box.classList.remove('hidden'); syncCoinRow();
     const done=Math.min(save.adSec||0,min), pct=Math.round(done/min*100);
     // Direkt nach einem Video ist kurz keins geladen – die Kachel bleibt sichtbar, aber gesperrt
     if(!ready){
@@ -4525,36 +4664,120 @@ window.IAP=(function(){
       if(got.length) flashAdShopMsg(p.name+': '+got.join(', '));
     }
   }
+  // ---------- Starter-Angebot: 7 Tage ab dem ersten Shop-Besuch ----------
+  function starterEnd(){
+    const p=IAP.def('starter_pack'); if(!p) return 0;
+    const tage=p.offerDays||7;
+    if(!save.starterEnd){ save.starterEnd=Date.now()+tage*86400000; persist(); }
+    return save.starterEnd;
+  }
+  function restZeit(ms){
+    if(ms<0) ms=0;
+    const s=Math.floor(ms/1000), t=Math.floor(s/86400), h=Math.floor(s%86400/3600),
+          m=Math.floor(s%3600/60), sek=s%60, zz=n=>String(n).padStart(2,'0');
+    return (t>0?t+'T ':'')+zz(h)+':'+zz(m)+':'+zz(sek);
+  }
+  let starterTick=null;
+  function stopStarterTimer(){ if(starterTick){ clearInterval(starterTick); starterTick=null; } }
+  function startStarterTimer(){
+    stopStarterTimer();
+    starterTick=setInterval(()=>{
+      const el=document.getElementById('starterTimer');
+      if(!el){ stopStarterTimer(); return; }
+      const rest=starterEnd()-Date.now();
+      if(rest<=0){ stopStarterTimer(); renderIapShop(); return; }     // Angebot vorbei
+      el.querySelector('b').textContent=restZeit(rest);
+      el.classList.toggle('eilig',rest<86400000);                     // letzter Tag
+    },1000);
+  }
+  // Reihe aus Werbe-Kachel und Muenzpaketen nur zeigen, wenn dort etwas steht
+  function syncCoinRow(){
+    const row=document.getElementById('coinRow'); if(!row) return;
+    const ad=document.getElementById('adShop'), packs=document.getElementById('coinPacks');
+    const adDa=ad&&!ad.classList.contains('hidden'), packsDa=packs&&packs.children.length>0;
+    row.classList.toggle('hidden',!adDa&&!packsDa);
+    const tab=document.getElementById('iapTab'), box=document.getElementById('iapShop');
+    if(tab) tab.classList.toggle('hidden',!adDa&&!packsDa&&!(box&&box.children.length));
+  }
   function renderIapShop(){
-    const box=document.getElementById('iapShop'); if(!box) return;
+    const box=document.getElementById('iapShop'), packs=document.getElementById('coinPacks');
+    if(!box||!packs) return;
     const list=IAP.products();
-    if(!IAP.available()||!list.length){ box.classList.add('hidden'); box.innerHTML=''; return; }
+    if(!IAP.available()||!list.length){
+      box.classList.add('hidden'); box.innerHTML=''; packs.innerHTML=''; syncCoinRow(); stopStarterTimer(); return;
+    }
     box.classList.remove('hidden');
-    box.innerHTML='<div class="shopTab">M\u00dcNZEN &amp; PAKETE</div>';
-    for(const p of list){
-      const einmal=p.type!=='consumable';
-      const hat=einmal&&(IAP.owned(p.id)||!!(save.iap&&save.iap[p.id]));
+    box.innerHTML=''; packs.innerHTML='';
+    const gekauft=p=>p.type!=='consumable'&&(IAP.owned(p.id)||!!(save.iap&&save.iap[p.id]));
+    const kaufen=(p,btn)=>{ btn.classList.add('real'); btn.onclick=()=>{ SND.play('click'); IAP.buy(p.id); }; };
+
+    // --- Muenzpakete: quadratische Kacheln neben der Werbe-Kachel ---
+    for(const p of list.filter(x=>x.slot==='coins')){
       const preis=IAP.price(p.id), laeuft=IAP.pending()===p.id;
-      const row=document.createElement('div'); row.className='pwr';
-      const ico=document.createElement('div'); ico.className='pico';
-      const col=p.tile||[]; ico.style.setProperty('--c1',col[0]||'#5AA6F7'); ico.style.setProperty('--c2',col[1]||'#1A6FD0');
-      ico.innerHTML=ic(p.icon||'coin')+(p.tag&&!hat?'<div class="iapTag">'+p.tag+'</div>':'');
-      row.appendChild(ico);
+      const t=document.createElement('button');
+      t.className='coinTile'+(laeuft?' busy':'')+(p.tag?' tagged':'');
+      const col=p.tile||[]; t.style.setProperty('--c1',col[0]||'#5AA6F7'); t.style.setProperty('--c2',col[1]||'#1A6FD0');
+      t.title=p.name+' – '+p.desc;
+      t.innerHTML=(p.tag?'<span class="ctTag">'+p.tag+'</span>':'')
+        +'<svg class="ic ctIco"><use href="#i-'+(p.icon||'coin')+'"/></svg>'
+        +'<span class="ctAmt">'+(p.short||p.coins)+'</span>'
+        +'<span class="ctPrice">'+(laeuft?'…':(preis||'…'))+'</span>';
+      if(!laeuft&&preis) t.onclick=()=>{ SND.play('click'); IAP.buy(p.id); };
+      else t.disabled=true;
+      packs.appendChild(t);
+    }
+    syncCoinRow();
+
+    // --- Starter-Paket: grosses Banner, solange das Angebot laeuft ---
+    const st=list.find(x=>x.slot==='starter');
+    if(st&&!gekauft(st)&&starterEnd()-Date.now()>0){
+      const b=document.createElement('div'); b.className='pwr starterBox'; b.id='starterBox';
+      const col=st.tile||[];
+      b.innerHTML='<div class="starterTag">'+(st.tag||'ANGEBOT')+'</div>'
+        +'<i class="spark" style="top:14px;left:34%"></i><i class="spark" style="bottom:16px;left:22%;animation-delay:.4s"></i>'
+        +'<i class="spark" style="top:26px;right:16%;animation-delay:.8s"></i><i class="spark" style="bottom:12px;right:34%;animation-delay:1.1s"></i>';
       const info=document.createElement('div'); info.className='pinfo';
-      info.innerHTML='<div class="pname">'+p.name+'</div><div class="pdesc">'+p.desc+'</div>';
-      row.appendChild(info);
+      info.innerHTML='<div class="pname">'+st.name+'</div>'
+        +'<div class="starterFeats">'+(st.feats||[]).map(f=>'<span>'+f+'</span>').join('')+'</div>'
+        +'<div class="starterTimer" id="starterTimer">'+ic('bolt')+'Nur noch <b>'+restZeit(starterEnd()-Date.now())+'</b></div>';
+      const btn=document.createElement('button'); btn.className='pbtn';
+      const preis=IAP.price(st.id), laeuft=IAP.pending()===st.id;
+      if(laeuft){ btn.textContent='…'; btn.classList.add('cant'); btn.disabled=true; }
+      else if(!preis){ btn.textContent='…'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
+      else { btn.textContent=preis; kaufen(st,btn); }
+      info.appendChild(btn); b.appendChild(info);
+      const art=document.createElement('div'); art.className='starterArt'; art.innerHTML=ic(st.icon||'rocket');
+      b.appendChild(art);
+      box.appendChild(b);
+      startStarterTimer();
+    } else stopStarterTimer();
+
+    // --- Skin-Paket und Werbefrei: eigene Karten darunter ---
+    for(const p of list.filter(x=>x.slot==='special')){
+      const hat=gekauft(p), preis=IAP.price(p.id), laeuft=IAP.pending()===p.id;
+      const c=document.createElement('div'); c.className='pwr featCard';
+      const col=p.tile||[]; c.style.setProperty('--c1',col[0]||'#FF7FC8'); c.style.setProperty('--c2',col[1]||'#D6249F');
+      if(p.tag&&!hat) c.innerHTML='<div class="fcTag">'+p.tag+'</div>';
+      const art=document.createElement('div'); art.className='fcArt'; art.innerHTML=ic(p.icon||'gem'); c.appendChild(art);
+      const info=document.createElement('div'); info.className='pinfo';
+      info.innerHTML='<div class="pname">'+p.name+'</div>'
+        +'<div class="fcFeats">'+(p.feats||[]).map(f=>'<span>'+f+'</span>').join('')+'</div>'
+        +(hat?'<div class="pown">'+ic('check')+' Gehört dir</div>':'');
+      c.appendChild(info);
       const btn=document.createElement('button'); btn.className='pbtn';
       if(hat){ btn.textContent='GEKAUFT'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
-      else if(laeuft){ btn.textContent='\u2026'; btn.classList.add('cant'); btn.disabled=true; }
-      else if(!preis){ btn.textContent='\u2026'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
-      else { btn.textContent=preis; btn.classList.add('real');
-        btn.onclick=()=>{ SND.play('click'); IAP.buy(p.id); }; }
-      row.appendChild(btn); box.appendChild(row);
+      else if(laeuft){ btn.textContent='…'; btn.classList.add('cant'); btn.disabled=true; }
+      else if(!preis){ btn.textContent='…'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
+      else { btn.textContent=preis; kaufen(p,btn); }
+      c.appendChild(btn);
+      box.appendChild(c);
     }
-    const rb=document.createElement('button'); rb.className='iapRestore'; rb.textContent='K\u00e4ufe wiederherstellen';
-    rb.onclick=async()=>{ SND.play('click'); rb.textContent='Wird gepr\u00fcft \u2026';
+
+    const rb=document.createElement('button'); rb.className='iapRestore'; rb.textContent='Käufe wiederherstellen';
+    rb.onclick=async()=>{ SND.play('click'); rb.textContent='Wird geprüft …';
       await IAP.restore(); renderShop(); };
     box.appendChild(rb);
+    syncCoinRow();
   }
 
   async function watchShopAd(){
@@ -4591,6 +4814,7 @@ window.IAP=(function(){
     box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
   };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.play('swoosh'); SND.setTrack('menu'); hide('shop');
+    stopStarterTimer();
     const t=document.getElementById('shopToast'); if(t) t.remove();
     updateCoinUI(); updateMenuSkin(); show('menu'); };
   document.getElementById('skinsBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); renderSkins(); hide('menu'); show('skins'); };

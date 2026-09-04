@@ -36,6 +36,8 @@ function iapConfigScript() {
   if (!fs.existsSync(cfgFile)) return '';
   const cfg = JSON.parse(fs.readFileSync(cfgFile, 'utf8'));
   const client = { products: (cfg.products || []).filter(p => p && p.id) };
+  // Slot bestimmt die Darstellung im Shop; ohne Angabe zaehlt das Produkt als eigene Karte
+  for (const p of client.products) if (!p.slot) p.slot = p.coins && p.type === 'consumable' ? 'coins' : 'special';
   const json = JSON.stringify(client).replace(/</g, '\\u003c');
   return '<script>window.IAP_CONFIG=' + json + ';</script>';
 }
