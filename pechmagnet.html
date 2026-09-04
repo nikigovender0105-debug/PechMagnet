@@ -667,6 +667,109 @@
   #muteBtn .slash{ display:none; }
   #muteBtn.muted .wave{ display:none; }
   #muteBtn.muted .slash{ display:inline; }
+  /* ================= Heller Menue-Look fuer Menue, Skins, Erfolge, Tutorial =================
+     Steht absichtlich am Ende: so gewinnt es gegen die Grundregeln weiter oben,
+     ohne dass an den Layouts etwas geaendert werden muss. */
+  /* Hintergruende: Stadt bleibt sichtbar, nur der Schleier wird hell */
+  #menu.lobby{ background:linear-gradient(rgba(182,226,251,.30), rgba(198,222,240,.72) 55%, rgba(178,201,222,.93)); }
+  #skins, #achievements{ background:linear-gradient(rgba(198,228,248,.88), rgba(186,210,230,.94)); }
+  #tutorial{ background:linear-gradient(rgba(14,26,60,.42), rgba(14,26,60,.58)); }
+  #menu::before, #skins::before, #achievements::before{
+    background:repeating-linear-gradient(-35deg, rgba(46,107,238,.05) 0 26px, rgba(124,92,255,.05) 26px 52px); }
+  /* Karten */
+  #skins .card, #achievements .card, #tutorial .card{
+    background:linear-gradient(var(--shCard1), var(--shCard2)); border:none; border-radius:22px;
+    box-shadow:0 4px 0 var(--shLine), 0 12px 26px rgba(8,18,45,.3); color:var(--shTitle); }
+  #skins .mtitle, #achievements .mtitle{ color:var(--shTitle); }
+  #skins .stat, #achievements .stat{ background:#E7EFFA; border:none; border-radius:14px;
+    box-shadow:0 2px 0 rgba(120,145,175,.45); }
+  #skins .stat .k, #achievements .stat .k{ color:var(--shDesc); opacity:1; }
+  #skins .stat .v, #achievements .stat .v{ color:var(--shTitle); }
+  #skins #coinsSkins{ color:#E08A00; }
+  #achievements .lead{ color:var(--shDesc); opacity:1; }
+  /* Zurueck-Knoepfe wie im Shop */
+  #skins .btn.go, #achievements .btn.go{ border:none; border-radius:15px; color:#fff; font-size:18px;
+    background:linear-gradient(var(--shBlue), var(--shBlue2)); box-shadow:0 4px 0 rgba(6,26,74,.6); }
+  #skins .btn.go:active, #achievements .btn.go:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(6,26,74,.6); }
+  /* ---- Menue: Plaketten, Kapitelkarte, Startknopf, Navigationsleiste ---- */
+  #menu .plate{ background:rgba(255,255,255,.93); border:2px solid rgba(18,58,140,.14); color:var(--shTitle);
+    box-shadow:0 3px 0 rgba(120,145,175,.5); }
+  #menu .plate.cur b{ color:#E08A00; }
+  /* Das Lautsprecher-Symbol ist cremefarben – auf Weiss verschwinden die Schallwellen,
+     deshalb bleibt diese eine Plakette dunkel (wie der Ton-Knopf in der Shop-Fussleiste). */
+  #menu .mplate{ background:rgba(6,26,74,.72); border-color:rgba(255,255,255,.3);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), 0 3px 0 rgba(6,26,74,.45); }
+  #menu .nameplate #nameInput{ color:var(--shTitle); }
+  #menu .nameplate #nameInput::placeholder{ color:rgba(18,58,140,.45); }
+  #menu .chapterCard{ background:linear-gradient(var(--shCard1), var(--shCard2)); border:none; border-radius:18px;
+    box-shadow:0 3px 0 var(--shLine), 0 8px 16px rgba(8,18,45,.22); }
+  #menu .chTitle{ color:var(--shTitle); }
+  #menu .chapterCard .boardTitle{ color:var(--shBlue2); opacity:.85; }
+  #menu .chapterCard .bempty{ color:var(--shDesc); opacity:1; }
+  #menu .brow{ background:#fff; border:none; border-radius:12px; box-shadow:0 2px 0 rgba(120,145,175,.4); }
+  #menu .brow.new{ background:linear-gradient(#FFEDB5,#FFD24A); }
+  #menu .brow .brk{ color:var(--shBlue2); }
+  #menu .brow .bsc{ color:var(--shTitle); }
+  #menu .brow .bst{ color:var(--shDesc); opacity:1; }
+  #menu .battleBtn{ color:#fff; -webkit-text-stroke:0; border:none; border-radius:20px;
+    background:linear-gradient(#6FE06F, #2E9E2E 55%, #25871f);
+    box-shadow:0 6px 0 var(--shGreenD), 0 10px 18px rgba(16,70,16,.32); text-shadow:0 2px 0 rgba(10,60,10,.35); }
+  #menu .battleBtn:active{ box-shadow:0 1px 0 var(--shGreenD); }
+  #menu .navbar{ background:linear-gradient(var(--shBlue2), var(--shNavy)); border-top:none;
+    box-shadow:0 -4px 0 rgba(6,26,74,.4), 0 -9px 16px rgba(6,26,74,.28); }
+  #menu .navb{ color:#fff; background:rgba(255,255,255,.16); border:2px solid rgba(255,255,255,.3);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16); }
+  #menu .navb:active{ background:rgba(255,255,255,.3); }
+  /* ---- Skins ---- */
+  #skins .skin{ background:linear-gradient(#FFFFFF,#EFF4FA); border:none; border-radius:14px;
+    box-shadow:0 3px 0 rgba(120,145,175,.45); }
+  #skins .skin.sel{ background:linear-gradient(#FFF3D0,#FFE49B); border:none; box-shadow:0 3px 0 #d0a340; }
+  #skins .skin .sname{ color:var(--shTitle); }
+  #skins .skin .sbtn{ border:none; border-radius:11px; color:#fff;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); box-shadow:0 3px 0 var(--shGreenD); }
+  #skins .skin .sbtn.owned{ background:linear-gradient(var(--shBlue), var(--shBlue2)); color:#fff;
+    box-shadow:0 3px 0 rgba(6,26,74,.6); }
+  #skins .skin .sbtn.sel{ background:linear-gradient(#FFD866,#F0A400); color:#5a3600; box-shadow:0 3px 0 #a06d00; }
+  #skins .skin .sbtn.cant{ background:linear-gradient(#d3dce6,#aebbc9); color:#5d6d81; box-shadow:0 3px 0 #8494a6; }
+  #skins .skin .sbtn:active{ transform:translateY(2px); box-shadow:none; }
+  /* ---- Erfolge ---- */
+  #achievements .asBig{ color:var(--shTitle); }
+  #achievements .asOf{ color:var(--shDesc); opacity:1; }
+  #achievements .asCoins{ color:#E08A00; }
+  #achievements .asBar{ background:#DBE4F0; border:2px solid rgba(18,58,140,.12); }
+  /* Stufenfarben sind auf Weiss zu hell fuer kleine Schrift – dunklere Textvariante je Stufe */
+  #achievements .achTier.t1{ --tcd:#1c7a26; }
+  #achievements .achTier.t2{ --tcd:#96690a; }
+  #achievements .achTier.t3{ --tcd:#b04a1c; }
+  #achievements .achTier.t4{ --tcd:#0d7676; }
+  #achievements .achTier.t5{ --tcd:#5334c9; }
+  #achievements .tierName, #achievements .tierStars{ color:var(--tcd, var(--tc)); }
+  #achievements .tierHead{
+    background-image:linear-gradient(90deg, rgba(18,58,140,.08), transparent 62%),
+      repeating-linear-gradient(-45deg, rgba(18,58,140,.035) 0 8px, transparent 8px 16px); }
+  #achievements .tierCount{ color:var(--tcd, var(--shTitle)); background:rgba(255,255,255,.85); }
+  #achievements .tierBar{ background:#DBE4F0; }
+  #achievements .tierHint{ color:var(--shDesc); opacity:.9; }
+  #achievements .ach{ background-color:#EDF2FA;
+    background-image:repeating-linear-gradient(45deg, rgba(18,58,140,.028) 0 6px, transparent 6px 13px);
+    border:2px solid rgba(18,58,140,.10); }
+  #achievements .ach .aname{ color:var(--shTitle); }
+  #achievements .ach .arw{ color:#E08A00; }
+  #achievements .ach.locked{ background-color:#E5EAF2; }
+  #achievements .ach.got{ background-color:#fff; box-shadow:0 3px 0 rgba(120,145,175,.4); }
+  #achievements .ach.sel{ background-color:#DFEAFF; border-color:var(--shBlue2); }
+  #achievements .achDetail{ background-color:#fff;
+    background-image:repeating-linear-gradient(-45deg, rgba(18,58,140,.03) 0 6px, transparent 6px 13px);
+    border:2px solid rgba(18,58,140,.12); box-shadow:0 6px 14px rgba(8,18,45,.22); }
+  #achievements .achDetail .adName{ color:var(--shTitle); }
+  #achievements .achDetail .adDesc, #achievements .achDetail .adHint{ color:var(--shDesc); opacity:1; }
+  #achievements .achDetail .adRw{ color:#E08A00; }
+  /* ---- Tutorial ---- */
+  #tutorial .lead{ color:var(--shDesc); }
+  #tutorial .lead b{ color:var(--shTitle); }
+  #tutorial .btn{ border:none; border-radius:15px; color:#fff;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); box-shadow:0 4px 0 var(--shGreenD); }
+  #tutorial .btn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--shGreenD); }
 </style>
 </head>
 <body>
@@ -695,7 +798,7 @@
 <symbol id="i-lock" viewBox="0 0 32 32"><path d="M10 14v-3a6 6 0 0112 0v3" stroke="#FFB300" stroke-width="3.2"/><rect x="6" y="14" width="20" height="13" rx="3.5" fill="#FFB300"/><circle cx="16" cy="20" r="2.4" fill="#1A1A2E" stroke="none"/></symbol>
 <symbol id="i-ban" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#E63946"/><path d="M8 8l16 16" stroke="#FFF6E5" stroke-width="3.4"/></symbol>
 <symbol id="i-star" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="#FFD23F"/></symbol>
-<symbol id="i-star-o" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="none" stroke="#FFF6E5" stroke-width="2.2" opacity=".42"/></symbol>
+<symbol id="i-star-o" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="none" stroke="#7C93B8" stroke-width="2.2" opacity=".62"/></symbol>
 <symbol id="i-sparkle" viewBox="0 0 32 32"><path d="M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z" fill="#FFD23F"/><path d="M27 3.5l1 3 3 1-3 1-1 3-1-3-3-1 3-1zM5 2.5l.8 2.3L8 5.5l-2.2.8L5 8.5l-.8-2.2L2 5.5l2.2-.7z" fill="#FFF6E5" stroke="none"/></symbol>
 <symbol id="i-sun" viewBox="0 0 32 32"><circle cx="16" cy="16" r="7.5" fill="#FFD23F"/><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6.3 6.3l2.8 2.8M22.9 22.9l2.8 2.8M25.7 6.3l-2.8 2.8M9.1 22.9l-2.8 2.8" stroke-width="2.6"/></symbol>
 <symbol id="i-sunset" viewBox="0 0 32 32"><circle cx="16" cy="17" r="6.5" fill="#FF7A45"/><path d="M16 5v3M6.5 8.5l2 2M25.5 8.5l-2 2" stroke-width="2.4"/><path d="M3 23h26M6 28h20" stroke-width="2.8"/></symbol>
