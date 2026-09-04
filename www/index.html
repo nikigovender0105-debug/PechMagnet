@@ -938,6 +938,96 @@
   #achievements .achDetail .adName{ color:var(--shTitle); }
   #achievements .achDetail .adDesc, #achievements .achDetail .adHint{ color:var(--shDesc); opacity:1; }
   #achievements .achDetail .adRw{ color:#E08A00; }
+  /* ---- Startkarte des Mitspiel-Tutorials ---- */
+  #tutSteps{ background:linear-gradient(rgba(14,26,60,.5), rgba(14,26,60,.66)); }
+  #tutSteps .card{ background:linear-gradient(var(--shCard1), var(--shCard2)); border:none; border-radius:22px;
+    box-shadow:0 4px 0 var(--shLine), 0 12px 26px rgba(8,18,45,.4); max-width:340px; padding:16px 18px 14px; }
+  .tsHead{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .tsNo{ font-size:10px; font-weight:700; letter-spacing:1.6px; color:var(--shDesc); }
+  .tsDots{ display:flex; gap:4px; }
+  .tsDot{ width:7px; height:7px; border-radius:50%; background:#CFDCEA; }
+  .tsDot.done{ background:var(--shGreen2); }
+  .tsDot.on{ background:var(--shBlue2); transform:scale(1.35); }
+  .tsArt{ position:relative; height:104px; margin:10px 0 4px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:6px; overflow:hidden;
+    background:#E7EFFA; border-radius:16px; box-shadow:inset 0 2px 0 rgba(255,255,255,.7); }
+  .tsTitle{ font-size:20px; font-weight:700; color:var(--shTitle); line-height:1.15; margin-top:6px; }
+  .tsText{ font-size:13.5px; font-weight:500; color:var(--shDesc); line-height:1.4; margin:5px 0 12px; }
+  .tsText b{ color:var(--shTitle); }
+  #tutSteps .btn.go.tsNext{ width:100%; border:none; border-radius:16px; font-size:19px; padding:13px 20px; color:#fff;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); box-shadow:0 5px 0 var(--shGreenD); animation:none; }
+  #tutSteps .btn.go.tsNext:active{ transform:translateY(4px); box-shadow:0 1px 0 var(--shGreenD); }
+  .tsSkip{ pointer-events:auto; cursor:pointer; font-family:inherit; margin-top:9px; padding:3px 6px;
+    background:none; border:none; font-size:12px; font-weight:700; color:var(--shDesc); opacity:.8; text-decoration:underline; }
+  /* Bild der Startkarte */
+  .tsFinger{ display:flex; align-items:center; justify-content:center; width:52px; height:52px; border-radius:50%;
+    background:#fff; box-shadow:0 3px 0 rgba(120,145,175,.5); animation:tsUp 1.5s ease-in-out infinite; }
+  .tsFinger .ic{ width:26px; height:26px; transform:rotate(-90deg); }
+  @keyframes tsUp{ 0%,100%{transform:translateY(16px);} 50%{transform:translateY(-14px);} }
+  .tsHint{ font-size:10.5px; font-weight:700; letter-spacing:.8px; color:var(--shDesc); }
+  @media (max-height:660px){
+    #tutSteps .card{ padding:12px 14px 11px; }
+    .tsArt{ height:84px; margin:8px 0 2px; }
+    .tsTitle{ font-size:18px; }
+    .tsText{ font-size:12.5px; margin:4px 0 9px; }
+    #tutSteps .btn.go.tsNext{ font-size:17px; padding:11px 18px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tsFinger{ animation:none !important; }
+  }
+  /* ---- Mitspiel-Tutorial: Coach waehrend des Laufs ---- */
+  #tutCoach{ position:absolute; inset:0; z-index:40; pointer-events:none; }
+  #tcSkip{ pointer-events:auto; cursor:pointer; font-family:inherit; position:absolute;
+    right:10px; bottom:calc(26px + env(safe-area-inset-bottom)); border:none; border-radius:12px;
+    padding:7px 11px; font-size:11px; font-weight:700; color:#EAF1FB;
+    background:rgba(14,26,60,.6); box-shadow:0 3px 0 rgba(6,14,36,.55); }
+  #tcSkip:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(6,14,36,.55); }
+  .tcCard{ position:absolute; left:10px; right:10px; bottom:calc(84px + env(safe-area-inset-bottom));
+    margin:0 auto; max-width:360px; padding:9px 14px 11px; border-radius:18px; text-align:center;
+    background:linear-gradient(var(--shCard1), var(--shCard2));
+    box-shadow:0 4px 0 var(--shLine), 0 10px 22px rgba(8,18,45,.45); }
+  .tcCard.in{ animation:tcIn .3s cubic-bezier(.2,1.5,.5,1) both; }
+  @keyframes tcIn{ from{opacity:0; transform:translateY(24px) scale(.94);} to{opacity:1; transform:none;} }
+  .tcTop{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px; }
+  .tcNo{ font-size:9.5px; font-weight:700; letter-spacing:1.5px; color:var(--shDesc); }
+  .tcTitle{ font-size:17px; font-weight:700; color:var(--shTitle); line-height:1.15; }
+  .tcText{ font-size:12.5px; font-weight:500; color:var(--shDesc); line-height:1.35; margin-top:3px; }
+  .tcText b{ color:var(--shTitle); }
+  .tcNudge{ font-size:11.5px; font-weight:700; color:#C6410C; }
+  .tcNudge:not(:empty){ margin-top:5px; }
+  /* Hinweis-Geste mitten im Bild */
+  .tcCue{ position:absolute; left:50%; transform:translateX(-50%);
+    bottom:calc(196px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .tcHand{ display:flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%;
+    background:rgba(255,255,255,.95); box-shadow:0 4px 0 rgba(16,34,74,.45);
+    animation:tcUp 1.4s ease-in-out infinite; }
+  .tcHand .ic{ width:28px; height:28px; transform:rotate(-90deg); }
+  @keyframes tcUp{ 0%,100%{transform:translateY(20px);} 50%{transform:translateY(-16px);} }
+  .tcArrow{ display:flex; flex-direction:column; align-items:center; line-height:.8;
+    font-size:26px; font-weight:700; color:#fff; text-shadow:0 3px 0 rgba(10,20,50,.55);
+    animation:tcUp 1.2s ease-in-out infinite; }
+  .tcRelease{ padding:8px 16px; border-radius:14px; font-size:18px; font-weight:700; color:#fff;
+    background:linear-gradient(#ff7b6f,#E63946); box-shadow:0 4px 0 #a3202a;
+    -webkit-text-stroke:3px rgba(60,10,10,.32); paint-order:stroke fill;
+    animation:tcShake .45s ease-in-out infinite alternate; }
+  @keyframes tcShake{ from{transform:rotate(-2deg) scale(1);} to{transform:rotate(2deg) scale(1.05);} }
+  /* Erfolgs-Stempel */
+  .tcOk{ position:absolute; left:50%; top:42%; display:flex; align-items:center; gap:8px;
+    padding:11px 18px; border-radius:16px; font-size:19px; font-weight:700; color:#12561e;
+    background:linear-gradient(#EAFFE8,#BFF3BE); box-shadow:0 5px 0 #79c47a, 0 12px 24px rgba(8,18,45,.35);
+    transform:translate(-50%,-50%) rotate(-3deg); }
+  .tcOk .ic{ width:22px; height:22px; }
+  .tcOk.pop{ animation:tcStamp .42s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes tcStamp{ 0%{opacity:0; transform:translate(-50%,-50%) scale(.45) rotate(-9deg);}
+    60%{opacity:1;} 100%{opacity:1; transform:translate(-50%,-50%) scale(1) rotate(-3deg);} }
+  @media (max-height:660px){
+    .tcCard{ bottom:calc(74px + env(safe-area-inset-bottom)); padding:8px 12px 10px; }
+    .tcTitle{ font-size:16px; } .tcText{ font-size:12px; }
+    .tcCue{ bottom:calc(172px + env(safe-area-inset-bottom)); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tcCard.in, .tcHand, .tcArrow, .tcRelease, .tcOk.pop{ animation:none !important; }
+  }
   /* ---- Tutorial ---- */
   #tutorial .lead{ color:var(--shDesc); }
   #tutorial .lead b{ color:var(--shTitle); }
@@ -1148,6 +1238,33 @@
     </div>
   </div>
 
+  <div id="tutSteps" class="screen hidden">
+    <div class="card tutCard">
+      <div class="tsHead">
+        <span class="tsNo" id="tsNo"></span>
+        <div class="tsDots" id="tsDots"></div>
+      </div>
+      <div class="tsArt" id="tsArt"></div>
+      <h2 class="tsTitle" id="tsTitle"></h2>
+      <p class="tsText" id="tsText"></p>
+      <button class="btn go tsNext" id="tsNext">WEITER</button>
+      <button class="tsSkip" id="tsSkip">Kenn ich schon, überspringen</button>
+    </div>
+  </div>
+  <div id="tutCoach" class="hidden">
+    <div class="tcCue" id="tcCue"></div>
+    <div class="tcOk hidden" id="tcOk"></div>
+    <div class="tcCard" id="tcCard">
+      <div class="tcTop">
+        <span class="tcNo" id="tcNo"></span>
+        <div class="tsDots" id="tcDots"></div>
+      </div>
+      <div class="tcTitle" id="tcTitle"></div>
+      <div class="tcText" id="tcText"></div>
+      <div class="tcNudge" id="tcNudge"></div>
+    </div>
+    <button id="tcSkip">Tutorial &uuml;berspringen</button>
+  </div>
   <div id="tutorial" class="screen hidden">
     <div class="card">
       <h2 style="font-size:21px;color:var(--purple);margin-bottom:6px;">So geht's</h2>
@@ -1879,10 +1996,11 @@ window.IAP=(function(){
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false, starterEnd:0 };
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false, starterEnd:0, tutDone:false };
   function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.adSec!=='number'||save.adSec<0) save.adSec=0;
         if(!save.iap||typeof save.iap!=='object') save.iap={}; save.noAds=!!save.noAds;
-        if(typeof save.starterEnd!=='number') save.starterEnd=0; } } }catch(e){} }
+        if(typeof save.starterEnd!=='number') save.starterEnd=0;
+        save.tutDone=!!save.tutDone; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
@@ -2142,6 +2260,7 @@ window.IAP=(function(){
   function currentZone(y){ for(const z of zones){ if(y>=z.y0 && y<z.y1) return z; } return zones[0]||null; }
 
   function resetWorld(){
+    tutStop();
     zones=[]; npcs=[]; coins=[]; items=[]; obstacles=[]; magnetTime=0; pickFx=[]; hintCharges=0; coinsRun=0; lastZoneTypeId=null;
     excusesRun=0; caughtRun=0; itemsRun=0; weatherRun={};
     player.x=W/2; player.y=0; player.vx=player.vy=0; player.moving=false;
@@ -2164,12 +2283,172 @@ window.IAP=(function(){
     score=0; streetsCleared=0; bestNerve=0; suspicion=0;
     resetWorld(); updateHUD();
     hide('menu'); hide('gameover'); hide('dialog'); hide('reaction');
-    show('tutorial'); state=ST.MENU;
+    state=ST.MENU;
+    if(!save.tutDone){ renderTutIntro(); show('tutSteps'); }   // beim ersten Mal: Mitspiel-Tutorial
+    else show('tutorial');
   }
-  function beginPlay(){ hide('tutorial'); state=ST.PLAY; SND.setTrack('game'); armGuaranteed(); lastT=performance.now(); }
+  // ---------- Mitspiel-Tutorial (nur beim allerersten Start) ----------
+  // Kein Info-Karussell: der Lauf laeuft wirklich mit, und jeder Schritt wird erst
+  // abgehakt, wenn der Spieler ihn selbst gemacht hat. Sterben ist dabei unmoeglich.
+  const TUT_PLAY=[
+    { title:'Zieh nach oben',
+      text:'Finger irgendwo auf den Bildschirm legen und nach oben ziehen. Loslassen hei\u00dft stehen bleiben.',
+      cue:'hand', ok:'Genau so!' },
+    { title:'Sammle die M\u00fcnzen',
+      text:'Lauf durch die drei M\u00fcnzen vor dir. Davon kaufst du im Shop Skins und Power-ups.',
+      cue:'arrow', ok:'Kasse gemacht!' },
+    { title:'Jetzt Finger loslassen!',
+      text:'Alle drehen sich um. Solange <b>STEHENBLEIBEN!</b> steht: keinen Schritt \u2013 sonst steigt der <b>Verdacht</b>.',
+      cue:'release', ok:'Eiskalt geblieben!' },
+    { title:'Bei LOS! weiterlaufen',
+      text:'Die Luft ist rein. Jetzt schnell weiter \u2013 jeder Meter bringt Punkte.',
+      cue:'arrow', ok:'Schnell wie der Wind!' },
+    { title:'Um die Leute herum',
+      text:'Renn niemanden an und nimm bei Absperrungen die L\u00fccke. Lauf ein St\u00fcck sauber durch.',
+      cue:'arrow', ok:'Elegant vorbei!' },
+    { title:'Erwischt? Dreist bleiben',
+      text:'Die Menge stellt dich. W\u00e4hle die passende Ausrede \u2013 hier kostet ein Fehler nichts.',
+      cue:'', ok:'Astrein gelogen!' }
+  ];
+  const TUT={active:false,i:0,t:0,markY:0,markCoins:0,fired:false,wait:0};
+  let tutSubBase='';   // Situationstext im Erwischt-Dialog, damit der Hinweis ihn nicht ueberschreibt
+
+  function renderTutIntro(){
+    document.getElementById('tsNo').textContent='MITSPIEL-TUTORIAL';
+    document.getElementById('tsDots').innerHTML=TUT_PLAY.map(()=>'<span class="tsDot"></span>').join('');
+    const art=document.getElementById('tsArt');
+    art.className='tsArt s1';
+    art.innerHTML='<div class="tsFinger">'+ic('play')+'</div>'
+      +'<div class="tsHint">'+TUT_PLAY.length+' Schritte \u2013 zum Mitmachen</div>';
+    document.getElementById('tsTitle').innerHTML='Komm, ich zeig\u2019s dir';
+    document.getElementById('tsText').innerHTML='Du spielst gleich selbst. Ich sage dir Schritt f\u00fcr Schritt, '
+      +'was zu tun ist \u2013 und im Tutorial kann dir <b>nichts</b> passieren.';
+    document.getElementById('tsNext').textContent='LOS GEHT\u2019S!';
+    document.getElementById('tsSkip').classList.remove('hidden');
+    const card=art.closest('.card');
+    card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+  }
+  function tutCoachShown(on){ const el=document.getElementById('tutCoach'); if(el) el.classList.toggle('hidden',!on); }
+  function tutSay(msg){
+    const n=document.getElementById('tcNudge'); if(!n||!TUT.active) return;
+    n.textContent=msg; if(n._t) clearTimeout(n._t);
+    n._t=setTimeout(()=>{ n.textContent=''; n._t=null; },2400);
+  }
+  function tutBegin(){
+    TUT.active=true; TUT.i=-1; TUT.wait=0;
+    hide('tutSteps'); beginPlay();          // armGuaranteed haelt das Ticket zurueck, solange TUT.active
+    tutNext();
+  }
+  function tutStop(){
+    TUT.active=false; TUT.wait=0;
+    const ok=document.getElementById('tcOk'); if(ok) ok.classList.add('hidden');
+    tutCoachShown(false);
+  }
+  function tutSkipAll(){
+    const wasIntro=(state===ST.MENU);
+    tutStop(); save.tutDone=true; persist(); hide('tutSteps');
+    if(wasIntro) beginPlay();
+    else { chaosTimer=Math.max(chaosTimer,2.5); armGuaranteed(); }
+  }
+  function tutRenderCoach(){
+    const st=TUT_PLAY[TUT.i]; if(!st) return;
+    document.getElementById('tcNo').textContent='SCHRITT '+(TUT.i+1)+' VON '+TUT_PLAY.length;
+    document.getElementById('tcDots').innerHTML=TUT_PLAY.map((x,i)=>
+      '<span class="tsDot'+(i===TUT.i?' on':(i<TUT.i?' done':''))+'"></span>').join('');
+    document.getElementById('tcTitle').innerHTML=st.title;
+    document.getElementById('tcText').innerHTML=st.text;
+    document.getElementById('tcNudge').textContent='';
+    const cue=document.getElementById('tcCue');
+    cue.innerHTML = st.cue==='hand'    ? '<div class="tcHand">'+ic('play')+'</div>'
+                  : st.cue==='arrow'   ? '<div class="tcArrow">\u25b2</div>'
+                  : st.cue==='release' ? '<div class="tcRelease">LOSLASSEN!</div>' : '';
+    cue.classList.toggle('hidden',!st.cue);
+    const card=document.getElementById('tcCard');
+    card.classList.remove('in'); void card.offsetWidth; card.classList.add('in');
+  }
+  function tutEnter(){
+    if(!TUT_PLAY[TUT.i]) return;
+    TUT.t=0; TUT.fired=false; TUT.markY=player.y; TUT.markCoins=coinsRun;
+    if(TUT.i===1) tutSpawnCoins();
+    tutCoachShown(true); tutRenderCoach();
+  }
+  // Drei Muenzen direkt in den Weg legen, damit der Schritt sicher machbar ist.
+  function tutSpawnCoins(){
+    for(let k=0;k<3;k++) coins.push({x:clamp(player.x+(k-1)*46,ROAD_L+22,W-ROAD_R-22), y:player.y-95-k*32});
+  }
+  // Ein gescripteter STEHENBLEIBEN!-Moment, der nur endet, wenn der Spieler stehen bleibt.
+  function tutAlarm(){
+    const z=currentZone(player.y);
+    currentEvent=EVENTS[pick((z&&z.events)||['anvil'])]; currentSpecialKey='';
+    phase='alarm'; alarmTimer=999; stareStill=0;
+    const bx=clamp(player.x+rand(-70,70),playMinX(),playMaxX());
+    const by=z?clamp(player.y-60,z.y0+30,z.y1-20):player.y-60;
+    bursts.push({x:bx,y:by,vis:currentEvent.vis,boom:currentEvent.boom,fall:false,
+                 fallDur:0.5,impacted:true,t:0,life:3.4});
+    for(const n of npcs) n.point=true;
+    shake=reduceMotion?4:8; SND.play(soundForVis(currentEvent.vis)); SND.play('alarm');
+    setBanner('alarm');
+  }
+  function tutForceCatch(){
+    TUT.fired=true;
+    const z=currentZone(player.y);
+    currentEvent=EVENTS[pick((z&&z.events)||['anvil'])];
+    confrontMode=false; specialMode=false; currentSpecialKey='';
+    getCaught();
+  }
+  function tutPass(){
+    const st=TUT_PLAY[TUT.i]; if(!st) return;
+    SND.play('correct');
+    const ok=document.getElementById('tcOk');
+    ok.innerHTML=ic('check')+'<span>'+(st.ok||'Super!')+'</span>';
+    ok.classList.remove('hidden','pop'); void ok.offsetWidth; ok.classList.add('pop');
+    const dot=document.getElementById('tcDots').children[TUT.i];
+    if(dot) dot.className='tsDot done';
+    TUT.wait=1.2;
+  }
+  function tutNext(){
+    TUT.i++;
+    if(TUT.i>=TUT_PLAY.length){ tutAllDone(); return; }
+    tutEnter();
+  }
+  function tutAllDone(){
+    tutStop(); save.tutDone=true; persist();
+    chaosTimer=Math.max(2.5,diff().chaosInterval*0.8);
+    armGuaranteed();                                   // Ticket erst jetzt einloesen
+    document.getElementById('reactTitle').innerHTML='Tutorial geschafft! '+ic('check');
+    document.getElementById('reactText').textContent='Du kennst jetzt alles Wichtige. '
+      +'Der Lauf geht weiter \u2013 viel Gl\u00fcck!';
+    show('reaction'); state=ST.REACT; reactTimer=2.2;
+  }
+  function updateTut(dt){
+    if(!TUT.active) return;
+    if(TUT.wait>0){ TUT.wait-=dt;
+      if(TUT.wait<=0){ document.getElementById('tcOk').classList.add('hidden'); tutNext(); }
+      return; }
+    if(!TUT_PLAY[TUT.i]) return;
+    TUT.t+=dt;
+    if(TUT.i===5){                                     // Ausrede: laeuft im Erwischt-Dialog
+      const dlgOpen=!document.getElementById('dialog').classList.contains('hidden');
+      tutCoachShown(!dlgOpen && state!==ST.CAUGHT);
+      if(!TUT.fired){ if(state===ST.PLAY && TUT.t>0.8) tutForceCatch(); return; }
+      if(state!==ST.CAUGHT && !dlgOpen) tutPass();
+      return;
+    }
+    if(state!==ST.PLAY) return;
+    let done=false;
+    if(TUT.i===0)      done=(TUT.markY-player.y)>=150;
+    else if(TUT.i===1) done=(coinsRun-TUT.markCoins)>=2;
+    else if(TUT.i===2){ if(!TUT.fired){ if(TUT.t>0.4){ TUT.fired=true; tutAlarm(); } } else done=(phase==='calm'); }
+    else if(TUT.i===3) done=(TUT.markY-player.y)>=240;
+    else if(TUT.i===4) done=(TUT.markY-player.y)>=320;   // Rempler setzt die Strecke zurueck
+    if(done) tutPass();
+  }
+
+  function beginPlay(){ hide('tutorial'); hide('tutSteps'); state=ST.PLAY; SND.setTrack('game'); armGuaranteed(); lastT=performance.now(); }
   // Spezial-Ticket: garantiert ein Special-Event innerhalb der ersten 2 Viertel dieser Runde.
   function armGuaranteed(){
     guaranteedActive=false;
+    if(TUT.active){ updateTicketHUD(); return; }   // im Tutorial kein Spezial-Event: Ticket bleibt erhalten
     if(save.specialTokens>0){
       save.specialTokens--; persist();
       guaranteedActive=true;
@@ -2284,6 +2563,11 @@ window.IAP=(function(){
         save.coins-=bribeCost; persist(); updateCoinUI(); escapeCatch(true);
       };
     }
+    if(TUT.active){                                   // Situation bleibt stehen, der Tipp kommt dazu
+      tutSubBase=document.getElementById('caughtSub').textContent;
+      document.getElementById('caughtSub').textContent=tutSubBase
+        +' \u2013 Tipp: die Ausrede antippen, die dazu passt. Im Tutorial kostet ein Fehler nichts.';
+    }
     caughtWasSpecial=specialMode;
     document.getElementById('dialog').classList.toggle('specialCaught',specialMode);
     confrontMode=false; specialMode=false;
@@ -2294,6 +2578,10 @@ window.IAP=(function(){
     if(state!==ST.CAUGHT) return;
     if(excuseSet[i].ok){ escapeCatch(); }
     else{ btn.classList.add('wrong'); shake=reduceMotion?6:14; SND.play('wrong');
+      if(TUT.active){ btn.disabled=true;                                    // Tutorial: einfach nochmal versuchen
+        document.getElementById('caughtSub').textContent=tutSubBase
+          +' \u2013 Daneben! Probier eine andere \u2013 hier kostet das nichts.';
+        return; }
       endGame('Falsche Ausrede \u2013 die Menge rastet aus!'); }
   }
   function escapeCatch(bribed){
@@ -2432,6 +2720,13 @@ window.IAP=(function(){
     updateHUD();
   }
   function confrontNPC(n){
+    if(TUT.active){                                   // im Tutorial nur ein Schubs mit Hinweis
+      bumpCD=1.4; shake=reduceMotion?5:11; SND.play('wrong');
+      suspicion=Math.min(85,suspicion+16); setSusBar();
+      TUT.markY=player.y;                             // Strecke fuer den Ausweich-Schritt neu starten
+      tutSay('Autsch! Nicht in Leute reinrennen.');
+      return;
+    }
     const z=currentZone(player.y);
     currentEvent=z?EVENTS[pick(z.events)]:EVENTS.anvil;
     confrontMode=true;
@@ -2441,6 +2736,12 @@ window.IAP=(function(){
     bumpCD=1.2; getCaught();
   }
   function hitObstacle(o){
+    if(TUT.active){
+      bumpCD=1.4; shake=reduceMotion?5:11; SND.play('wrong');
+      TUT.markY=player.y;
+      tutSay('Absperrung! Nur durch die L\u00fccke.');
+      return;
+    }
     currentEvent={kind:o.kind,label:o.label,subText:o.label};
     confrontMode=false; specialMode=false; currentSpecialKey='';
     shake=reduceMotion?7:15; SND.play('caught'); bumpCD=1.2;
@@ -2448,6 +2749,13 @@ window.IAP=(function(){
   }
   // Startet die Death-Animation (WASTED bzw. themed je nach Special), danach Game-Over.
   function endGame(msg){
+    if(TUT.active){                                   // im Tutorial gibt es kein Game-Over
+      hide('dialog'); hide('minigame'); state=ST.PLAY;
+      suspicion=0; susLocked=false; setSusBar(); bumpCD=1.4;
+      endAlarm(); SND.setTrack('game');
+      tutSay('Halb so wild \u2013 im Tutorial passiert dir nichts.');
+      return;
+    }
     const style = caughtWasSpecial && currentEvent && currentEvent.death ? currentEvent.death : 'wasted';
     deathAnim={style:style,t:0,dur:style==='wasted'?1.5:1.9,msg:msg||'Die Menge hat dich erwischt.'};
     state=ST.DEATH;
@@ -2800,7 +3108,7 @@ window.IAP=(function(){
     if(spawnProtect>0) spawnProtect=Math.max(0,spawnProtect-dt);
 
     if(phase==='calm'){
-      if(spawnProtect<=0){ chaosTimer-=dt; if(chaosTimer<=0) triggerChaos(); }
+      if(spawnProtect<=0 && !TUT.active){ chaosTimer-=dt; if(chaosTimer<=0) triggerChaos(); }
     } else if(phase==='special'){
       specialTimer-=dt;
       specialAnimT=clamp(1-Math.max(0,specialTimer)/SPECIAL_DUR,0,1);
@@ -2817,6 +3125,7 @@ window.IAP=(function(){
       if(phase==='alarm'&&alarmTimer<=0) endAlarm();
     }
     suspicion=clamp(suspicion,0,100);
+    if(TUT.active) suspicion=Math.min(suspicion,88);   // im Tutorial kann der Verdacht nicht toeten
     if(suspicion>=100 && !susLocked){ susLocked=true; getCaught(); return; }
 
     for(const n of npcs){
@@ -2878,6 +3187,7 @@ window.IAP=(function(){
   }
   function updateCaught(dt){
     if(state!==ST.CAUGHT) return;
+    if(TUT.active){ document.getElementById('rageFill').style.width='100%'; return; }   // Tutorial: keine Zeitnot
     rageTimer-=dt*rageDrain;
     document.getElementById('rageFill').style.width=clamp(rageTimer/rageMax,0,1)*100+'%';
     if(rageTimer<=0) endGame('Die Wut der Menge kochte \u00fcber.');
@@ -4519,7 +4829,7 @@ window.IAP=(function(){
     if(state===ST.MENU && zones.length && !reduceMotion && !tutorialOpen()){
       camY-=dt*26; generateUpTo(camY-H*1.2); cullBehind(camY+H+600);
     }
-    advanceAmbient(dt); update(dt); updateCaught(dt); updateMini(dt); updateDeath(dt); render(); setAmbientHUD(); requestAnimationFrame(loop); }
+    advanceAmbient(dt); update(dt); updateTut(dt); updateCaught(dt); updateMini(dt); updateDeath(dt); render(); setAmbientHUD(); requestAnimationFrame(loop); }
 
   // Screen-Wechsel mit Ein-/Ausblend-Animation
   function show(id){
@@ -4541,6 +4851,9 @@ window.IAP=(function(){
   }
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
+  document.getElementById('tsNext').onclick=()=>{ SND.ensure(); SND.play('click'); tutBegin(); };
+  document.getElementById('tsSkip').onclick=()=>{ SND.ensure(); SND.play('click'); tutSkipAll(); };
+  document.getElementById('tcSkip').onclick=()=>{ SND.play('click'); tutSkipAll(); };
   // ---------- Rewarded-Video 1: Lauf-Muenzen verdoppeln ----------
   let rewardTaken=false, lastEarned=0, rewardDone=false;   // rewardDone: Erfolgsanzeige laeuft gerade
   function syncRewardBtn(){
