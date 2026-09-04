@@ -9,7 +9,8 @@ const root = path.resolve(__dirname, '..');
 const src = path.join(root, 'pechmagnet.html');
 const outDir = path.join(root, 'www');
 const out = path.join(outDir, 'index.html');
-const MARKER = '<!--ADMOB_CONFIG-->';
+const AD_MARKER = '<!--ADMOB_CONFIG-->';
+const IAP_MARKER = '<!--IAP_CONFIG-->';
 
 // Nur die Felder, die das Spiel im Browser braucht – die App-ID bleibt in den nativen Projekten.
 function adsConfigScript() {
@@ -29,13 +30,24 @@ function adsConfigScript() {
   return '<script>window.ADMOB_CONFIG=' + json + ';</script>';
 }
 
+// In-App-Kaeufe: Produkte und was sie gutschreiben
+function iapConfigScript() {
+  const cfgFile = path.join(root, 'iap.config.json');
+  if (!fs.existsSync(cfgFile)) return '';
+  const cfg = JSON.parse(fs.readFileSync(cfgFile, 'utf8'));
+  const client = { products: (cfg.products || []).filter(p => p && p.id) };
+  const json = JSON.stringify(client).replace(/</g, '\\u003c');
+  return '<script>window.IAP_CONFIG=' + json + ';</script>';
+}
+
 let html = fs.readFileSync(src, 'utf8');
-const inject = adsConfigScript();
-if (html.indexOf(MARKER) >= 0) {
-  html = html.replace(MARKER, inject);
-  console.log(inject ? 'AdMob-Konfiguration injiziert.' : 'Keine admob.config.json gefunden – ohne Werbung gebaut.');
-} else {
-  console.warn('Hinweis: Marker ' + MARKER + ' fehlt in pechmagnet.html – AdMob-Konfiguration nicht injiziert.');
+for (const [marker, code, name] of [[AD_MARKER, adsConfigScript(), 'AdMob'], [IAP_MARKER, iapConfigScript(), 'In-App-Kauf']]) {
+  if (html.indexOf(marker) < 0) {
+    console.warn('Hinweis: Marker ' + marker + ' fehlt in pechmagnet.html – ' + name + '-Konfiguration nicht injiziert.');
+    continue;
+  }
+  html = html.replace(marker, code);
+  console.log(code ? name + '-Konfiguration injiziert.' : 'Keine Konfiguration für ' + name + ' gefunden – ohne gebaut.');
 }
 
 fs.mkdirSync(outDir, { recursive: true });

@@ -1,0 +1,42 @@
+{
+  "_hinweis": "In-App-Kaeufe (Google Play). Die Produkt-IDs muessen EXAKT so in der Play Console angelegt sein. Preise kommen aus dem Store, nicht von hier.",
+  "_wo": "https://play.google.com/console -> App -> Monetarisierung -> Produkte -> In-App-Produkte",
+
+  "products": [
+    {
+      "id": "coins_small", "type": "consumable", "icon": "coin",
+      "name": "Kleiner Beutel", "desc": "1.000 Münzen sofort auf dein Konto.",
+      "coins": 1000, "tile": ["#5AA6F7", "#1A6FD0"]
+    },
+    {
+      "id": "coins_medium", "type": "consumable", "icon": "moneybag",
+      "name": "Prall gefüllt", "desc": "6.000 Münzen – deutlich mehr fürs Geld.",
+      "coins": 6000, "tag": "BELIEBT", "tile": ["#FFC94A", "#EF8B00"]
+    },
+    {
+      "id": "coins_large", "type": "consumable", "icon": "gem",
+      "name": "Tresor", "desc": "20.000 Münzen – der beste Kurs.",
+      "coins": 20000, "tag": "BESTER KURS", "tile": ["#BC90FF", "#7A34E0"]
+    },
+    {
+      "id": "no_ads", "type": "non_consumable", "icon": "ban",
+      "name": "Werbung entfernen", "desc": "Keine Banner, keine Vollbild-Anzeigen. Freiwillige Videos für Münzen bleiben.",
+      "noAds": true, "tile": ["#8ADB6E", "#3F9E2E"]
+    },
+    {
+      "id": "skin_pack", "type": "non_consumable", "icon": "shirt",
+      "name": "Skin-Paket", "desc": "Fünf Premium-Skins auf einmal: Neon-Geist, Galaxie, Der König, Zauberer und Regenbogen.",
+      "skins": ["neon", "galaxie", "koenig", "zauberer", "regenbogen"],
+      "tag": "5 SKINS", "tile": ["#FF7FC8", "#D6249F"]
+    },
+    {
+      "id": "starter_pack", "type": "non_consumable", "icon": "rocket",
+      "name": "Starter-Paket", "desc": "3.000 Münzen, 3 Spezial-Tickets und Werbung entfernt – alles in einem.",
+      "coins": 3000, "tickets": 3, "noAds": true,
+      "tag": "NUR EINMAL", "tile": ["#FFD24A", "#F0821A"]
+    }
+  ],
+
+  "_typen": "consumable = mehrfach kaufbar (Münzen). non_consumable = Einmalkauf, wird beim Start wiederhergestellt.",
+  "_felder": "coins/tickets/skins/noAds bestimmen, was ein Kauf gutschreibt. tile = Farbverlauf der Symbolkachel im Shop."
+}

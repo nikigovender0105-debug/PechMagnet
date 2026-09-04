@@ -164,11 +164,83 @@ Werbe-Konfiguration gebaut und alle Anzeigen-Aufrufe laufen ins Leere.
 
 ---
 
-## 7. In die Stores hochladen
+## 7. In-App-Käufe (Google Play)
+
+Käufe laufen über **`cordova-plugin-purchase`** (Google Play Billing). Wie bei der
+Werbung passiert **im Browser nichts** – der Kauf-Bereich im Shop bleibt dort einfach
+ausgeblendet.
+
+### Was verkauft wird
+
+| Produkt-ID | Art | Gibt |
+|-----------|-----|------|
+| `coins_small` | Verbrauchsartikel | 1.000 Münzen |
+| `coins_medium` | Verbrauchsartikel | 6.000 Münzen |
+| `coins_large` | Verbrauchsartikel | 20.000 Münzen |
+| `no_ads` | Einmalkauf | Banner und Vollbild-Anzeigen aus (freiwillige Videos bleiben) |
+| `skin_pack` | Einmalkauf | Neon-Geist, Galaxie, Der König, Zauberer, Regenbogen |
+| `starter_pack` | Einmalkauf | 3.000 Münzen + 3 Spezial-Tickets + werbefrei |
+
+Was ein Kauf gutschreibt, steht in **`iap.config.json`** – dort lassen sich Beträge,
+Skins und Texte ändern, ohne den Spielcode anzufassen. **Preise kommen aus der Play
+Console**, nicht aus dieser Datei; der Shop zeigt immer den echten, lokalisierten Preis.
+
+### Einrichten
+
+1. **Zahlungsprofil** anlegen: Play Console → *Einrichtung → Zahlungsprofil*. Ohne das
+   lassen sich keine kostenpflichtigen Produkte verkaufen.
+2. App **einmal in einen Track hochladen** (internes Testing genügt) – erst dann kennt
+   Play das Paket `com.pechmagnet.app` und erlaubt In-App-Produkte.
+3. Produkte anlegen: *Monetarisierung → Produkte → In-App-Produkte → Produkt erstellen*.
+   Die **IDs müssen exakt** den sechs oben genannten entsprechen, Preis setzen und jedes
+   Produkt **aktivieren** (inaktive Produkte tauchen in der App nicht auf).
+4. **Testkonten** eintragen: Play Console → *Einrichtung → Lizenztests*. Diese Konten
+   kaufen kostenlos, die Kauf-Dialoge sehen aber echt aus.
+5. Bauen und synchronisieren:
+
+   ```bash
+   npm install
+   npm run sync
+   ```
+
+`npm run sync` installiert das Plugin ins Android-Projekt, setzt die
+`com.android.vending.BILLING`-Berechtigung (macht das Plugin selbst) und hebt über
+`scripts/patch-native.js` die **`minSdkVersion` auf 23** an – Google Play Billing 9
+verlangt das, Capacitor legt Projekte mit 22 an.
+
+> **Testen geht nur über Play**, nicht über „Run" aus Android Studio: die App muss
+> signiert in einem Track liegen und vom Testkonto **aus dem Play Store installiert**
+> werden. Sonst bleibt der Kauf-Bereich leer, weil Play keine Produkte liefert.
+
+### Wichtig zu wissen
+
+- **Neue Entwicklerkonten** (privat, seit November 2023) müssen vor der Produktion einen
+  **Closed Test mit mindestens 12 Testern über 14 Tage** durchlaufen.
+- **Keine Server-Prüfung.** Die App glaubt dem Gerät. Für ein Einzelspieler-Spiel mit
+  lokalem Spielstand ist das üblich: wer sich Münzen erschleicht, betrügt nur den eigenen
+  Spielstand – es gibt keine Rangliste mit Geldwert. Für echte Absicherung bräuchte es
+  einen kleinen Server, der die Belege bei Google prüft.
+- **Einmalkäufe werden beim Start wiederhergestellt.** Play liefert sie erneut aus,
+  deshalb schreibt das Spiel sie nur einmal gut (`save.iap`). Zusätzlich gibt es unten im
+  Kauf-Bereich den Knopf **„Käufe wiederherstellen"** – Google verlangt eine solche
+  Möglichkeit.
+- **Store-Eintrag:** „Enthält In-App-Käufe" deklarieren und die Preisspanne angeben.
+- **iOS:** Dasselbe Plugin kann App-Store-Käufe, dafür müssen die Produkte in App Store
+  Connect mit denselben IDs angelegt und der Store dort auf `APPLE_APPSTORE` erweitert
+  werden. Aktuell ist nur Google Play verdrahtet.
+
+### Käufe abschalten
+
+`iap.config.json` löschen (oder umbenennen) und `npm run build` – dann wird ohne
+Kauf-Konfiguration gebaut und der Bereich erscheint nicht.
+
+---
+
+## 8. In die Stores hochladen
 
 | Store | Konto | Datei | Hinweis |
 |------|-------|-------|---------|
-| **Google Play** | Play-Developer (einmalig 25 $) | signiertes **.aab** | Store-Eintrag + Datenschutzerklärung nötig |
+| **Google Play** | Play-Developer (einmalig 25 $) | signiertes **.aab** | Store-Eintrag + Datenschutzerklärung nötig; Werbung und In-App-Käufe deklarieren |
 | **Apple App Store** | Apple Developer (99 $/Jahr) | Archive via Xcode | **Mac Pflicht**, App-Review durch Apple |
 
 > Apple lehnt reine „verpackte Webseiten" manchmal ab (Richtlinie 4.2). Ein echtes
