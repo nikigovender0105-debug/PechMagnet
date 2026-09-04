@@ -338,7 +338,65 @@ pro Fund.
 
 ---
 
-## 9. In die Stores hochladen
+## 9. Sprachen
+
+Oben links im Hauptmenü sitzt ein Knopf mit Weltkugel und Sprachkürzel. Er öffnet
+die Auswahl; die Wahl wird im Spielstand gemerkt (`lang`). Beim allerersten Start
+richtet sich das Spiel nach der Sprache des Geräts – ist sie nicht vorhanden,
+bleibt es bei Deutsch. Mitgeliefert sind **Deutsch** und **English**.
+
+### Wie es funktioniert
+
+Der **deutsche Text ist gleichzeitig der Schlüssel**. Fehlt eine Übersetzung,
+bleibt Deutsch stehen – ein Text kann also nie verschwinden. Zwei Stellen im
+Spiel sorgen dafür:
+
+- `T('deutscher Text')` bzw. `Tf('{n} Münzen',{n:12})` für alles, was das Spiel
+  selbst schreibt (Shop, Erfolge, Ausreden, Meldungen …)
+- alle festen Texte der Seite werden beim Start einmal gemerkt und beim Wechsel
+  ersetzt – das Markup braucht dafür keine Extra-Attribute
+
+Auch die Namen aus `iap.config.json` laufen durch `T()`. Wer sie übersetzen will,
+nimmt den deutschen Text als Schlüssel ins Wörterbuch auf.
+
+Die Bewertung der getippten Ausreden fragt in der eingestellten Sprache: die KI
+bekommt sie im Auftrag mitgeteilt und antwortet darin.
+
+### Eine Sprache hinzufügen
+
+In `pechmagnet.html` zwei Stellen ergänzen (beide stehen direkt beieinander,
+Suchbegriff `const LANGS`):
+
+```js
+  const LANGS=[
+    {code:'de',name:'Deutsch',short:'DE',ai:'Deutsch'},
+    {code:'en',name:'English',short:'EN',ai:'Englisch'},
+    {code:'tr',name:'Türkçe',short:'TR',ai:'Türkisch'}      // neu
+  ];
+```
+
+```js
+  TR.tr={
+    "LOS GEHT'S":"HADI BAŞLA",
+    "SHOP":"MAĞAZA"
+    // … weitere Zeilen: "deutscher Text":"Übersetzung"
+  };
+```
+
+`name` erscheint in der Auswahl (am besten in der Sprache selbst), `short` auf dem
+Knopf, `ai` sagt der Bewertungs-KI, in welcher Sprache sie antworten soll.
+Danach `npm run copy` (oder `npm run build`) – fertig. Übersetzt werden muss
+nichts vollständig: was fehlt, erscheint auf Deutsch.
+
+### Welche Texte gibt es?
+
+Alle Schlüssel stehen im Wörterbuch `TR.en` (rund 540 Zeilen) – das ist zugleich
+die vollständige Liste. Am schnellsten kopiert man diesen Block, ersetzt `en`
+durch das neue Kürzel und übersetzt die rechte Spalte.
+
+---
+
+## 10. In die Stores hochladen
 
 | Store | Konto | Datei | Hinweis |
 |------|-------|-------|---------|

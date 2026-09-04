@@ -1032,6 +1032,34 @@
     #excuseInput{ min-height:50px; }
     #excuseSend{ font-size:16px; padding:11px; }
   }
+  /* ---- Sprachwahl ---- */
+  .tbLeft{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; min-width:0; }
+  .lplate{ pointer-events:auto; cursor:pointer; font-family:inherit; font-size:13px; letter-spacing:.5px;
+    padding:4px 11px; }
+  .lplate .ic{ width:17px; height:17px; }
+  .lplate:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(120,145,175,.5); }
+  #langPick{ background:linear-gradient(rgba(8,14,34,.5), rgba(8,14,34,.72)); }
+  #langPick .card{ border:none; border-radius:22px; max-width:320px; padding:16px 16px 14px;
+    background:linear-gradient(var(--shCard1), var(--shCard2));
+    box-shadow:0 4px 0 var(--shLine), 0 12px 26px rgba(8,18,45,.42); }
+  .lpTitle{ font-size:21px; color:var(--shTitle); -webkit-text-stroke:0; margin-bottom:10px; }
+  .lpList{ display:flex; flex-direction:column; gap:8px; }
+  .lpItem{ pointer-events:auto; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:10px;
+    width:100%; text-align:left; font-size:16px; font-weight:700; color:var(--shTitle);
+    background:linear-gradient(#FFFFFF,#F1F5FA); border:none; border-radius:14px; padding:11px 13px;
+    box-shadow:0 3px 0 var(--shLine); }
+  .lpItem:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--shLine); }
+  .lpItem .lpFlag{ flex:none; min-width:34px; text-align:center; font-size:12px; letter-spacing:1px;
+    color:#fff; background:linear-gradient(var(--shBlue), var(--shBlue2)); border-radius:8px; padding:3px 0; }
+  .lpItem .lpChk{ margin-left:auto; display:none; }
+  .lpItem .lpChk .ic{ width:20px; height:20px; }
+  .lpItem.on{ background:linear-gradient(#EAFFE7,#C8F5C6); box-shadow:0 3px 0 #79c47a; }
+  .lpItem.on .lpFlag{ background:linear-gradient(var(--shGreen), var(--shGreen2)); }
+  .lpItem.on .lpChk{ display:block; }
+  #langPick .btn.go.lpDone{ width:100%; margin-top:12px; border:none; border-radius:16px; font-size:18px;
+    padding:12px 20px; color:#fff; background:linear-gradient(var(--shGreen), var(--shGreen2));
+    box-shadow:0 5px 0 var(--shGreenD); animation:none; }
+  #langPick .btn.go.lpDone:active{ transform:translateY(4px); box-shadow:0 1px 0 var(--shGreenD); }
   /* ---- Startkarte des Mitspiel-Tutorials ---- */
   #tutSteps{ background:linear-gradient(rgba(14,26,60,.5), rgba(14,26,60,.66)); }
   #tutSteps .card{ background:linear-gradient(var(--shCard1), var(--shCard2)); border:none; border-radius:22px;
@@ -1135,6 +1163,7 @@
      ohne Bilddateien auskommt und die Symbole auf jedem Geraet gleich aussehen. -->
 <svg id="iconset" aria-hidden="true" focusable="false"><defs>
 <g id="i-defaults"></g>
+<symbol id="i-globe" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.4" fill="#3A86FF"/><path d="M16 3.6c8 6.6 8 18.2 0 24.8-8-6.6-8-18.2 0-24.8z" fill="#5FA8FF" stroke="none"/><path d="M4.2 12h23.6M4.2 20h23.6" stroke="#FFF6E5" stroke-width="1.9"/><path d="M16 3.6c8 6.6 8 18.2 0 24.8M16 3.6c-8 6.6-8 18.2 0 24.8" stroke="#FFF6E5" stroke-width="1.9"/><circle cx="16" cy="16" r="12.4" fill="none"/></symbol>
 <symbol id="i-coin" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#E09400"/><circle cx="16" cy="16" r="9.3" fill="#FFCB3C" stroke="#B87400" stroke-width="1.1"/><path d="M16 9.4l2 4.2 4.6.6-3.4 3.1 1 4.5-4.2-2.4-4.2 2.4 1-4.5-3.4-3.1 4.6-.6z" fill="#FFF6C0" stroke="#B87400" stroke-width="1"/><path d="M9.2 12.6a8.2 8.2 0 013.5-3.4" stroke="#FFF6E5" stroke-width="2.2"/><path d="M25.5 6.2l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z" fill="#FFF6E5" stroke="none"/></symbol>
 <symbol id="i-moneybag" viewBox="0 0 32 32"><path d="M11.5 12.6H20.5C25.2 15.9 27.7 19.6 27.7 23C27.7 27.2 23.8 29.6 16 29.6C8.2 29.6 4.3 27.2 4.3 23C4.3 19.6 6.8 15.9 11.5 12.6Z" fill="#FFB300"/><path d="M5.6 22.2C8.4 24.3 11.9 25.4 16 25.4C20.1 25.4 23.6 24.3 26.4 22.2C26.8 23.3 27 24.2 27 25C27 27.4 22.6 28.6 16 28.6C9.4 28.6 5 27.4 5 25C5 24.2 5.2 23.3 5.6 22.2Z" fill="#E09400" stroke="none"/><path d="M10.6 15.9C8.1 18.1 6.7 20.2 6.4 22.2" stroke="#FFE9A8" stroke-width="2.8"/><g transform="translate(16 21.6) scale(.8) translate(-16 -16)"><path d="M16 9.4l2 4.2 4.6.6-3.4 3.1 1 4.5-4.2-2.4-4.2 2.4 1-4.5-3.4-3.1 4.6-.6z" fill="#FFF6C0" stroke="#B87400" stroke-width="1.4"/></g><path d="M11 8.6h10c1.1 0 2 .9 2 2v.8c0 1.1-.9 2-2 2H11c-1.1 0-2-.9-2-2v-.8c0-1.1.9-2 2-2z" fill="#E09400"/><path d="M11.2 8.6C11.9 5.1 13.7 3.1 16 2.6C18.3 3.1 20.1 5.1 20.8 8.6Z" fill="#FFD23F"/><path d="M14.3 8.4C14.4 6 14.9 4.2 16 3M17.7 8.4C17.6 6 17.1 4.2 16 3" stroke-width="1.1"/><path d="M26.4 4.6l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="#FFF6E5" stroke="none"/></symbol>
 <symbol id="i-gem" viewBox="0 0 32 32"><path d="M9.5 3.5h13l7.5 9.2L16 28.5 2 12.7z" fill="#19C3C3"/><path d="M9.5 3.5h13l1.7 9.2H7.8z" fill="#5FE3E3" stroke="none"/><path d="M7.8 12.7L16 28.5l8.2-15.8z" fill="#0F9B9B" stroke="none"/><path d="M2 12.7h28M9.5 3.5L7.8 12.7M22.5 3.5l1.7 9.2M2 12.7L16 28.5l14-15.8M7.8 12.7L16 28.5l8.2-15.8" stroke-width="1.5"/><path d="M11.4 5.6h7.4" stroke="#DFFFFF" stroke-width="1.6"/></symbol>
@@ -1240,9 +1269,12 @@
 
   <div id="menu" class="screen lobby">
     <div class="topbar">
-      <div class="plate nameplate">
-        <canvas id="meAvatar" width="114" height="114"></canvas>
-        <input id="nameInput" maxlength="20" placeholder="Dein Name" autocomplete="off" />
+      <div class="tbLeft">
+        <div class="plate nameplate">
+          <canvas id="meAvatar" width="114" height="114"></canvas>
+          <input id="nameInput" maxlength="20" placeholder="Dein Name" autocomplete="off" />
+        </div>
+        <button class="plate cur lplate" id="langBtn"><svg class="ic"><use href="#i-globe"/></svg> <b id="langCode">DE</b></button>
       </div>
       <div class="plates">
         <div class="plate cur"><svg class="ic"><use href="#i-trophy"/></svg> <b id="hsMenu">0</b></div>
@@ -1266,6 +1298,14 @@
       <button class="navb" id="shopBtn"><svg class="ic"><use href="#i-cart"/></svg><span>SHOP</span></button>
       <button class="navb" id="skinsBtn"><svg class="ic"><use href="#i-shirt"/></svg><span>SKINS</span></button>
       <button class="navb" id="achBtn"><svg class="ic"><use href="#i-trophy"/></svg><span>ERFOLGE</span></button>
+    </div>
+  </div>
+
+  <div id="langPick" class="screen hidden">
+    <div class="card lpCard">
+      <h2 class="lpTitle">Sprache</h2>
+      <div class="lpList" id="lpList"></div>
+      <button class="btn go lpDone" id="lpDone">FERTIG</button>
     </div>
   </div>
 
@@ -2056,11 +2096,11 @@ window.IAP=(function(){
     const t=document.getElementById('achToast');
     if(!t){ achShowing=false; return; }
     document.getElementById('achToastIcon').innerHTML=ic(a.icon);
-    document.getElementById('achToastName').textContent=a.name;
+    document.getElementById('achToastName').textContent=T(a.name);
     const rw=[];
     if(a.coins) rw.push('+'+a.coins+' Münzen');
     if(a.skin) rw.push('Skin: '+((SKINS.find(s=>s.id===a.skin)||{}).name||''));
-    document.getElementById('achToastDesc').textContent=rw.length?('Belohnung: '+rw.join(' · ')):a.desc;
+    document.getElementById('achToastDesc').textContent=rw.length?Tf('Belohnung: {r}',{r:rw.join(' · ')}):T(a.desc);
     t.classList.remove('hidden');
     requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
     SND.play('achieve');
@@ -2071,16 +2111,645 @@ window.IAP=(function(){
   const SAVE_KEY='pechmagnet_v1';
   let lsOK=false;
   try{ localStorage.setItem('__pm','1'); localStorage.removeItem('__pm'); lsOK=true; }catch(e){ lsOK=false; }
-  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false, starterEnd:0, tutDone:false };
+  let save={ coins:0, owned:['klassik'], selected:'klassik', scores:[], muted:false, specialTokens:0, achievements:{}, specialsSeen:[], playerName:'', upgrades:{}, minisWon:{}, deaths:0, adSec:0, iap:{}, noAds:false, starterEnd:0, tutDone:false, lang:'' };
   function loadSave(){ if(!lsOK) return; try{ const r=localStorage.getItem(SAVE_KEY); if(r){ const o=JSON.parse(r); if(o&&typeof o==='object'){ save=Object.assign(save,o); if(!Array.isArray(save.owned)) save.owned=['klassik']; if(!Array.isArray(save.scores)) save.scores=[]; if(typeof save.specialTokens!=='number') save.specialTokens=0; if(!save.achievements||typeof save.achievements!=='object') save.achievements={}; if(!Array.isArray(save.specialsSeen)) save.specialsSeen=[]; if(typeof save.playerName!=='string') save.playerName=''; if(!save.upgrades||typeof save.upgrades!=='object') save.upgrades={}; if(!save.minisWon||typeof save.minisWon!=='object') save.minisWon={}; if(typeof save.deaths!=='number') save.deaths=0; if(typeof save.adSec!=='number'||save.adSec<0) save.adSec=0;
         if(!save.iap||typeof save.iap!=='object') save.iap={}; save.noAds=!!save.noAds;
         if(typeof save.starterEnd!=='number') save.starterEnd=0;
-        save.tutDone=!!save.tutDone; } } }catch(e){} }
+        save.tutDone=!!save.tutDone;
+        save.lang=(typeof save.lang==='string')?save.lang:''; } } }catch(e){} }
   function persist(){ if(!lsOK) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){} }
   function applySkin(){ curSkin=SKINS.find(s=>s.id===save.selected)||SKINS[0]; }
 
   // Zeichnet ein Symbol aus dem Icon-Sprite. Ersetzt ueberall die frueheren Emojis.
   function ic(name,cls){ return '<svg class="ic'+(cls?' '+cls:'')+'"><use href="#i-'+name+'"/></svg>'; }
+
+  // ---------- Sprachen ----------
+  // Der deutsche Text ist gleichzeitig der Schluessel. Fehlt eine Uebersetzung,
+  // bleibt Deutsch stehen - so kann nie ein Text verschwinden.
+  const LANGS=[
+    {code:'de',name:'Deutsch',short:'DE',ai:'Deutsch'},
+    {code:'en',name:'English',short:'EN',ai:'Englisch'}
+  ];
+  const TR={};   // TR.<code> = { 'deutscher Text':'uebersetzung', ... }
+  // ---- Englisch: deutscher Text -> english text ----
+  TR.en={
+    "Belohnung: {r}":"Reward: {r}",
+    "{n} Münzen":"{n} coins",
+    "MITSPIEL-TUTORIAL":"PLAY-ALONG TUTORIAL",
+    "{n} Schritte – zum Mitmachen":"{n} steps – hands on",
+    "Komm, ich zeig’s dir":"Come on, I'll show you",
+    "LOS GEHT’S!":"LET'S GO!",
+    "SCHRITT {i} VON {n}":"STEP {i} OF {n}",
+    "LOSLASSEN!":"LET GO!",
+    "Tutorial geschafft!":"Tutorial done!",
+    "„{e}“ – UND DU WARST DAS?!":"“{e}” – AND THAT WAS YOU?!",
+    "Deine Ausrede … sei kreativ!":"Your excuse … get creative!",
+    "Spicker eingesetzt – diese Ausrede zieht <b>garantiert</b>. Einfach abgeben!":"Cheat sheet used – this excuse works <b>for sure</b>. Just hand it in!",
+    " – Tipp: tippe irgendeine dreiste Ausrede ein. Im Tutorial kommt jede durch.":" – Tip: type any brazen excuse. In the tutorial they all work.",
+    "Schweigen macht dich nur verdächtiger!":"Saying nothing only makes you look guiltier!",
+    "Dein Spicker sitzt – die Menge nickt und macht dir Platz.":"Your cheat sheet lands – the crowd nods and lets you through.",
+    "<b>{p}/100 – zu schwach:</b> „{c}“ Probier eine dreistere – hier kostet das nichts.":"<b>{p}/100 – too weak:</b> “{c}” Try something bolder – it costs you nothing here.",
+    "Noch dreister …":"Bolder, please …",
+    "Die Menge winkt dich durch – im Tutorial noch.":"The crowd waves you through – tutorial mercy.",
+    "Ausrede abgelehnt ({p}/100): „{c}“":"Excuse rejected ({p}/100): “{c}”",
+    "Geschmiert!":"Greased!",
+    "Die Menge steckt das Geld ein und schaut betont weg. Diesmal.":"The crowd pockets the money and looks away. Just this once.",
+    "{p}/100 – Durchgekommen!":"{p}/100 – You got away!",
+    "Die Menge kauft es dir ab.":"The crowd buys it.",
+    "JETZT! TIPPEN!":"NOW! TAP!",
+    "ZIEH!":"PULL!",
+    "Die Menge hat dich erwischt.":"The crowd got you.",
+    "Noch keine Läufe – leg los!":"No runs yet – get going!",
+    "{n} Viertel":"{n} districts",
+    "jetzt":"now",
+    "ANGEBOT!":"DEAL!",
+    "Spezial-Ticket":"Special Ticket",
+    "Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.":"Guarantees a special event in the first 2 districts of your next run.",
+    "Im Vorrat: {n}":"In stock: {n}",
+    "Ausgewählt":"Selected",
+    "Auswählen":"Select",
+    "Erfolg":"Achievement",
+    "Skin „{s}“":"Skin “{s}”",
+    "Tippe einen Erfolg an – hier steht dann, wie du ihn bekommst.":"Tap an achievement – this is where you'll see how to get it.",
+    "von {n} Erfolgen":"of {n} achievements",
+    "kassiert":"collected",
+    "STEHENBLEIBEN!":"FREEZE!",
+    "LOS!":"GO!",
+    "Münzen verdoppeln":"Double your coins",
+    "Kurzes Video ansehen · gratis":"Watch a short video · free",
+    "Video läuft …":"Video running …",
+    "Bitte bis zum Ende ansehen":"Please watch to the end",
+    "Verdoppelt!":"Doubled!",
+    "auf dein Konto gebucht":"added to your account",
+    "LÄDT …":"LOADING …",
+    "Mindestens {min} Sek. Werbung ansehen – dafür {n} Münzen. Kürzere Videos werden addiert.":"Watch at least {min} sec. of ads – that's {n} coins. Shorter videos add up.",
+    "Angesehen: {a}/{b} Sek.":"Watched: {a}/{b} sec.",
+    "WERBUNG":"ADS",
+    "+{n} Münzen":"+{n} coins",
+    "+{n} Spezial-Tickets":"+{n} special tickets",
+    "+{n} Skins":"+{n} skins",
+    "Werbung entfernt":"Ads removed",
+    "Nur noch":"Only",
+    "Gehört dir":"Yours",
+    "GEKAUFT":"PURCHASED",
+    "Käufe wiederherstellen":"Restore purchases",
+    "Wird geprüft …":"Checking …",
+    "LÄUFT …":"RUNNING …",
+    "Video abgebrochen – keine Münzen.":"Video cancelled – no coins.",
+    "+{n} Münzen erhalten!":"+{n} coins received!",
+    "{a} Sek. angesehen – noch {b} Sek.":"{a} sec. watched – {b} sec. to go.",
+    "Du spielst gleich selbst. Ich sage dir Schritt für Schritt, was zu tun ist – und im Tutorial kann dir <b>nichts</b> passieren.":"You'll be playing yourself. I'll tell you step by step what to do – and <b>nothing</b> can happen to you in the tutorial.",
+    "Du kennst jetzt alles Wichtige. Der Lauf geht weiter – viel Glück!":"You know all the essentials now. The run continues – good luck!",
+    "Ein Amboss kracht herab!":"An anvil comes crashing down!",
+    "KRACH!":"CRASH!",
+    "Ein Klavier stürzt vom Himmel!":"A piano drops out of the sky!",
+    "KLABÖNG!":"KLAAANG!",
+    "Ein Tresor donnert herunter!":"A safe thunders down!",
+    "WUMM!":"WHAM!",
+    "Ziegelsteine prasseln nieder!":"Bricks rain down!",
+    "RUMMS!":"THUD!",
+    "Ein Stahlträger kippt um!":"A steel beam topples over!",
+    "Eine Kuh fällt vom Himmel!":"A cow falls from the sky!",
+    "MUUH!":"MOOO!",
+    "Eine Topfpflanze segelt herab!":"A potted plant sails down!",
+    "Der Obststand kippt um!":"The fruit stand tips over!",
+    "PLATTER!":"SPLAT!",
+    "Der Brunnen spritzt los!":"The fountain bursts open!",
+    "PLATSCH!":"SPLASH!",
+    "Ein Hydrant explodiert!":"A hydrant explodes!",
+    "FFFT!":"FFFT!",
+    "Die Kaffeemaschine läuft über!":"The coffee machine boils over!",
+    "BLUBB!":"BLUBB!",
+    "Die Hochzeitstorte brennt!":"The wedding cake is on fire!",
+    "FOOM!":"FOOM!",
+    "Der Grill geht in Flammen auf!":"The grill goes up in flames!",
+    "WHOOSH!":"WHOOSH!",
+    "Die Tauben drehen durch!":"The pigeons lose it!",
+    "FLATTER!":"FLUTTER!",
+    "Wütende Enten greifen an!":"Angry ducks attack!",
+    "QUAAK!":"QUACK!",
+    "Die Hunde reißen sich los!":"The dogs break loose!",
+    "WUFF!":"WOOF!",
+    "Ein Kellner stolpert mit Tabletts!":"A waiter stumbles with a tray!",
+    "SCHEPPER!":"CLATTER!",
+    "Der Blumenbogen kracht um!":"The flower arch crashes down!",
+    "Ein Einkaufswagen rollt Amok!":"A shopping cart runs amok!",
+    "Ein Bienenstock platzt auf!":"A beehive bursts open!",
+    "BZZZZ!":"BZZZZ!",
+    "Ein Auto rast heran und überfährt dich fast!":"A car races up and nearly runs you over!",
+    "SCREECH!":"SCREECH!",
+    "Quietschende Reifen – das Auto erwischt dich fast und alle gaffen!":"Screeching tyres – the car nearly got you and everyone is staring!",
+    "Die Mafia ist aufgetaucht!":"The mafia has shown up!",
+    "KLICK-KLACK!":"CLICK-CLACK!",
+    "Zwei breite Typen im Anzug bauen sich auf: „Wir müssen reden. Jetzt.“":"Two broad guys in suits step up: “We need to talk. Now.”",
+    "Ein UFO erfasst dich mit dem Traktorstrahl!":"A UFO catches you in its tractor beam!",
+    "WZZZT!":"WZZZT!",
+    "Ein Traktorstrahl zieht dich hoch – die Aliens warten auf eine Erklärung.":"A tractor beam pulls you up – the aliens want an explanation.",
+    "Ein Polizist nimmt dich ins Visier!":"A police officer has you in his sights!",
+    "TATÜ-TATA!":"WEE-WOO!",
+    "Ein Streifenpolizist baut sich vor dir auf: „Ausweis. Sofort.“":"A patrol officer steps in front of you: “ID. Now.”",
+    "Eine Reporterin hält dir das Mikro ins Gesicht!":"A reporter shoves a mic in your face!",
+    "LIVE!":"LIVE!",
+    "Kameras an, Mikro ins Gesicht: „Ein Statement zum Chaos hier?“":"Cameras rolling, mic in your face: “A statement on the chaos here?”",
+    "Ein Geist materialisiert sich vor dir!":"A ghost materialises in front of you!",
+    "BUUUH!":"BOOOO!",
+    "Ein durchsichtiger Geist schwebt heran und starrt dich vorwurfsvoll an...":"A see-through ghost floats up and stares at you reproachfully...",
+    "Ein Tornado reißt dich von den Füßen!":"A tornado sweeps you off your feet!",
+    "WHOOOSH!":"WHOOOSH!",
+    "Ein Wirbelsturm zerrt an dir – und die Menge gibt natürlich dir die Schuld.":"A whirlwind tugs at you – and of course the crowd blames you.",
+    "Ein Dinosaurier bricht aus dem Museum aus!":"A dinosaur breaks out of the museum!",
+    "ROOOAR!":"ROOOAR!",
+    "Ein echter Saurier beugt sich über dich und schnaubt. Erklär das mal.":"A real dino leans over you and snorts. Explain that one.",
+    "Ein Roboter scannt dich als Verdächtigen!":"A robot scans you as a suspect!",
+    "BZZ-ZRT!":"BZZ-ZRT!",
+    "Rote Scanner-Augen fixieren dich: „IDENTITÄT BESTÄTIGEN.“":"Red scanner eyes lock on you: “CONFIRM IDENTITY.”",
+    "Ein Zombie schlurft direkt auf dich zu!":"A zombie shuffles straight at you!",
+    "GRÖÖHL!":"GRAAAWL!",
+    "Ein modriger Zombie streckt seine Arme nach dir aus...":"A mouldy zombie reaches out for you...",
+    "Ein Meteorit schlägt direkt neben dir ein!":"A meteorite slams down right next to you!",
+    "KAWUMM!":"KABOOM!",
+    "Ein Nashorn bricht aus dem Zoo aus!":"A rhino breaks out of the zoo!",
+    "TRAMPEL!":"STOMP!",
+    "Ein Blitz schlägt direkt neben dir ein!":"Lightning strikes right next to you!",
+    "ZACK!":"ZAP!",
+    "Ein Kleinflugzeug macht eine Bruchlandung!":"A small plane crash-lands!",
+    "KRRRSCH!":"KRRRSCH!",
+    "Ein Riesenmonster stapft an dir vorbei!":"A giant monster stomps past you!",
+    "GROOAR!":"GROOAR!",
+    "Ein Stapel Ölfässer rollt los!":"A stack of oil drums rolls off!",
+    "POLTER!":"RUMBLE!",
+    "Das Baugerüst kippt um!":"The scaffolding topples over!",
+    "WACKEL-KRACH!":"WOBBLE-CRASH!",
+    "Ein Eimer Farbe kippt aus!":"A bucket of paint tips over!",
+    "Der Eiswagen verliert seine Ladung!":"The ice cream truck loses its load!",
+    "KLATSCH!":"SPLOSH!",
+    "Die Bratwurst-Bude geht in Flammen auf!":"The sausage stand goes up in flames!",
+    "ZISCH!":"SIZZLE!",
+    "Wütende Schwäne attackieren!":"Angry swans attack!",
+    "FAUCH!":"HISS!",
+    "Ein Schwarm Papageien entkommt!":"A flock of parrots escapes!",
+    "KRAAH!":"SQUAWK!",
+    "Die Sektdusche explodiert!":"The champagne shower explodes!",
+    "KORK-KNALL!":"CORK-POP!",
+    "Innenstadt":"Downtown",
+    "Du bist in eine Absperrung gekracht!":"You crashed into a barrier!",
+    "Baustelle":"Building site",
+    "Du bist in den Bauzaun gekracht!":"You crashed into the site fence!",
+    "Marktplatz":"Market square",
+    "Du bist in einen Marktstand gerast!":"You plowed into a market stall!",
+    "Straßencafé":"Street café",
+    "Du bist in die Café-Stühle gestürzt!":"You tumbled into the café chairs!",
+    "Stadtpark":"City park",
+    "Du bist in den Fluss gefallen!":"You fell into the river!",
+    "Tierhandlung":"Pet shop",
+    "Du bist gegen ein Gehege gelaufen!":"You ran into an enclosure!",
+    "Hochzeit":"Wedding",
+    "Du hast die Hochzeitstorte umgeworfen!":"You knocked over the wedding cake!",
+    "Das war schon kaputt, bevor ich kam!":"That was already broken before I got here!",
+    "Die Schwerkraft hat heute einfach frei.":"Gravity has the day off today.",
+    "Ich arbeite für die Stadt. Inspektion.":"I work for the city. Inspection.",
+    "Ich heiße gar nicht so, wie Sie denken.":"My name isn't what you think it is.",
+    "Ich teste nur den Wasserdruck. Stadtauftrag.":"I'm just testing the water pressure. City job.",
+    "Wasser ist nass. Nicht mein Problem.":"Water is wet. Not my problem.",
+    "Ich bin eigentlich nur ein Hologramm.":"I'm actually just a hologram.",
+    "Mein böser Zwilling war hier, ehrlich.":"My evil twin was here, honestly.",
+    "Das ist eine Wärmebehandlung. Voll im Trend.":"This is a heat treatment. Very on trend.",
+    "Feuer? Ich sehe hier gar kein Feuer.":"Fire? I don't see any fire here.",
+    "Das war die Sonne. Reine Physik.":"That was the sun. Pure physics.",
+    "Schauen Sie, eine Taube!":"Look, a pigeon!",
+    "Schauen Sie, noch eine Taube! Und noch eine!":"Look, another pigeon! And another one!",
+    "Die Viecher haben angefangen.":"The critters started it.",
+    "Ich spreche kein Vogel. Fragen Sie die.":"I don't speak bird. Ask them.",
+    "Ich bin Tierflüsterer. Das war Notwehr.":"I'm an animal whisperer. That was self-defence.",
+    "Ich bin nur der Pizzabote. Falsche Adresse, sorry!":"I'm just the pizza guy. Wrong address, sorry!",
+    "Ich kenne hier niemanden. Niemanden!":"I don't know anyone here. Nobody!",
+    "Welche Mafia? Ich sehe keine Mafia.":"What mafia? I don't see any mafia.",
+    "Ich zahle doch jeden Monat pünktlich!":"I pay on time every month!",
+    "Bringt mich zu eurem Anführer.":"Take me to your leader.",
+    "Ich bin auch ein Alien, Kollege!":"I'm an alien too, buddy!",
+    "Beam mich hoch, ich hab nichts gemacht.":"Beam me up, I didn't do anything.",
+    "Das ist nur ein Wetterballon.":"That's just a weather balloon.",
+    "Ich lag da schon – das Auto kam zu mir!":"I was already lying there – the car came to me!",
+    "Welches Auto? Ich sehe gar kein Auto.":"What car? I don't see any car.",
+    "Das war ein geplanter Stunt. Applaus bitte.":"That was a planned stunt. Applause, please.",
+    "Sie sind gefahren, nicht ich. Ihr Problem.":"You were driving, not me. Your problem.",
+    "Kein Kommentar. Mein Anwalt meldet sich.":"No comment. My lawyer will be in touch.",
+    "Ich bin gar nicht hier. Das ist ein Double.":"I'm not even here. That's a double.",
+    "Drehen Sie das?! Sofort löschen!":"Are you filming this?! Delete it now!",
+    "Ich rede nur gegen Bezahlung.":"I only talk for money.",
+    "Buh zurück! Ich spuke hier auch.":"Boo right back! I haunt here too.",
+    "Geister gibt es nicht. Sie träumen.":"Ghosts don't exist. You're dreaming.",
+    "Ich bin nur zufällig durchsichtig.":"I just happen to be see-through.",
+    "Das war Nebel. Ganz normaler Nebel.":"That was fog. Perfectly normal fog.",
+    "Das war doch nur ein laues Lüftchen!":"That was just a gentle breeze!",
+    "Wind? Ich spüre gar keinen Wind.":"Wind? I don't feel any wind.",
+    "Ich übe gerade fürs Fliegen.":"I'm practising for flying.",
+    "Petrus hat was gegen mich, nicht ich!":"The weather gods have it in for me, not me!",
+    "Fehler 404: Schuldiger nicht gefunden.":"Error 404: culprit not found.",
+    "Ich bin nur ein harmloser Toaster.":"I'm just a harmless toaster.",
+    "Hast du mich gerade neu gestartet?":"Did you just reboot me?",
+    "Beep boop, ich verstehe kein Deutsch.":"Beep boop, I don't speak human.",
+    "Schild":"Shield",
+    "Speed":"Speed",
+    "Magnet":"Magnet",
+    "Spicker":"Cheat sheet",
+    "Geld":"Cash",
+    "Ruhe":"Calm",
+    "Unverwundbarkeit beim Aufsammeln":"Invincibility on pickup",
+    "Speed-Boost":"Speed boost",
+    "Dauer des Tempo-Boosts":"Duration of the speed boost",
+    "Münz­magnet":"Coin magnet",
+    "Dauer der Münz-Anziehung":"Duration of the coin pull",
+    "Sichere Ausreden pro Spicker":"Sure-fire excuses per cheat sheet",
+    "Geldsack":"Money bag",
+    "Münzen pro Geldsack":"Coins per money bag",
+    "Klassiker":"Classic",
+    "Blauer Blitz":"Blue Bolt",
+    "Grüner Schreck":"Green Fright",
+    "Pinke Panik":"Pink Panic",
+    "Cyan-Chaot":"Cyan Chaos",
+    "Goldjunge":"Golden Boy",
+    "Lila Legende":"Purple Legend",
+    "Schattenmann":"Shadow Man",
+    "Minze":"Mint",
+    "Koralle":"Coral",
+    "Ozean":"Ocean",
+    "Neon-Geist":"Neon Ghost",
+    "Galaxie":"Galaxy",
+    "Regenbogen":"Rainbow",
+    "Partygänger":"Party Animal",
+    "Cooler Typ":"Cool Guy",
+    "Gentleman":"Gentleman",
+    "Engelchen":"Little Angel",
+    "Teufelchen":"Little Devil",
+    "Der König":"The King",
+    "Zauberer":"Wizard",
+    "Feuerball":"Fireball",
+    "Eiswürfel":"Ice Cube",
+    "Lavendel":"Lavender",
+    "Waldgeist":"Forest Spirit",
+    "Wintermütze":"Winter Hat",
+    "DJ Pech":"DJ Jinx",
+    "Chefkoch":"Head Chef",
+    "Cowboy":"Cowboy",
+    "Außerirdisch":"Alien",
+    "Vampir":"Vampire",
+    "Prinzessin":"Princess",
+    "Astronaut":"Astronaut",
+    "Diamant":"Diamond",
+    "Rampenlicht":"Spotlight",
+    "Goldzylinder":"Golden Topper",
+    "Pech-Legende":"Jinx Legend",
+    "LEICHTES PECH":"MILD BAD LUCK",
+    "Läuft beim Spielen fast von allein mit.":"Comes along almost by itself while you play.",
+    "ECHTES PECH":"REAL BAD LUCK",
+    "Dafür brauchst du ein paar Runden Übung.":"This one takes a few rounds of practice.",
+    "DICKES PECH":"SERIOUS BAD LUCK",
+    "Lange Läufe und eine ruhige Hand.":"Long runs and a steady hand.",
+    "SELTENES PECH":"RARE BAD LUCK",
+    "Jedes Special einmal treffen – und überstehen.":"Hit every special once – and survive it.",
+    "PECH-LEGENDE":"JINX LEGEND",
+    "Die Königsdisziplin. Viel Glück. Oder Pech.":"The masterclass. Good luck. Or bad.",
+    "Im Rampenlicht":"In the Spotlight",
+    "Erlebe dein erstes Special-Event.":"Experience your first special event.",
+    "Cool geblieben":"Kept Your Cool",
+    "Überstehe ein Special-Event mit der richtigen Ausrede.":"Survive a special event with the right excuse.",
+    "Chaos-Sammler":"Chaos Collector",
+    "Erlebe 3 verschiedene Special-Typen.":"Experience 3 different special types.",
+    "Magnet für Ärger":"Magnet for Trouble",
+    "Erlebe 6 verschiedene Special-Typen.":"Experience 6 different special types.",
+    "Erlebe alle Special-Typen – das gesamte Chaos.":"Experience every special type – the whole chaos.",
+    "Stadtbummler":"City Stroller",
+    "Erreiche Viertel 5 in einem Lauf.":"Reach district 5 in one run.",
+    "Pech-Marathon":"Bad Luck Marathon",
+    "Erreiche Viertel 10 in einem Lauf.":"Reach district 10 in one run.",
+    "Punktejäger":"Point Hunter",
+    "Knacke 1000 Punkte in einem Lauf.":"Crack 1000 points in one run.",
+    "Münzmagnet":"Coin Magnet",
+    "Sammle 15 Münzen in einem einzigen Lauf.":"Collect 15 coins in a single run.",
+    "Auf der Kippe":"On the Edge",
+    "Treibe den Verdacht über 90% und überlebe.":"Push suspicion above 90% and survive.",
+    "Stadtflucht":"City Escape",
+    "Erreiche Viertel 15 in einem Lauf.":"Reach district 15 in one run.",
+    "Unaufhaltbar":"Unstoppable",
+    "Erreiche Viertel 20 in einem Lauf.":"Reach district 20 in one run.",
+    "Punkte-Profi":"Point Pro",
+    "Knacke 2500 Punkte in einem Lauf.":"Crack 2500 points in one run.",
+    "Punkte-Legende":"Point Legend",
+    "Knacke 5000 Punkte in einem Lauf.":"Crack 5000 points in one run.",
+    "Goldrausch":"Gold Rush",
+    "Sammle 30 Münzen in einem einzigen Lauf.":"Collect 30 coins in a single run.",
+    "Silberzunge":"Silver Tongue",
+    "Rede dich 5-mal in einem Lauf richtig heraus.":"Talk your way out 5 times in one run.",
+    "Sauber unterwegs":"Clean Getaway",
+    "Erreiche Viertel 5, ohne erwischt zu werden.":"Reach district 5 without being caught.",
+    "Schmiergeld":"Hush Money",
+    "Besteche die Menge zum ersten Mal.":"Bribe the crowd for the first time.",
+    "Straßenkämpfer":"Street Fighter",
+    "Gewinne dein erstes Minigame.":"Win your first minigame.",
+    "Arcade-König":"Arcade King",
+    "Gewinne alle 4 Minigames mindestens einmal.":"Win all 4 minigames at least once.",
+    "Staubsauger":"Vacuum Cleaner",
+    "Sammle 5 Power-ups in einem Lauf.":"Collect 5 power-ups in one run.",
+    "Neuer Look":"New Look",
+    "Kaufe deinen ersten Skin im Shop.":"Buy your first skin in the shop.",
+    "Kleiderschrank":"Wardrobe",
+    "Besitze 10 Skins.":"Own 10 skins.",
+    "Sparschwein":"Piggy Bank",
+    "Habe 1000 Münzen gleichzeitig.":"Hold 1000 coins at once.",
+    "Dagobert":"Scrooge",
+    "Habe 5000 Münzen gleichzeitig.":"Hold 5000 coins at once.",
+    "Tuning":"Tuning",
+    "Kaufe dein erstes Item-Upgrade.":"Buy your first item upgrade.",
+    "Vollausbau":"Fully Loaded",
+    "Bringe ein Item-Upgrade auf Maximum.":"Max out an item upgrade.",
+    "Wetterfest":"All Weathers",
+    "Erlebe Regen, Schnee und Nebel in einem Lauf.":"See rain, snow and fog in one run.",
+    "Stehaufmännchen":"Bounce Back",
+    "Werde insgesamt 5-mal geschnappt.":"Get caught 5 times in total.",
+    "Schutzgeld":"Protection Money",
+    "Triff die Mafia.":"Meet the mafia.",
+    "Mafioso":"Mafioso",
+    "Fast platt":"Nearly Flat",
+    "Werde fast überfahren.":"Almost get run over.",
+    "Raser":"Speeder",
+    "Entführt":"Abducted",
+    "Triff das UFO.":"Meet the UFO.",
+    "Marsmensch":"Martian",
+    "Festgenommen":"Arrested",
+    "Triff den Polizisten.":"Meet the police officer.",
+    "Streife":"Patrol",
+    "Schlagzeile":"Headline",
+    "Triff die Reporterin.":"Meet the reporter.",
+    "Star-Reporter":"Star Reporter",
+    "Spukhaft":"Spooky",
+    "Triff den Geist.":"Meet the ghost.",
+    "Gespenst":"Phantom",
+    "Vom Winde verweht":"Gone With the Wind",
+    "Triff den Tornado.":"Meet the tornado.",
+    "Sturmjäger":"Storm Chaser",
+    "Ausgestorben":"Extinct",
+    "Triff den Dino.":"Meet the dino.",
+    "Urzeit":"Prehistoric",
+    "Aussortiert":"Obsolete",
+    "Triff den Roboter.":"Meet the robot.",
+    "Android":"Android",
+    "Infiziert":"Infected",
+    "Triff den Zombie.":"Meet the zombie.",
+    "Untoter":"Undead",
+    "Ein Bodybuilder fordert dich zum Armdrücken!":"A bodybuilder challenges you to arm wrestling!",
+    "GRRR!":"GRRR!",
+    "Ein riesiger Bodybuilder knallt seinen Arm auf den Tisch.":"A huge bodybuilder slams his arm onto the table.",
+    "Muckis":"Guns",
+    "Gewinne das Armdrücken.":"Win the arm wrestling.",
+    "Muskelprotz":"Muscle Man",
+    "Ein Hai schnappt mitten auf der Straße nach dir!":"A shark snaps at you in the middle of the street!",
+    "CHOMP!":"CHOMP!",
+    "Ein Hai gleitet durch eine Pfütze direkt auf dich zu.":"A shark glides through a puddle straight at you.",
+    "Landhai":"Land Shark",
+    "Triff den Hai.":"Meet the shark.",
+    "Hai-Alarm":"Shark Alert",
+    "Ein Horror-Clown taucht direkt vor dir auf!":"A horror clown pops up right in front of you!",
+    "HIHIHI!":"HEEHEEHEE!",
+    "Ein grinsender Clown starrt dich aus toten Augen an...":"A grinning clown stares at you with dead eyes...",
+    "Spaßbremse":"Party Pooper",
+    "Triff den Clown.":"Meet the clown.",
+    "Clownerie":"Clownery",
+    "Ein Ninja springt aus dem Schatten!":"A ninja leaps out of the shadows!",
+    "HYAH!":"HYAH!",
+    "Ein vermummter Ninja zückt blitzschnell seine Klinge.":"A masked ninja draws his blade in a flash.",
+    "Schattenkrieger":"Shadow Warrior",
+    "Triff den Ninja.":"Meet the ninja.",
+    "Ninja":"Ninja",
+    "Ein Bär stellt sich brüllend vor dir auf!":"A bear rears up in front of you, roaring!",
+    "GROAR!":"GROAR!",
+    "Ein riesiger Bär richtet sich auf und brüllt dich an.":"A huge bear rises up and roars at you.",
+    "Bärenstark":"Bear Strong",
+    "Triff den Bären.":"Meet the bear.",
+    "Grizzly":"Grizzly",
+    "Ein Drache landet krachend vor dir!":"A dragon lands in front of you with a crash!",
+    "Ein Drache faltet die Flügel zusammen und mustert dich hungrig.":"A dragon folds its wings and eyes you hungrily.",
+    "Drachenzähmer":"Dragon Tamer",
+    "Triff den Drachen.":"Meet the dragon.",
+    "Drache":"Dragon",
+    "Ein Pirat entert die Straße!":"A pirate boards the street!",
+    "ARRR!":"ARRR!",
+    "Ein Pirat fuchtelt mit dem Säbel: „Wo ist mein Gold?!“":"A pirate waves his sabre: “Where's my gold?!”",
+    "Landratte":"Landlubber",
+    "Triff den Piraten.":"Meet the pirate.",
+    "Freibeuter":"Buccaneer",
+    "Der Sensenmann winkt dich zu sich!":"The Grim Reaper beckons you over!",
+    "Eine knochige Hand zeigt direkt auf dich.":"A bony hand points straight at you.",
+    "Dem Tod entkommen":"Cheated Death",
+    "Triff den Sensenmann.":"Meet the Grim Reaper.",
+    "Sensenmann":"Grim Reaper",
+    "Ein Panzer rollt auf dich zu!":"A tank rolls towards you!",
+    "BRRRM!":"BRRRM!",
+    "Ein Panzer richtet seinen Lauf genau auf dich.":"A tank aims its barrel right at you.",
+    "Schwer bewaffnet":"Heavily Armed",
+    "Triff den Panzer.":"Meet the tank.",
+    "Kommandant":"Commander",
+    "Ein Dämon steigt aus dem Asphalt!":"A demon rises out of the asphalt!",
+    "RAAAH!":"RAAAH!",
+    "Der Boden reißt auf und ein Dämon klettert heraus.":"The ground tears open and a demon climbs out.",
+    "Höllisch":"Hellish",
+    "Triff den Dämon.":"Meet the demon.",
+    "Dämon":"Demon",
+    "Ein Sprinter fordert dich zum Wettrennen!":"A sprinter challenges you to a race!",
+    "Ein Sprinter dehnt sich neben dir: „Bis zur Laterne. Jetzt.“":"A sprinter stretches next to you: “To the lamppost. Now.”",
+    "Zielfoto":"Photo Finish",
+    "Gewinne das Wettrennen gegen den Sprinter.":"Win the race against the sprinter.",
+    "Sprinter":"Sprinter",
+    "Eine Kraft-Oma fordert dich zum Tauziehen!":"A power granny challenges you to tug of war!",
+    "HAU-RUCK!":"HEAVE-HO!",
+    "Eine Oma spuckt in die Hände und hebt das Seil auf.":"A granny spits in her hands and picks up the rope.",
+    "Hau-Ruck":"Heave-Ho",
+    "Gewinne das Tauziehen gegen die Oma.":"Win the tug of war against the granny.",
+    "Kraft-Oma":"Power Granny",
+    "Der Sheriff fordert dich zum Blick-Duell!":"The sheriff challenges you to a staredown!",
+    "PENG!":"BANG!",
+    "High Noon: Der Sheriff starrt dich an. Keiner blinzelt.":"High noon: the sheriff stares you down. Nobody blinks.",
+    "Schneller Finger":"Fast Finger",
+    "Gewinne das Duell gegen den Sheriff.":"Win the duel against the sheriff.",
+    "Sheriff":"Sheriff",
+    "Zieh nach oben":"Drag upwards",
+    "Finger irgendwo auf den Bildschirm legen und nach oben ziehen. Loslassen heißt stehen bleiben.":"Put your finger anywhere on the screen and drag upwards. Letting go means standing still.",
+    "Genau so!":"Just like that!",
+    "Sammle die Münzen":"Collect the coins",
+    "Lauf durch die drei Münzen vor dir. Davon kaufst du im Shop Skins und Power-ups.":"Run through the three coins ahead of you. You spend them on skins and power-ups in the shop.",
+    "Kasse gemacht!":"Cha-ching!",
+    "Jetzt Finger loslassen!":"Now let go!",
+    "Alle drehen sich um. Solange <b>STEHENBLEIBEN!</b> steht: keinen Schritt – sonst steigt der <b>Verdacht</b>.":"Everyone is turning around. While it says <b>FREEZE!</b>: don't move a step – or <b>suspicion</b> rises.",
+    "Eiskalt geblieben!":"Ice cold!",
+    "Bei LOS! weiterlaufen":"Keep running on GO!",
+    "Die Luft ist rein. Jetzt schnell weiter – jeder Meter bringt Punkte.":"All clear. Now move fast – every metre scores points.",
+    "Schnell wie der Wind!":"Fast as the wind!",
+    "Um die Leute herum":"Around the people",
+    "Renn niemanden an und nimm bei Absperrungen die Lücke. Lauf ein Stück sauber durch.":"Don't run into anyone and take the gap at barriers. Run a clean stretch.",
+    "Elegant vorbei!":"Smoothly past!",
+    "Erwischt? Dreist bleiben":"Caught? Stay brazen",
+    "Die Menge stellt dich. <b>Tippe selbst</b> eine Ausrede ein – hier kostet ein Fehler nichts.":"The crowd stops you. <b>Type your own</b> excuse – a mistake costs nothing here.",
+    "Astrein gelogen!":"Flawless lie!",
+    "Hier herrscht totales Chaos!":"Total chaos around here!",
+    "Du wirst direkt zur Rede gestellt!":"You're being questioned on the spot!",
+    "ARMDRÜCKEN!":"ARM WRESTLING!",
+    "Spam-klicke so schnell du kannst, um den Bodybuilder wegzudrücken!":"Spam-tap as fast as you can to push the bodybuilder away!",
+    "DRÜCKEN!":"PUSH!",
+    "BUFF! ":"BUFF! ",
+    "Du drückst ihn weg und siehst jetzt mega buff aus! +40s Speed-Boost.":"You push him away and look mega buff now! +40s speed boost.",
+    "Der Bodybuilder hat dich plattgemacht.":"The bodybuilder flattened you.",
+    "WETTRENNEN!":"RACE!",
+    "Tippe so schnell du kannst und erreiche das Ziel vor dem Sprinter!":"Tap as fast as you can and reach the finish before the sprinter!",
+    "RENNEN!":"RUN!",
+    "ZIELFOTO! ":"PHOTO FINISH! ",
+    "Du gewinnst haarscharf! Die Menge feiert dich. +40s Speed-Boost.":"You win by a hair! The crowd cheers for you. +40s speed boost.",
+    "Der Sprinter hat dich stehen lassen.":"The sprinter left you standing.",
+    "TAUZIEHEN!":"TUG OF WAR!",
+    "Zieh! Aber Vorsicht: Die Oma reißt immer wieder kräftig am Seil!":"Pull! But watch out: the granny keeps yanking the rope!",
+    "ZIEHEN!":"PULL!",
+    "HAU-RUCK! ":"HEAVE-HO! ",
+    "Die Oma landet weich im Blumenbeet und lacht. Respekt! +40s Speed-Boost.":"The granny lands softly in the flower bed and laughs. Respect! +40s speed boost.",
+    "Die Oma hat dich quer über die Straße geschleift.":"The granny dragged you across the street.",
+    "BLICK-DUELL!":"STAREDOWN!",
+    "Warte auf das Signal … und tippe dann SOFORT! Zu früh tippen heißt verlieren.":"Wait for the signal … then tap IMMEDIATELY! Tapping too early means losing.",
+    "WARTEN…":"WAITING…",
+    "BLITZSCHNELL! ":"LIGHTNING FAST! ",
+    "Du warst schneller als der Sheriff! Er tippt anerkennend an den Hut. +40s Speed-Boost.":"You were faster than the sheriff! He tips his hat in respect. +40s speed boost.",
+    "Der Sheriff war schneller als dein Schatten.":"The sheriff was faster than your shadow.",
+    "Zu früh gezuckt – der Sheriff grinst und legt dir Handschellen an.":"Twitched too early – the sheriff grins and cuffs you.",
+    "Hmm... ok?":"Hmm... ok?",
+    "Die Menge nickt verwirrt und geht weiter.":"The crowd nods, confused, and moves on.",
+    "Klingt logisch.":"Sounds logical.",
+    "Niemand hat etwas verstanden. Perfekt.":"Nobody understood a thing. Perfect.",
+    "Ach so!":"Oh, I see!",
+    "Alle tun, als hätten sie es gewusst.":"Everyone acts like they knew all along.",
+    "Na gut...":"Fine then...",
+    "Die Menge zuckt mit den Schultern und zerstreut sich.":"The crowd shrugs and disperses.",
+    "SPEZIAL":"SPECIAL",
+    "Punkte":"Points",
+    "VERDACHT":"SUSPICION",
+    "MAGNET":"MAGNET",
+    "KAPITEL 1 · ENDLOSE STRASSE":"CHAPTER 1 · ENDLESS STREET",
+    "BESTENLISTE":"LEADERBOARD",
+    "LOS GEHT'S":"LET'S GO",
+    "SHOP":"SHOP",
+    "SKINS":"SKINS",
+    "ERFOLGE":"AWARDS",
+    "Sprache":"Language",
+    "FERTIG":"DONE",
+    "ITEMS":"ITEMS",
+    "MÜNZEN & PAKETE":"COINS & PACKS",
+    "ZURÜCK":"BACK",
+    "DEINE MÜNZEN":"YOUR COINS",
+    "ERFOLG FREIGESCHALTET":"ACHIEVEMENT UNLOCKED",
+    "WEITER":"NEXT",
+    "Kenn ich schon, überspringen":"I know this, skip it",
+    "Tutorial überspringen":"Skip tutorial",
+    "So geht's":"How it works",
+    "Ziehen":"Drag",
+    "= laufen (nach oben).":"= run (upwards).",
+    "– ruhig weiterlaufen.":"– keep running, stay calm.",
+    "– Finger loslassen, sonst steigt der Verdacht.":"– let go, or suspicion rises.",
+    "• Nicht in Leute reinrennen.":"• Don't run into people.",
+    "• Erwischt?":"• Caught?",
+    "Tippe selbst":"Type your own",
+    "eine dreiste Ausrede – die Menge bewertet sie!":"brazen excuse – the crowd rates it!",
+    "VERSTANDEN":"GOT IT",
+    "ERWISCHT!":"CAUGHT!",
+    "Die Menge brüllt. Sag irgendwas Glaubhaftes!":"The crowd is roaring. Say something believable!",
+    "Ausrede, die sicher zieht":"An excuse that always works",
+    "Bestechen":"Bribe",
+    "25 Münzen":"25 coins",
+    "WUT DER MENGE":"CROWD'S RAGE",
+    "AUSREDE ABGEBEN":"HAND IN EXCUSE",
+    "Die Menge überlegt, ob sie dir das glaubt …":"The crowd is deciding whether to believe you …",
+    "GESCHNAPPT!":"NABBED!",
+    "PUNKTE":"POINTS",
+    "VIERTEL":"DISTRICTS",
+    "KNAPPSTES ENTKOMMEN":"CLOSEST CALL",
+    "HIGHSCORE":"HIGH SCORE",
+    "MÜNZEN":"COINS",
+    "NOCHMAL":"AGAIN",
+    "MENÜ":"MENU",
+    "Dein Name":"Your name",
+    " Mü.":" coins",
+    "{t}T ":"{t}d ",
+    "DU":"YOU",
+    "ERWISCHT":"CAUGHT",
+    "EINGESPERRT!":"LOCKED UP!",
+    "ENTFÜHRT!":"ABDUCTED!",
+    "PLATT!":"FLATTENED!",
+    "VERSPEIST!":"DEVOURED!",
+    "VERFLUCHT!":"CURSED!",
+    "WEGGEWEHT!":"BLOWN AWAY!",
+  };
+  let lang='de';
+  function T(s){
+    if(!s||lang==='de') return s;
+    const d=TR[lang]; if(!d) return s;
+    const v=d[s]; return (v===undefined||v==='')?s:v;
+  }
+  // Vorlage mit Platzhaltern: Tf('{n} M\u00fcnzen',{n:12})
+  function Tf(tpl,vars){
+    let out=T(tpl);
+    if(vars) for(const k in vars) out=out.split('{'+k+'}').join(vars[k]);
+    return out;
+  }
+  function langDef(code){ return LANGS.find(l=>l.code===(code||lang))||LANGS[0]; }
+  function autoLang(){
+    const n=String(navigator.language||navigator.userLanguage||'de').slice(0,2).toLowerCase();
+    return LANGS.some(l=>l.code===n)?n:'de';
+  }
+  // Alle festen Texte der Seite einmal auf Deutsch merken; beim Wechsel werden
+  // genau diese Knoten ersetzt. So braucht das Markup keine Extra-Attribute.
+  let i18nNodes=null;
+  function i18nSnapshot(){
+    i18nNodes={text:[],attr:[]};
+    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>{
+      const par=n.parentElement; if(!par) return NodeFilter.FILTER_REJECT;
+      const tg=par.tagName;
+      if(tg==='SCRIPT'||tg==='STYLE'||tg==='CANVAS') return NodeFilter.FILTER_REJECT;
+      return /[A-Za-z\u00c0-\u024f]/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }});
+    let n; while(n=w.nextNode()) i18nNodes.text.push({n:n,de:n.nodeValue});
+    for(const el of document.querySelectorAll('[placeholder]'))
+      i18nNodes.attr.push({el:el,a:'placeholder',de:el.getAttribute('placeholder')});
+  }
+  function i18nApplyDom(){
+    if(!i18nNodes) return;
+    for(const it of i18nNodes.text){
+      const m=it.de.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      const core=m[2].replace(/\s+/g,' ');
+      if(core) it.n.nodeValue=m[1]+T(core)+m[3];
+    }
+    for(const it of i18nNodes.attr) it.el.setAttribute(it.a,T(it.de));
+  }
+  function renderLangPick(){
+    const list=document.getElementById('lpList'); if(!list) return;
+    list.innerHTML='';
+    for(const l of LANGS){
+      const b=document.createElement('button');
+      b.className='lpItem'+(l.code===lang?' on':'');
+      b.innerHTML='<span class="lpFlag">'+l.short+'</span><span>'+l.name+'</span>'
+        +'<span class="lpChk">'+ic('check')+'</span>';
+      b.onclick=()=>{ SND.play('click'); if(l.code!==lang) setLang(l.code,true); renderLangPick(); };
+      list.appendChild(b);
+    }
+  }
+  // Sprache setzen und alles neu zeichnen, was Text enthaelt
+  function setLang(code,merken){
+    lang=LANGS.some(l=>l.code===code)?code:'de';
+    document.documentElement.setAttribute('lang',lang);
+    i18nApplyDom();
+    const lc=document.getElementById('langCode'); if(lc) lc.textContent=langDef().short;
+    if(merken){ save.lang=lang; persist(); }
+    updateHUD(); updateCoinUI(); updateMenuSkin();
+    renderBoard(document.getElementById('boardMenu'),null);
+    const off=id=>document.getElementById(id).classList.contains('hidden');
+    if(!off('shop')) renderShop();
+    if(!off('skins')) renderSkins();
+    if(!off('achievements')) renderAchievements();
+    if(!off('langPick')) renderLangPick();
+  }
   function rand(a,b){return a+Math.random()*(b-a);}
   function pick(a){return a[(Math.random()*a.length)|0];}
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
@@ -2389,16 +3058,16 @@ window.IAP=(function(){
   let tutSubBase='';   // Situationstext im Erwischt-Dialog, damit der Hinweis ihn nicht ueberschreibt
 
   function renderTutIntro(){
-    document.getElementById('tsNo').textContent='MITSPIEL-TUTORIAL';
+    document.getElementById('tsNo').textContent=T('MITSPIEL-TUTORIAL');
     document.getElementById('tsDots').innerHTML=TUT_PLAY.map(()=>'<span class="tsDot"></span>').join('');
     const art=document.getElementById('tsArt');
     art.className='tsArt s1';
     art.innerHTML='<div class="tsFinger">'+ic('play')+'</div>'
-      +'<div class="tsHint">'+TUT_PLAY.length+' Schritte \u2013 zum Mitmachen</div>';
-    document.getElementById('tsTitle').innerHTML='Komm, ich zeig\u2019s dir';
-    document.getElementById('tsText').innerHTML='Du spielst gleich selbst. Ich sage dir Schritt f\u00fcr Schritt, '
-      +'was zu tun ist \u2013 und im Tutorial kann dir <b>nichts</b> passieren.';
-    document.getElementById('tsNext').textContent='LOS GEHT\u2019S!';
+      +'<div class="tsHint">'+Tf('{n} Schritte \u2013 zum Mitmachen',{n:TUT_PLAY.length})+'</div>';
+    document.getElementById('tsTitle').innerHTML=T('Komm, ich zeig\u2019s dir');
+    document.getElementById('tsText').innerHTML=T('Du spielst gleich selbst. Ich sage dir Schritt f\u00fcr Schritt, '
+      +'was zu tun ist \u2013 und im Tutorial kann dir <b>nichts</b> passieren.');
+    document.getElementById('tsNext').textContent=T('LOS GEHT\u2019S!');
     document.getElementById('tsSkip').classList.remove('hidden');
     const card=art.closest('.card');
     card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
@@ -2406,7 +3075,7 @@ window.IAP=(function(){
   function tutCoachShown(on){ const el=document.getElementById('tutCoach'); if(el) el.classList.toggle('hidden',!on); }
   function tutSay(msg){
     const n=document.getElementById('tcNudge'); if(!n||!TUT.active) return;
-    n.textContent=msg; if(n._t) clearTimeout(n._t);
+    n.textContent=T(msg); if(n._t) clearTimeout(n._t);
     n._t=setTimeout(()=>{ n.textContent=''; n._t=null; },2400);
   }
   function tutBegin(){
@@ -2427,16 +3096,16 @@ window.IAP=(function(){
   }
   function tutRenderCoach(){
     const st=TUT_PLAY[TUT.i]; if(!st) return;
-    document.getElementById('tcNo').textContent='SCHRITT '+(TUT.i+1)+' VON '+TUT_PLAY.length;
+    document.getElementById('tcNo').textContent=Tf('SCHRITT {i} VON {n}',{i:TUT.i+1,n:TUT_PLAY.length});
     document.getElementById('tcDots').innerHTML=TUT_PLAY.map((x,i)=>
       '<span class="tsDot'+(i===TUT.i?' on':(i<TUT.i?' done':''))+'"></span>').join('');
-    document.getElementById('tcTitle').innerHTML=st.title;
-    document.getElementById('tcText').innerHTML=st.text;
+    document.getElementById('tcTitle').innerHTML=T(st.title);
+    document.getElementById('tcText').innerHTML=T(st.text);
     document.getElementById('tcNudge').textContent='';
     const cue=document.getElementById('tcCue');
     cue.innerHTML = st.cue==='hand'    ? '<div class="tcHand">'+ic('play')+'</div>'
                   : st.cue==='arrow'   ? '<div class="tcArrow">\u25b2</div>'
-                  : st.cue==='release' ? '<div class="tcRelease">LOSLASSEN!</div>' : '';
+                  : st.cue==='release' ? '<div class="tcRelease">'+T('LOSLASSEN!')+'</div>' : '';
     cue.classList.toggle('hidden',!st.cue);
     const card=document.getElementById('tcCard');
     card.classList.remove('in'); void card.offsetWidth; card.classList.add('in');
@@ -2475,7 +3144,7 @@ window.IAP=(function(){
     const st=TUT_PLAY[TUT.i]; if(!st) return;
     SND.play('correct');
     const ok=document.getElementById('tcOk');
-    ok.innerHTML=ic('check')+'<span>'+(st.ok||'Super!')+'</span>';
+    ok.innerHTML=ic('check')+'<span>'+T(st.ok||'Super!')+'</span>';
     ok.classList.remove('hidden','pop'); void ok.offsetWidth; ok.classList.add('pop');
     const dot=document.getElementById('tcDots').children[TUT.i];
     if(dot) dot.className='tsDot done';
@@ -2490,9 +3159,9 @@ window.IAP=(function(){
     tutStop(); save.tutDone=true; persist();
     chaosTimer=Math.max(2.5,diff().chaosInterval*0.8);
     armGuaranteed();                                   // Ticket erst jetzt einloesen
-    document.getElementById('reactTitle').innerHTML='Tutorial geschafft! '+ic('check');
-    document.getElementById('reactText').textContent='Du kennst jetzt alles Wichtige. '
-      +'Der Lauf geht weiter \u2013 viel Gl\u00fcck!';
+    document.getElementById('reactTitle').innerHTML=T('Tutorial geschafft!')+' '+ic('check');
+    document.getElementById('reactText').textContent=T('Du kennst jetzt alles Wichtige. '
+      +'Der Lauf geht weiter \u2013 viel Gl\u00fcck!');
     show('reaction'); state=ST.REACT; reactTimer=2.2;
   }
   function updateTut(dt){
@@ -2583,16 +3252,17 @@ window.IAP=(function(){
     excuseCorrects=corrects; excuseEvaluating=false;
     excuseAccusation=(currentEvent&&currentEvent.label)?currentEvent.label:'Hier herrscht totales Chaos!';
     excuseSuggestions=[]; fetchExcuseSuggestions(excuseAccusation);   // Vorschlaege im Hintergrund laden
-    document.getElementById('accuseBig').textContent='\u201e'+excuseAccusation.replace(/!+$/,'')+'\u201c \u2013 UND DU WARST DAS?!';
+    document.getElementById('accuseBig').textContent=Tf('\u201e{e}\u201c \u2013 UND DU WARST DAS?!',
+      {e:T(excuseAccusation).replace(/!+$/,'')});
     const exInp=document.getElementById('excuseInput');
-    exInp.value=''; exInp.disabled=false; exInp.placeholder='Deine Ausrede \u2026 sei kreativ!';
+    exInp.value=''; exInp.disabled=false; exInp.placeholder=T('Deine Ausrede \u2026 sei kreativ!');
     document.getElementById('excuseSend').disabled=false;
     document.getElementById('aiThinking').classList.remove('on');
-    document.getElementById('caughtSub').textContent=specialMode
+    document.getElementById('caughtSub').textContent=T(specialMode
       ? (currentEvent&&currentEvent.subText?currentEvent.subText:'Du wirst direkt zur Rede gestellt!')
       : (confrontMode
         ? 'Du bist direkt in jemanden reingerannt! Sag schnell was!'
-        : 'Alle starren dich an. Rede dich raus \u2013 tippe deine Ausrede!');
+        : 'Alle starren dich an. Rede dich raus \u2013 tippe deine Ausrede!'));
     const hintEl=document.getElementById('crowdHint');
     hintEl.style.display='none'; hintEl.classList.remove('bad');
     // Taktik 1 \u2013 Spicker: setzt eine passende Ausrede ein, die garantiert durchgeht (kostet 1 Ladung)
@@ -2603,11 +3273,11 @@ window.IAP=(function(){
       const sug=takeSuggestion(); exInp.value=sug; guaranteedExcuse=sug;
       hintCharges--; updateHintHUD(); sb.disabled=!(hintCharges>0);
       hintEl.classList.remove('bad');
-      hintEl.innerHTML=ic('search')+' Spicker eingesetzt \u2013 diese Ausrede zieht <b>garantiert</b>. Einfach abgeben!';
+      hintEl.innerHTML=ic('search')+' '+T('Spicker eingesetzt \u2013 diese Ausrede zieht <b>garantiert</b>. Einfach abgeben!');
       hintEl.style.display=''; SND.play('click'); };
     // Taktik 2 \u2013 Bestechen: Flucht gegen Muenzen
     const bribeCost=25+streetsCleared*5;
-    document.getElementById('bribeCost').textContent=bribeCost+' M\u00fcnzen';
+    document.getElementById('bribeCost').textContent=Tf('{n} M\u00fcnzen',{n:bribeCost});
     const bb=document.getElementById('bribeBtn');
     bb.disabled=save.coins<bribeCost;
     bb.onclick=()=>{ if(state!==ST.CAUGHT||save.coins<bribeCost||excuseEvaluating) return;
@@ -2617,7 +3287,7 @@ window.IAP=(function(){
       tutExcuseTries=0;
       tutSubBase=document.getElementById('caughtSub').textContent;
       document.getElementById('caughtSub').textContent=tutSubBase
-        +' \u2013 Tipp: tippe irgendeine dreiste Ausrede ein. Im Tutorial kommt jede durch.';
+        +T(' \u2013 Tipp: tippe irgendeine dreiste Ausrede ein. Im Tutorial kommt jede durch.');
     }
     caughtWasSpecial=specialMode;
     document.getElementById('dialog').classList.toggle('specialCaught',specialMode);
@@ -2661,9 +3331,10 @@ window.IAP=(function(){
   async function fetchExcuseSuggestions(accusation){
     try{
       const avoid=usedExcuses.length?('\n\nVermeide Ausreden, die diesen bereits benutzten \u00e4hneln:\n- '+usedExcuses.join('\n- ')):'';
-      const prompt='Lustiges Cartoon-Spiel: Der Spieler wurde bei diesem Chaos-Ereignis erwischt:\n"'+accusation
+      const prompt='Lustiges Cartoon-Spiel (Sprache: '+langDef().ai+'): Der Spieler wurde bei diesem Chaos-Ereignis erwischt:\n"'+accusation
         +'"\n\nSchreibe 3 kurze, dreiste, kreative Ausreden (je max. 10 W\u00f6rter), die KONKRET zu genau diesem Ereignis passen und die Schuld witzig von sich weisen.'
-        +avoid+'\n\nAntworte NUR mit einem JSON-Array aus 3 Strings, ohne Markdown:\n["...","...","..."]';
+        +avoid+'\n\nSchreibe die Ausreden auf '+langDef().ai+'.'
+        +'\n\nAntworte NUR mit einem JSON-Array aus 3 Strings, ohne Markdown:\n["...","...","..."]';
       const arr=JSON.parse(await askExcuseAI(prompt));
       if(Array.isArray(arr)&&accusation===excuseAccusation)
         excuseSuggestions=arr.filter(x=>typeof x==='string'&&x.trim()).map(x=>x.trim().slice(0,120));
@@ -2702,10 +3373,10 @@ window.IAP=(function(){
       +usedExcuses.join('\n- ')+'\nWICHTIG: Wenn die neue Ausrede im Kern dieselbe ist wie eine bereits benutzte (auch umformuliert), '
       +'glaubt die Menge sie NICHT mehr \u2013 gib dann h\u00f6chstens 25 Punkte und weise im Kommentar frech darauf hin, dass sie den Trick schon kennt.'):'';
     const prompt='Du bist die aufgebrachte Menschenmenge in einem lustigen Cartoon-Spiel. Der Spieler wurde bei einem Chaos-Ereignis erwischt und gibt eine selbst getippte Ausrede ab.'
-      +'\n\nEREIGNIS: "'+excuseAccusation+'"\nAUSREDE DES SPIELERS: "'+txt+'"'+usedList
+      +'\n\nEREIGNIS: "'+T(excuseAccusation)+'"\nAUSREDE DES SPIELERS: "'+txt+'"'+usedList
       +'\n\nBewerte die Ausrede nach Kreativit\u00e4t, Dreistigkeit und ob sie zum Ereignis passt. Absurde, aber clevere Ausreden d\u00fcrfen gut abschneiden. '
       +'Faule Antworten wie "wei\u00df nicht" oder Ein-Wort-Antworten schneiden sehr schlecht ab (unter 30). Richtig witzige oder passende Ausreden bekommen 60-95.'
-      +'\n\nAntworte NUR mit einem JSON-Objekt, ohne Markdown, ohne Backticks:\n{"punkte": <Zahl 0-100>, "kommentar": "<1 kurzer frecher Satz auf Deutsch als Reaktion der Menge, direkt an den Spieler>"}';
+      +'\n\nAntworte NUR mit einem JSON-Objekt, ohne Markdown, ohne Backticks:\n{"punkte": <Zahl 0-100>, "kommentar": "<1 kurzer frecher Satz auf '+langDef().ai+' als Reaktion der Menge, direkt an den Spieler>"}';
     const r=JSON.parse(await askExcuseAI(prompt));
     return { p:clamp(Math.round(Number(r.punkte)||0),0,100), c:String(r.kommentar||'').slice(0,180) };
   }
@@ -2713,21 +3384,21 @@ window.IAP=(function(){
   async function submitExcuse(){
     if(state!==ST.CAUGHT||excuseEvaluating) return;
     const exInp=document.getElementById('excuseInput'), txt=exInp.value.trim();
-    if(!txt){ exInp.placeholder='Schweigen macht dich nur verd\u00e4chtiger!'; return; }
+    if(!txt){ exInp.placeholder=T('Schweigen macht dich nur verd\u00e4chtiger!'); return; }
     excuseEvaluating=true; exInp.disabled=true; exInp.blur();
     document.getElementById('excuseSend').disabled=true;
     // Spicker-Ausrede unveraendert abgegeben? Dann keine Bewertung \u2013 die zieht immer.
     if(guaranteedExcuse&&txt===guaranteedExcuse.trim()){
       excuseEvaluating=false; guaranteedExcuse='';
       usedExcuses.push(txt);
-      escapeCatch(false,{p:75,c:'Dein Spicker sitzt \u2013 die Menge nickt und macht dir Platz.'});
+      escapeCatch(false,{p:75,c:T('Dein Spicker sitzt \u2013 die Menge nickt und macht dir Platz.')});
       return;
     }
     document.getElementById('aiThinking').classList.add('on');
     let v;
     try{ v=await evalExcuseAI(txt); }
     catch(e){ const pt=localExcuseScore(txt);
-      v={ p:pt, c:pick(pt>=EXCUSE_PASS?LOCAL_OK:LOCAL_BAD) }; }
+      v={ p:pt, c:T(pick(pt>=EXCUSE_PASS?LOCAL_OK:LOCAL_BAD)) }; }
     excuseEvaluating=false;
     if(state!==ST.CAUGHT) return;   // z.B. inzwischen bestochen worden
     document.getElementById('aiThinking').classList.remove('on');
@@ -2738,16 +3409,17 @@ window.IAP=(function(){
       const hintEl=document.getElementById('crowdHint');
       if(tutExcuseTries<2){
         hintEl.classList.add('bad');
-        hintEl.innerHTML='<b>'+v.p+'/100 \u2013 zu schwach:</b> \u201e'+escHtml(v.c)+'\u201c Probier eine dreistere \u2013 hier kostet das nichts.';
+        hintEl.innerHTML=Tf('<b>{p}/100 \u2013 zu schwach:</b> \u201e{c}\u201c Probier eine dreistere \u2013 hier kostet das nichts.',
+          {p:v.p,c:escHtml(v.c)});
         hintEl.style.display='';
-        exInp.disabled=false; exInp.value=''; exInp.placeholder='Noch dreister \u2026';
+        exInp.disabled=false; exInp.value=''; exInp.placeholder=T('Noch dreister \u2026');
         document.getElementById('excuseSend').disabled=false;
         return;
       }
-      escapeCatch(false,{p:Math.max(v.p,55),c:'Die Menge winkt dich durch \u2013 im Tutorial noch.'});
+      escapeCatch(false,{p:Math.max(v.p,55),c:T('Die Menge winkt dich durch \u2013 im Tutorial noch.')});
       return;
     }
-    endGame('Ausrede abgelehnt ('+v.p+'/100): \u201e'+v.c+'\u201c');
+    endGame(Tf('Ausrede abgelehnt ({p}/100): \u201e{c}\u201c',{p:v.p,c:v.c}));
   }
   function escapeCatch(bribed,verdict){
     SND.play(bribed?'coin':'correct');
@@ -2760,8 +3432,9 @@ window.IAP=(function(){
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
     SND.setTrack('game');
-    const r=bribed?['Geschmiert! '+ic('moneybag'),'Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']
-      :(verdict?[verdict.p+'/100 \u2013 Durchgekommen!',verdict.c||'Die Menge kauft es dir ab.']:pick(REACTIONS));
+    const r=bribed?[T('Geschmiert!')+' '+ic('moneybag'),T('Die Menge steckt das Geld ein und schaut betont weg. Diesmal.')]
+      :(verdict?[Tf('{p}/100 \u2013 Durchgekommen!',{p:verdict.p}),verdict.c||T('Die Menge kauft es dir ab.')]
+        :pick(REACTIONS).map(x=>T(x)));
     document.getElementById('reactTitle').innerHTML=r[0];
     document.getElementById('reactText').textContent=r[1];
     show('reaction'); state=ST.REACT; reactTimer=1.5;
@@ -2798,9 +3471,9 @@ window.IAP=(function(){
       mini={def:def,mode:'spam',prog:def.start,time:def.time,decay:def.decay+streetsCleared*0.012,gain:def.gain,
         yankT:def.yank?rand(0.7,1.3):0,clicks:0};
     }
-    document.getElementById('miniTitle').textContent=def.title;
-    document.getElementById('miniDesc').textContent=def.desc;
-    document.getElementById('miniBtn').textContent=def.btn;
+    document.getElementById('miniTitle').textContent=T(def.title);
+    document.getElementById('miniDesc').textContent=T(def.desc);
+    document.getElementById('miniBtn').textContent=T(def.btn);
     const bar=document.getElementById('miniBar');
     if(bar) bar.style.background=def.mode==='duel'?'var(--danger)':'linear-gradient(90deg,var(--safe),var(--gold))';
     document.getElementById('miniMid').style.display=def.mode==='duel'?'none':'';
@@ -2813,11 +3486,11 @@ window.IAP=(function(){
       mini.t+=dt;
       if(mini.phase==='wait'&&mini.t>=mini.wait){
         mini.phase='go'; mini.t=0;
-        document.getElementById('miniBtn').textContent='JETZT! TIPPEN!';
+        document.getElementById('miniBtn').textContent=T('JETZT! TIPPEN!');
         const bar=document.getElementById('miniBar'); if(bar) bar.style.background='var(--safe)';
         SND.play('alarm');
       } else if(mini.phase==='go'&&mini.t>=mini.react){ return miniLose(); }
-      const t=document.getElementById('miniTime'); if(t) t.textContent=mini.phase==='wait'?'…':'ZIEH!';
+      const t=document.getElementById('miniTime'); if(t) t.textContent=mini.phase==='wait'?'…':T('ZIEH!');
       return;
     }
     mini.time-=dt; mini.prog-=mini.decay*dt;
@@ -2849,8 +3522,8 @@ window.IAP=(function(){
       if(!save.minisWon[mk]){ save.minisWon[mk]=true; persist(); }
       if(['armwrestle','race','tug','duel'].every(k=>save.minisWon[k])) unlockAch('mini_all'); }
     score+=200+streetsCleared*5; speedBuff=SPEED_BUFF_DUR; updateBuffHUD();
-    document.getElementById('reactTitle').innerHTML=mini.def.winT;
-    document.getElementById('reactText').textContent=mini.def.winX;
+    document.getElementById('reactTitle').innerHTML=T(mini.def.winT);
+    document.getElementById('reactText').textContent=T(mini.def.winX);
     show('reaction'); state=ST.REACT; reactTimer=1.9;
     caughtWasSpecial=false; bumpCD=1.2; SND.setTrack('game');
     endAlarm(); chaosTimer=Math.max(2.5,diff().chaosInterval*0.6); updateHUD();
@@ -2875,7 +3548,7 @@ window.IAP=(function(){
     else if(it.type==='hint'){ hintCharges+=upVal('hint'); updateHintHUD(); }
     else if(it.type==='coins'){ coinsRun+=upVal('coins'); updateHUD(); if(coinsRun>=15) unlockAch('coins_run'); if(coinsRun>=30) unlockAch('coins_run_30'); }
     else if(it.type==='calm'){ suspicion=0; if(phase==='alarm') endAlarm(); setSusBar(); }
-    addPickFx(it.x,it.y-18,def.name,def.col);
+    addPickFx(it.x,it.y-18,T(def.name),def.col);
   }
   function districtCrossed(){
     streetsCleared++; score+=150; SND.play('district');
@@ -2945,7 +3618,7 @@ window.IAP=(function(){
     highscore=save.scores.length?save.scores[0].score:score;
     persist();
     setBanner('hide'); document.getElementById('vignette').classList.remove('on');
-    document.getElementById('goMsg').textContent=msg||'Die Menge hat dich erwischt.';
+    document.getElementById('goMsg').textContent=msg||T('Die Menge hat dich erwischt.');
     document.getElementById('goScore').textContent=score;
     document.getElementById('goScenes').textContent=streetsCleared;
     document.getElementById('goNerve').textContent=bestNerve+'%';
@@ -3000,9 +3673,9 @@ window.IAP=(function(){
     if(save.coins>=1000) unlockAch('rich_1000'); if(save.coins>=5000) unlockAch('rich_5000'); }
   function renderBoard(el,latest){
     if(!el) return;
-    if(save.scores.length===0){ el.innerHTML='<div class="bempty">Noch keine L\u00e4ufe \u2013 leg los!</div>'; return; }
+    if(save.scores.length===0){ el.innerHTML='<div class="bempty">'+T('Noch keine L\u00e4ufe \u2013 leg los!')+'</div>'; return; }
     el.innerHTML=save.scores.slice(0,5).map((e,i)=>
-      '<div class="'+(e===latest?'brow new':'brow')+'"><span class="brk">#'+(i+1)+'</span><span class="bsc">'+e.score+'</span><span class="bst">'+e.streets+' Viertel</span></div>'
+      '<div class="'+(e===latest?'brow new':'brow')+'"><span class="brk">#'+(i+1)+'</span><span class="bsc">'+e.score+'</span><span class="bst">'+Tf('{n} Viertel',{n:e.streets})+'</span></div>'
     ).join('');
   }
   const SPECIAL_PRICE=100;
@@ -3025,7 +3698,8 @@ window.IAP=(function(){
       const info=document.createElement('div'); info.className='pinfo';
       const fresh=(upFlash===u.key)?lvl-1:-1;       // der zuletzt gefuellte Punkt darf aufpoppen
       let dots=''; for(let d=0;d<u.max;d++) dots+='<span class="ud'+(d<lvl?' on':'')+(d===fresh?' pop':'')+'"></span>';
-      info.innerHTML='<div class="pname">'+u.name+'</div><div class="pdesc">'+u.desc+' &middot; jetzt <b>'+val+u.unit+'</b></div><div class="upBar">'+dots+'</div>';
+      info.innerHTML='<div class="pname">'+T(u.name)+'</div><div class="pdesc">'+T(u.desc)+' &middot; '+T('jetzt')
+        +' <b>'+val+T(u.unit)+'</b></div><div class="upBar">'+dots+'</div>';
       row.appendChild(info);
       const btn=document.createElement('button'); btn.className='pbtn';
       if(maxed){ btn.textContent='MAX'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
@@ -3048,11 +3722,12 @@ window.IAP=(function(){
     if(pw){
       pw.innerHTML='';
       const box=document.createElement('div'); box.className='pwr specialBox'; box.id='specialBox';
-      const tag=document.createElement('div'); tag.className='specTag'; tag.textContent='ANGEBOT!'; box.appendChild(tag);
+      const tag=document.createElement('div'); tag.className='specTag'; tag.textContent=T('ANGEBOT!'); box.appendChild(tag);
       const info=document.createElement('div'); info.className='pinfo';
       const btn=document.createElement('button'); btn.className='pbtn'; btn.innerHTML=SPECIAL_PRICE+' '+ic('coin');
-      info.innerHTML='<div class="pname">Spezial-Ticket</div><div class="pdesc">Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.</div>'
-        +(save.specialTokens>0?'<div class="pown">Im Vorrat: '+save.specialTokens+'</div>':'');
+      info.innerHTML='<div class="pname">'+T('Spezial-Ticket')+'</div><div class="pdesc">'
+        +T('Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.')+'</div>'
+        +(save.specialTokens>0?'<div class="pown">'+Tf('Im Vorrat: {n}',{n:save.specialTokens})+'</div>':'');
       if(save.coins>=SPECIAL_PRICE){ btn.classList.add('buy');
         btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return;
           coinBurst(btn); save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI();
@@ -3080,14 +3755,14 @@ window.IAP=(function(){
       const card=document.createElement('div'); card.className='skin'+(sel?' sel':'');
       const pvr=Math.min(window.devicePixelRatio||1,3);
       const cnv=document.createElement('canvas'); cnv.width=Math.round(54*pvr); cnv.height=Math.round(54*pvr); card.appendChild(cnv);
-      const nm=document.createElement('div'); nm.className='sname'; nm.textContent=sk.name; card.appendChild(nm);
+      const nm=document.createElement('div'); nm.className='sname'; nm.textContent=T(sk.name); card.appendChild(nm);
       const btn=document.createElement('button'); btn.className='sbtn';
-      if(sel){ btn.textContent='Ausgew\u00e4hlt'; btn.classList.add('sel'); }
-      else if(owned){ btn.textContent='Ausw\u00e4hlen'; btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderSkins(); }; }
-      else if(sk.unlock){ btn.innerHTML=ic('lock')+' Erfolg'; btn.classList.add('cant'); nm.innerHTML=sk.name+' '+ic('lock'); }
-      else if(save.coins>=sk.price){ btn.textContent=sk.price+' M\u00fcnzen'; btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI();
+      if(sel){ btn.textContent=T('Ausgew\u00e4hlt'); btn.classList.add('sel'); }
+      else if(owned){ btn.textContent=T('Ausw\u00e4hlen'); btn.classList.add('owned'); btn.onclick=()=>{ save.selected=sk.id; applySkin(); persist(); renderSkins(); }; }
+      else if(sk.unlock){ btn.innerHTML=ic('lock')+' '+T('Erfolg'); btn.classList.add('cant'); nm.innerHTML=T(sk.name)+' '+ic('lock'); }
+      else if(save.coins>=sk.price){ btn.textContent=Tf('{n} M\u00fcnzen',{n:sk.price}); btn.onclick=()=>{ save.coins-=sk.price; save.owned.push(sk.id); save.selected=sk.id; applySkin(); persist(); renderSkins(); updateCoinUI();
         unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }; }
-      else { btn.textContent=sk.price+' M\u00fcnzen'; btn.classList.add('cant'); }
+      else { btn.textContent=Tf('{n} M\u00fcnzen',{n:sk.price}); btn.classList.add('cant'); }
       card.appendChild(btn); grid.appendChild(card); drawSkinPreview(cnv,sk);
     }
   }
@@ -3095,7 +3770,7 @@ window.IAP=(function(){
   function achRewardText(a){
     const rw=[]; if(a.coins) rw.push(a.coins+' '+ic('coin'));
     const sk=a.skin?(SKINS.find(s=>s.id===a.skin)||{}).name:'';
-    if(sk) rw.push('Skin „'+sk+'“');
+    if(sk) rw.push(Tf('Skin „{s}“',{s:T(sk)}));
     return rw.join(' + ');
   }
   // Auf den kleinen Kacheln ist kein Platz für die Beschreibung – die steht in der Leiste
@@ -3103,15 +3778,15 @@ window.IAP=(function(){
   function showAchDetail(a){
     const el=document.getElementById('achDetail'); if(!el) return;
     if(!a){ el.className='achDetail';
-      el.innerHTML='<div class="adHint">Tippe einen Erfolg an – hier steht dann, wie du ihn bekommst.</div>'; return; }
+      el.innerHTML='<div class="adHint">'+T('Tippe einen Erfolg an – hier steht dann, wie du ihn bekommst.')+'</div>'; return; }
     const got=!!(save.achievements&&save.achievements[a.id]);
     const t=ACH_TIERS.find(x=>x.tier===(a.tier||1))||ACH_TIERS[0];
     const rw=achRewardText(a);
     el.className='achDetail on'+(got?'':' locked');
     el.style.setProperty('--tc',t.col);
     el.innerHTML='<div class="adIco">'+ic(a.icon)+'</div><div class="adTxt">'
-      +'<div class="adName">'+a.name+'</div><div class="adDesc">'+a.desc+'</div>'
-      +(rw?'<div class="adRw">Belohnung: '+rw+'</div>':'')
+      +'<div class="adName">'+T(a.name)+'</div><div class="adDesc">'+T(a.desc)+'</div>'
+      +(rw?'<div class="adRw">'+Tf('Belohnung: {r}',{r:rw})+'</div>':'')
       +'</div><div class="adStat">'+ic(got?'check':'lock')+'</div>';
   }
   // Fredoka ist nicht auf jedem Gerät verfügbar, und die Ersatzschrift ist breiter. Namen,
@@ -3167,11 +3842,11 @@ window.IAP=(function(){
       doneAll+=done; total+=items.length;
       const sec=document.createElement('div'); sec.className='achTier t'+t.tier; sec.style.setProperty('--tc',t.col);
       sec.innerHTML='<div class="tierHead"><span class="tierIco">'+ic(t.icon)+'</span>'
-        +'<span class="tierName">'+t.name+'</span>'
+        +'<span class="tierName">'+T(t.name)+'</span>'
         +'<span class="tierStars">'+ic('star').repeat(t.tier)+ic('star-o').repeat(5-t.tier)+'</span>'
         +'<span class="tierCount">'+done+'/'+items.length+'</span></div>'
         +'<div class="tierBar"><i data-w="'+Math.round(done/items.length*100)+'" style="width:0%"></i></div>'
-        +'<div class="tierHint">'+t.hint+'</div>';
+        +'<div class="tierHint">'+T(t.hint)+'</div>';
       const grid=document.createElement('div'); grid.className='achGrid';
       let idx=0;
       for(const a of items){
@@ -3181,7 +3856,7 @@ window.IAP=(function(){
         if(!reduceMotion){ b.style.animationDelay=(0.04+Math.min(idx,13)*0.03)+'s';
           b.style.setProperty('--sd',(idx%9)*0.62+'s'); }
         idx++;
-        b.innerHTML='<div class="aico">'+ic(a.icon)+'</div><div class="aname">'+a.name+'</div>'
+        b.innerHTML='<div class="aico">'+ic(a.icon)+'</div><div class="aname">'+T(a.name)+'</div>'
           +(a.coins?'<div class="arw">'+a.coins+' '+ic('coin')+'</div>':'')
           +'<div class="astat">'+ic(got?'check':'lock')+'</div>'
           +(a.skin?'<div class="askin">'+ic('shirt')+'</div>':'');
@@ -3197,21 +3872,21 @@ window.IAP=(function(){
     }
     const sum=document.getElementById('achSummary');
     if(sum) sum.innerHTML='<div class="asRow"><span class="asBig">'+doneAll+'</span>'
-      +'<span class="asOf">von '+total+' Erfolgen</span>'
-      +'<span class="asCoins">'+earned+' '+ic('coin')+' kassiert</span></div>'
+      +'<span class="asOf">'+Tf('von {n} Erfolgen',{n:total})+'</span>'
+      +'<span class="asCoins">'+earned+' '+ic('coin')+' '+T('kassiert')+'</span></div>'
       +'<div class="asBar"><i data-w="'+(total?Math.round(doneAll/total*100):0)+'" style="width:0%"></i></div>';
     showAchDetail(null);
     fitAchNames(list);
     animateAchBars(list,doneAll);
   }
-  function updateZoneHUD(){ const z=currentZone(player.y); if(z&&z.name!==lastZoneName){ document.getElementById('scene').textContent=z.name; lastZoneName=z.name; } }
+  function updateZoneHUD(){ const z=currentZone(player.y); if(z&&z.name!==lastZoneName){ document.getElementById('scene').textContent=T(z.name); lastZoneName=z.name; } }
   function setSusBar(){ const f=document.getElementById('susFill'); f.style.width=suspicion+'%';
     f.style.background=suspicion<45?'var(--safe)':(suspicion<75?'var(--warn)':'var(--danger)'); }
   function setBanner(mode){
     const b=document.getElementById('banner'), v=document.getElementById('vignette');
-    if(mode==='alarm'){ b.textContent='STEHENBLEIBEN!'; b.className='freeze'; b.style.opacity=1; v.classList.add('on'); }
-    else if(mode==='special'){ b.textContent=specialBanner||'AUFGEFLOGEN!'; b.className='freeze'; b.style.opacity=1; v.classList.add('on'); }
-    else if(mode==='calm'){ b.textContent='LOS!'; b.className='go'; b.style.opacity=1; v.classList.remove('on');
+    if(mode==='alarm'){ b.textContent=T('STEHENBLEIBEN!'); b.className='freeze'; b.style.opacity=1; v.classList.add('on'); }
+    else if(mode==='special'){ b.textContent=T(specialBanner||'AUFGEFLOGEN!'); b.className='freeze'; b.style.opacity=1; v.classList.add('on'); }
+    else if(mode==='calm'){ b.textContent=T('LOS!'); b.className='go'; b.style.opacity=1; v.classList.remove('on');
       setTimeout(()=>{ if(phase==='calm'&&state===ST.PLAY) document.getElementById('banner').style.opacity=0; },900); }
     else{ b.style.opacity=0; v.classList.remove('on'); }
   }
@@ -3264,7 +3939,7 @@ window.IAP=(function(){
       // Überqueren derselben Grenze darf Punkte und Viertel nicht doppelt geben.
       if(lastZone && cz.y0<bestZoneY){ bestZoneY=cz.y0; districtCrossed(); }
       lastZone=cz;
-      if(cz.name!==lastZoneName){ document.getElementById('scene').textContent=cz.name; lastZoneName=cz.name; }
+      if(cz.name!==lastZoneName){ document.getElementById('scene').textContent=T(cz.name); lastZoneName=cz.name; }
     }
     if(suspicion>bestNerve) bestNerve=Math.round(suspicion);
     if(score>=1000) unlockAch('score_1000');
@@ -4288,7 +4963,7 @@ window.IAP=(function(){
       ctx.save(); ctx.translate(b.x,b.y+14); ctx.scale(sqx,sqy);
       drawObject(b.vis,0,-14); ctx.restore();
     } else drawEffect(b.vis,b.x,b.y,since);
-    if(since<1.0) spikeWord(b.x,b.y-48,b.boom,boomColor(b.vis));
+    if(since<1.0) spikeWord(b.x,b.y-48,T(b.boom),boomColor(b.vis));
   }
 
   function drawStreetBase(){
@@ -4473,7 +5148,7 @@ window.IAP=(function(){
       ctx.fillStyle=INK; rr(ROAD_L-6,by-16,bw,30,8); ctx.fill();
       ctx.fillStyle=z.bld; rr(ROAD_L-2,by-12,bw-8,22,6); ctx.fill();
       ctx.fillStyle=INK; ctx.font='700 15px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(z.name.toUpperCase(),W/2,by);
+      ctx.fillText(T(z.name).toUpperCase(),W/2,by);
     }
   }
   function drawStick(){
@@ -4529,7 +5204,7 @@ window.IAP=(function(){
     if(youHint>0){ const a=Math.abs(Math.sin(performance.now()/200))*6;
       ctx.fillStyle='#FF3B30'; ctx.strokeStyle=INK; ctx.lineWidth=3;
       ctx.beginPath(); ctx.moveTo(player.x,player.y-40-a); ctx.lineTo(player.x-9,player.y-54-a); ctx.lineTo(player.x+9,player.y-54-a); ctx.closePath(); fs();
-      ctx.fillStyle=INK; ctx.font='700 13px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.fillText('DU',player.x,player.y-60-a); }
+      ctx.fillStyle=INK; ctx.font='700 13px Fredoka,sans-serif'; ctx.textAlign='center'; ctx.fillText(T('DU'),player.x,player.y-60-a); }
 
     for(const b of bursts) drawBurst(b);
 
@@ -4935,8 +5610,9 @@ window.IAP=(function(){
     ctx.lineWidth=2; ctx.strokeStyle=col;
     starShape(-lw,-26,5.5); starShape(lw,-26,5.5);
     ctx.font='800 20px Fredoka,sans-serif'; ctx.lineWidth=5; ctx.lineJoin='round';
-    ctx.strokeStyle='#0a0a14'; ctx.strokeText(currentEvent.label,0,2);
-    ctx.fillStyle='#FFF6E5'; ctx.fillText(currentEvent.label,0,2);
+    const clbl=T(currentEvent.label);
+    ctx.strokeStyle='#0a0a14'; ctx.strokeText(clbl,0,2);
+    ctx.fillStyle='#FFF6E5'; ctx.fillText(clbl,0,2);
     ctx.restore();
   }
   function starShape(cx,cy,r){
@@ -5072,6 +5748,7 @@ window.IAP=(function(){
     const sc=0.4+0.6*Math.min(1,p*2.2)+0.03*Math.sin(now/120);
     ctx.save(); ctx.translate(W/2,H*0.5); ctx.scale(sc,sc);
     ctx.font='900 44px Fredoka,sans-serif'; ctx.lineWidth=8; ctx.lineJoin='round'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    word=T(word);
     ctx.strokeStyle='#0a0a14'; ctx.strokeText(word,0,0); ctx.fillStyle=col; ctx.fillText(word,0,0);
     ctx.restore();
   }
@@ -5105,6 +5782,8 @@ window.IAP=(function(){
     el._hideT=setTimeout(()=>{ el.classList.add('hidden'); el.classList.remove('closing','pop'); el._hideT=null; },170);
   }
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
+  document.getElementById('langBtn').onclick=()=>{ SND.ensure(); SND.play('click'); renderLangPick(); show('langPick'); };
+  document.getElementById('lpDone').onclick=()=>{ SND.play('click'); hide('langPick'); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
   document.getElementById('tsNext').onclick=()=>{ SND.ensure(); SND.play('click'); tutBegin(); };
   document.getElementById('tsSkip').onclick=()=>{ SND.ensure(); SND.play('click'); tutSkipAll(); };
@@ -5125,13 +5804,13 @@ window.IAP=(function(){
     btn.innerHTML='<span class="dblBadge">\u00d72</span>'
       +'<span class="dblPlay">'+ic('play')+'</span>'
       +'<span class="dblTxt">'
-        +'<span class="dblTitle">M\u00fcnzen verdoppeln</span>'
+        +'<span class="dblTitle">'+T('M\u00fcnzen verdoppeln')+'</span>'
         +'<span class="dblMath">'
           +'<span class="dblNow">'+ic('coin')+'+'+lastEarned+'</span>'
           +'<span class="dblArrow">\u2192</span>'
           +'<span class="dblNew">'+ic('coin')+'+'+(lastEarned*2)+'</span>'
         +'</span>'
-        +'<span class="dblHint">Kurzes Video ansehen \u00b7 gratis</span>'
+        +'<span class="dblHint">'+T('Kurzes Video ansehen \u00b7 gratis')+'</span>'
       +'</span>';
   }
   // Zahl in der Muenz-Kachel hochzaehlen statt springen
@@ -5157,8 +5836,8 @@ window.IAP=(function(){
     SND.play('click');
     btn.disabled=true; btn.className='dblCard busy';
     btn.innerHTML='<span class="dblPlay">'+ic('play')+'</span>'
-      +'<span class="dblTxt"><span class="dblTitle">Video l\u00e4uft \u2026</span>'
-      +'<span class="dblHint">Bitte bis zum Ende ansehen</span></span>';
+      +'<span class="dblTxt"><span class="dblTitle">'+T('Video l\u00e4uft \u2026')+'</span>'
+      +'<span class="dblHint">'+T('Bitte bis zum Ende ansehen')+'</span></span>';
     const res=await ADS.showReward();
     if(!res.ok){ syncRewardBtn(); return; }                       // abgebrochen: Karte bleibt nutzbar
     rewardTaken=true;
@@ -5170,9 +5849,9 @@ window.IAP=(function(){
     if(stat){ stat.classList.remove('pop'); void stat.offsetWidth; stat.classList.add('pop'); }
     rewardDone=true; btn.className='dblCard done';
     btn.innerHTML='<span class="dblPlay">'+ic('check')+'</span>'
-      +'<span class="dblTxt"><span class="dblTitle">Verdoppelt!</span>'
+      +'<span class="dblTxt"><span class="dblTitle">'+T('Verdoppelt!')+'</span>'
         +'<span class="dblMath"><span class="dblNew">'+ic('coin')+'+'+(lastEarned*2)+'</span></span>'
-        +'<span class="dblHint">auf dein Konto gebucht</span></span>';
+        +'<span class="dblHint">'+T('auf dein Konto gebucht')+'</span></span>';
     setTimeout(()=>{ rewardDone=false;
       const r=document.getElementById('rewardRow'); if(r) r.classList.add('hidden'); },2200);
   };
@@ -5191,14 +5870,14 @@ window.IAP=(function(){
     // Direkt nach einem Video ist kurz keins geladen – die Kachel bleibt sichtbar, aber gesperrt
     if(!ready){
       box.innerHTML='<button class="adTile busy" id="adShopBtn" disabled>'+ic('play')
-        +'<div class="atCap">L\u00c4DT \u2026</div><div class="atBar"><i style="width:'+pct+'%"></i></div></button>';
+        +'<div class="atCap">'+T('L\u00c4DT \u2026')+'</div><div class="atBar"><i style="width:'+pct+'%"></i></div></button>';
       return;
     }
     adTileSeen=true;
-    const tip='Mindestens '+min+' Sek. Werbung ansehen \u2013 daf\u00fcr '+reward
-      +' M\u00fcnzen. K\u00fcrzere Videos werden addiert.'+(done>0?' Angesehen: '+done+'/'+min+' Sek.':'');
+    const tip=Tf('Mindestens {min} Sek. Werbung ansehen \u2013 daf\u00fcr {n} M\u00fcnzen. K\u00fcrzere Videos werden addiert.',
+      {min:min,n:reward})+(done>0?' '+Tf('Angesehen: {a}/{b} Sek.',{a:done,b:min}):'');
     box.innerHTML='<button class="adTile ready" id="adShopBtn" title="'+tip+'">'
-      +ic('play')+'<div class="atVal">+'+reward+'</div><div class="atCap">WERBUNG</div>'
+      +ic('play')+'<div class="atVal">+'+reward+'</div><div class="atCap">'+T('WERBUNG')+'</div>'
       +'<div class="atBar"><i style="width:'+pct+'%"></i></div></button>';
     document.getElementById('adShopBtn').onclick=watchShopAd;
   }
@@ -5220,19 +5899,19 @@ window.IAP=(function(){
     if(!save.iap) save.iap={};
     if(p.type!=='consumable'&&save.iap[id]) return;
     const got=[];
-    if(p.coins){ save.coins+=p.coins; got.push('+'+p.coins+' M\u00fcnzen'); }
-    if(p.tickets){ save.specialTokens=(save.specialTokens||0)+p.tickets; got.push('+'+p.tickets+' Spezial-Tickets'); }
+    if(p.coins){ save.coins+=p.coins; got.push(Tf('+{n} M\u00fcnzen',{n:p.coins})); }
+    if(p.tickets){ save.specialTokens=(save.specialTokens||0)+p.tickets; got.push(Tf('+{n} Spezial-Tickets',{n:p.tickets})); }
     if(p.skins&&p.skins.length){
       let n=0; for(const sk of p.skins) if(save.owned.indexOf(sk)<0){ save.owned.push(sk); n++; }
-      if(n){ got.push('+'+n+' Skins'); unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }
+      if(n){ got.push(Tf('+{n} Skins',{n:n})); unlockAch('buy_skin_1'); if(save.owned.length>=10) unlockAch('skins_10'); }
     }
-    if(p.noAds&&!save.noAds){ save.noAds=true; ADS.setNoAds(true); got.push('Werbung entfernt'); }
+    if(p.noAds&&!save.noAds){ save.noAds=true; ADS.setNoAds(true); got.push(T('Werbung entfernt')); }
     save.iap[id]=true;
     persist(); updateCoinUI();
     const sh=document.getElementById('shop');
     if(sh&&!sh.classList.contains('hidden')){
       SND.play('buy'); renderShop();
-      if(got.length) flashAdShopMsg(p.name+': '+got.join(', '));
+      if(got.length) flashAdShopMsg(T(p.name)+': '+got.join(', '));
     }
   }
   // ---------- Starter-Angebot: 7 Tage ab dem ersten Shop-Besuch ----------
@@ -5246,7 +5925,7 @@ window.IAP=(function(){
     if(ms<0) ms=0;
     const s=Math.floor(ms/1000), t=Math.floor(s/86400), h=Math.floor(s%86400/3600),
           m=Math.floor(s%3600/60), sek=s%60, zz=n=>String(n).padStart(2,'0');
-    return (t>0?t+'T ':'')+zz(h)+':'+zz(m)+':'+zz(sek);
+    return (t>0?Tf('{t}T ',{t:t}):'')+zz(h)+':'+zz(m)+':'+zz(sek);
   }
   let starterTick=null;
   function stopStarterTimer(){ if(starterTick){ clearInterval(starterTick); starterTick=null; } }
@@ -5288,8 +5967,8 @@ window.IAP=(function(){
       const t=document.createElement('button');
       t.className='coinTile'+(laeuft?' busy':'')+(p.tag?' tagged':'');
       const col=p.tile||[]; t.style.setProperty('--c1',col[0]||'#5AA6F7'); t.style.setProperty('--c2',col[1]||'#1A6FD0');
-      t.title=p.name+' – '+p.desc;
-      t.innerHTML=(p.tag?'<span class="ctTag">'+p.tag+'</span>':'')
+      t.title=T(p.name)+' – '+T(p.desc);
+      t.innerHTML=(p.tag?'<span class="ctTag">'+T(p.tag)+'</span>':'')
         +'<svg class="ic ctIco"><use href="#i-'+(p.icon||'coin')+'"/></svg>'
         +'<span class="ctAmt">'+(p.short||p.coins)+'</span>'
         +'<span class="ctPrice">'+(laeuft?'…':(preis||'…'))+'</span>';
@@ -5304,13 +5983,14 @@ window.IAP=(function(){
     if(st&&!gekauft(st)&&starterEnd()-Date.now()>0){
       const b=document.createElement('div'); b.className='pwr starterBox'; b.id='starterBox';
       const col=st.tile||[];
-      b.innerHTML='<div class="starterTag">'+(st.tag||'ANGEBOT')+'</div>'
+      b.innerHTML='<div class="starterTag">'+T(st.tag||'ANGEBOT')+'</div>'
         +'<i class="spark" style="top:14px;left:34%"></i><i class="spark" style="bottom:16px;left:22%;animation-delay:.4s"></i>'
         +'<i class="spark" style="top:26px;right:16%;animation-delay:.8s"></i><i class="spark" style="bottom:12px;right:34%;animation-delay:1.1s"></i>';
       const info=document.createElement('div'); info.className='pinfo';
-      info.innerHTML='<div class="pname">'+st.name+'</div>'
-        +'<div class="starterFeats">'+(st.feats||[]).map(f=>'<span>'+f+'</span>').join('')+'</div>'
-        +'<div class="starterTimer" id="starterTimer">'+ic('bolt')+'Nur noch <b>'+restZeit(starterEnd()-Date.now())+'</b></div>';
+      info.innerHTML='<div class="pname">'+T(st.name)+'</div>'
+        +'<div class="starterFeats">'+(st.feats||[]).map(f=>'<span>'+T(f)+'</span>').join('')+'</div>'
+        +'<div class="starterTimer" id="starterTimer">'+ic('bolt')+T('Nur noch')
+        +' <b>'+restZeit(starterEnd()-Date.now())+'</b></div>';
       const btn=document.createElement('button'); btn.className='pbtn';
       const preis=IAP.price(st.id), laeuft=IAP.pending()===st.id;
       if(laeuft){ btn.textContent='…'; btn.classList.add('cant'); btn.disabled=true; }
@@ -5328,15 +6008,15 @@ window.IAP=(function(){
       const hat=gekauft(p), preis=IAP.price(p.id), laeuft=IAP.pending()===p.id;
       const c=document.createElement('div'); c.className='pwr featCard';
       const col=p.tile||[]; c.style.setProperty('--c1',col[0]||'#FF7FC8'); c.style.setProperty('--c2',col[1]||'#D6249F');
-      if(p.tag&&!hat) c.innerHTML='<div class="fcTag">'+p.tag+'</div>';
+      if(p.tag&&!hat) c.innerHTML='<div class="fcTag">'+T(p.tag)+'</div>';
       const art=document.createElement('div'); art.className='fcArt'; art.innerHTML=ic(p.icon||'gem'); c.appendChild(art);
       const info=document.createElement('div'); info.className='pinfo';
-      info.innerHTML='<div class="pname">'+p.name+'</div>'
-        +'<div class="fcFeats">'+(p.feats||[]).map(f=>'<span>'+f+'</span>').join('')+'</div>'
-        +(hat?'<div class="pown">'+ic('check')+' Gehört dir</div>':'');
+      info.innerHTML='<div class="pname">'+T(p.name)+'</div>'
+        +'<div class="fcFeats">'+(p.feats||[]).map(f=>'<span>'+T(f)+'</span>').join('')+'</div>'
+        +(hat?'<div class="pown">'+ic('check')+' '+T('Gehört dir')+'</div>':'');
       c.appendChild(info);
       const btn=document.createElement('button'); btn.className='pbtn';
-      if(hat){ btn.textContent='GEKAUFT'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
+      if(hat){ btn.textContent=T('GEKAUFT'); btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
       else if(laeuft){ btn.textContent='…'; btn.classList.add('cant'); btn.disabled=true; }
       else if(!preis){ btn.textContent='…'; btn.classList.add('cant'); btn.onclick=()=>nopeBtn(btn); }
       else { btn.textContent=preis; kaufen(p,btn); }
@@ -5344,8 +6024,8 @@ window.IAP=(function(){
       box.appendChild(c);
     }
 
-    const rb=document.createElement('button'); rb.className='iapRestore'; rb.textContent='Käufe wiederherstellen';
-    rb.onclick=async()=>{ SND.play('click'); rb.textContent='Wird geprüft …';
+    const rb=document.createElement('button'); rb.className='iapRestore'; rb.textContent=T('Käufe wiederherstellen');
+    rb.onclick=async()=>{ SND.play('click'); rb.textContent=T('Wird geprüft …');
       await IAP.restore(); renderShop(); };
     box.appendChild(rb);
     syncCoinRow();
@@ -5356,18 +6036,18 @@ window.IAP=(function(){
     if(!btn||btn.disabled) return;
     SND.play('click');
     btn.disabled=true; btn.classList.remove('ready'); btn.classList.add('busy');
-    btn.innerHTML=ic('play')+'<div class="atCap">L\u00c4UFT \u2026</div>';
+    btn.innerHTML=ic('play')+'<div class="atCap">'+T('L\u00c4UFT \u2026')+'</div>';
     const res=await ADS.showReward();
     const min=ADS.shopMinSeconds();
-    if(!res.ok){ flashAdShopMsg('Video abgebrochen \u2013 keine M\u00fcnzen.'); renderAdShop(); return; }
+    if(!res.ok){ flashAdShopMsg(T('Video abgebrochen \u2013 keine M\u00fcnzen.')); renderAdShop(); return; }
     save.adSec=(save.adSec||0)+res.seconds;
     if(save.adSec>=min){
       save.adSec=Math.min(save.adSec-min,min-1);                  // Rest bleibt stehen, bleibt aber unter der Vorgabe
       save.coins+=ADS.shopCoins(); SND.play('coin'); SND.play('buy');
       coinBurst(btn,8);                                           // noch von der alten Kachel aus
-      flashAdShopMsg('+'+ADS.shopCoins()+' M\u00fcnzen erhalten!');
+      flashAdShopMsg(Tf('+{n} M\u00fcnzen erhalten!',{n:ADS.shopCoins()}));
     } else {
-      flashAdShopMsg(res.seconds+' Sek. angesehen \u2013 noch '+(min-save.adSec)+' Sek.');
+      flashAdShopMsg(Tf('{a} Sek. angesehen \u2013 noch {b} Sek.',{a:res.seconds,b:min-save.adSec}));
     }
     persist(); updateCoinUI(); renderShop();   // kompletter Shop: die neuen Muenzen gelten sofort auch fuer Kaeufe
   }
@@ -5412,10 +6092,12 @@ window.IAP=(function(){
     for(const id of ['meSkin','meAvatar']){
       const cv=document.getElementById(id); if(cv) drawSkinPreview(cv,curSkin);
     }
-    const nm=document.getElementById('meSkinName'); if(nm) nm.textContent=curSkin.name;
+    const nm=document.getElementById('meSkinName'); if(nm) nm.textContent=T(curSkin.name);
   }
   ADS.init();
+  i18nSnapshot();                                  // feste Texte auf Deutsch sichern
   loadSave(); applySkin(); refreshMute(); SND.setTrack('menu');
+  setLang(save.lang||autoLang(),false);            // gemerkte Sprache, sonst die des Geraets
   if(save.noAds) ADS.setNoAds(true);
   IAP.init(grantIAP);
   IAP.onChange(()=>{ const sh=document.getElementById('shop');
