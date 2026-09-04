@@ -87,7 +87,7 @@
   .logoMag{ display:inline-block; -webkit-text-stroke:0; filter:none; width:38px; height:38px;
     animation:magSwing 1.7s ease-in-out infinite alternate; transform-origin:50% 0; }
   @keyframes magSwing{ from{transform:rotate(-14deg);} to{transform:rotate(10deg);} }
-  #menu::before, #shop::before, #skins::before, #achievements::before{
+  #menu::before, #skins::before, #achievements::before{
     content:''; position:absolute; inset:-90px; pointer-events:none; z-index:0;
     background:repeating-linear-gradient(-35deg, rgba(255,210,63,.07) 0 26px, rgba(124,92,255,.07) 26px 52px);
     animation:stripeMove 4.5s linear infinite; }
@@ -101,103 +101,172 @@
   #skins .skin{ background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); box-shadow:none; }
   #skins .skin .sname{ color:var(--cream); }
 
-  /* ================= SHOP: Marktbude ================= */
+  /* ================= SHOP ================= */
   #shop{ padding:0; gap:0; justify-content:flex-start; overflow:hidden;
+    --shNavy:#0E3A9C; --shNavy2:#0A2C78; --shBlue:#2E6BEE; --shBlue2:#1B4FD8;
+    --shTitle:#123A8C; --shDesc:#4E7BC4; --shGreen:#5BD75B; --shGreen2:#2E9E2E; --shGreenD:#1c6b1c;
+    background:linear-gradient(#B6E2FB 0%, #DCF1FF 46%, #CFE3F0 100%); }
+  /* Himmel: langsam ziehende Wolken */
+  #shop::before{ content:''; position:absolute; top:0; left:-60%; width:220%; height:62%; z-index:0; pointer-events:none;
     background:
-      radial-gradient(130% 55% at 50% 0%, rgba(124,92,255,.30), rgba(14,14,26,0) 72%),
-      repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 3px, rgba(0,0,0,0) 3px 52px),   /* Dielen */
-      linear-gradient(rgba(14,14,26,.62), rgba(20,14,40,.88)); }
-  /* Markise als Kopfband */
-  .shopHead{ position:relative; z-index:3; flex-shrink:0; width:100%;
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    padding:calc(9px + env(safe-area-inset-top)) 14px 11px;
-    background:repeating-linear-gradient(90deg, var(--danger) 0 26px, var(--cream) 26px 52px);
-    border-bottom:4px solid var(--ink); box-shadow:0 5px 0 rgba(0,0,0,.4); }
-  .shopHead::after{ content:''; position:absolute; left:0; right:0; bottom:-13px; height:13px;
-    background:radial-gradient(circle at 13px 0, var(--ink) 12px, rgba(0,0,0,0) 13px) 0 0/26px 26px repeat-x; }
-  .shopTitle{ display:flex; align-items:center; gap:7px; font-size:22px; font-weight:700; letter-spacing:2px;
-    color:var(--gold); background:var(--ink); border:3px solid var(--ink); border-radius:12px; padding:5px 13px;
-    box-shadow:0 3px 0 rgba(0,0,0,.45); }
-  .shopTitle .ic{ width:22px; height:22px; }
-  .shopPurse{ display:flex; align-items:center; gap:6px; font-size:19px; font-weight:700; color:var(--gold);
-    background:var(--ink); border:3px solid var(--ink); border-radius:999px; padding:5px 13px 5px 9px;
-    box-shadow:0 3px 0 rgba(0,0,0,.45); }
-  .shopPurse .ic{ width:21px; height:21px; animation:coinFlip 3.4s ease-in-out infinite; }
-  @keyframes coinFlip{ 0%,68%{transform:rotateY(0);} 84%{transform:rotateY(180deg) scaleX(.6);} 100%{transform:rotateY(360deg);} }
-  .shopPurse.bump{ animation:purseBump .5s cubic-bezier(.2,1.5,.4,1); }
-  @keyframes purseBump{ 0%{transform:scale(1);} 35%{transform:scale(1.16);} 100%{transform:scale(1);} }
-  /* Scrollbereich */
+      radial-gradient(closest-side, rgba(255,255,255,.95) 88%, rgba(255,255,255,0)) 6% 22%/150px 52px no-repeat,
+      radial-gradient(closest-side, rgba(255,255,255,.95) 88%, rgba(255,255,255,0)) 11% 17%/96px 44px no-repeat,
+      radial-gradient(closest-side, rgba(255,255,255,.8) 88%, rgba(255,255,255,0)) 27% 44%/190px 56px no-repeat,
+      radial-gradient(closest-side, rgba(255,255,255,.75) 88%, rgba(255,255,255,0)) 41% 12%/130px 46px no-repeat,
+      radial-gradient(closest-side, rgba(255,255,255,.7) 88%, rgba(255,255,255,0)) 58% 34%/210px 60px no-repeat;
+    animation:cloudDrift 90s linear infinite; }
+  @keyframes cloudDrift{ from{transform:translateX(0);} to{transform:translateX(28%);} }
+  /* Park und Pflasterweg unten */
+  #shop::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:34%; z-index:0; pointer-events:none;
+    background:
+      repeating-linear-gradient(90deg, rgba(120,150,180,.2) 0 2px, rgba(0,0,0,0) 2px 48px),
+      repeating-linear-gradient(0deg, rgba(120,150,180,.2) 0 2px, rgba(0,0,0,0) 2px 42px),
+      repeating-radial-gradient(circle at 34px 112%, rgba(126,196,110,.3) 0 22px, rgba(126,196,110,0) 30px),
+      linear-gradient(rgba(205,224,238,0) 0%, rgba(196,216,233,.35) 30%, rgba(176,199,219,.9) 100%); }
+  /* ---- Kopfband ---- */
+  .shopHead{ position:relative; z-index:5; flex-shrink:0; width:100%; min-height:56px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:6px;
+    padding:calc(7px + env(safe-area-inset-top)) 8px 8px;
+    background:linear-gradient(var(--shBlue2), var(--shNavy));
+    box-shadow:0 4px 0 rgba(6,26,74,.45), 0 9px 16px rgba(6,26,74,.3); }
+  .shopPlaque{ position:absolute; left:50%; top:calc(env(safe-area-inset-top) - 2px); transform:translateX(-50%); z-index:6;
+    padding:3px 22px 11px; border-radius:0 0 20px 20px;
+    background:linear-gradient(var(--shBlue), var(--shBlue2)); box-shadow:0 5px 0 rgba(6,26,74,.5); }
+  .shopPlaque b{ display:block; font-size:26px; font-weight:700; letter-spacing:1.5px; line-height:1.05; color:#fff;
+    -webkit-text-stroke:4px var(--shNavy); paint-order:stroke fill; }
+  .shPill{ display:flex; align-items:center; gap:4px; padding:3px; border-radius:999px; color:#fff;
+    font-size:14px; font-weight:700; background:rgba(6,26,74,.55); border:2px solid rgba(255,255,255,.28);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.14); }
+  .shPill .pIco{ width:22px; height:22px; flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(#FFD866,#F0A400); border:2px solid #8a5a00; }
+  .shPill .pIco.tk{ background:linear-gradient(#E89BFF,#A63BE0); border-color:#5c1a86; }
+  .shPill .pIco .ic{ width:13px; height:13px; }
+  .shPill .pVal{ padding:0 2px; min-width:20px; text-align:center; }
+  .shPill.bump{ animation:purseBump .5s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes purseBump{ 0%{transform:scale(1);} 35%{transform:scale(1.15);} 100%{transform:scale(1);} }
+  .shPlus{ pointer-events:auto; cursor:pointer; font-family:inherit; width:22px; height:22px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#fff;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); border:2px solid var(--shGreenD);
+    border-radius:7px; box-shadow:0 2px 0 var(--shGreenD); }
+  .shPlus:active{ transform:translateY(2px); box-shadow:none; }
+  .shPlus.pulse{ animation:btnPulse 1.3s ease-in-out infinite alternate; }
+  /* Auf schmalen Geraeten wird es in der Kopfleiste eng – mit dem Plus an beiden Pillen */
+  @media (max-width:380px){
+    .shopPlaque{ padding:3px 12px 10px; }
+    .shopPlaque b{ font-size:21px; -webkit-text-stroke:3.5px var(--shNavy); letter-spacing:1px; }
+    .shPill{ font-size:12.5px; gap:3px; padding:2px; }
+    .shPill .pIco{ width:19px; height:19px; }
+    .shPill .pIco .ic{ width:11px; height:11px; }
+    .shPlus{ width:19px; height:19px; font-size:13px; border-radius:6px; }
+  }
+  /* ---- Scrollbereich ---- */
   .shopScroll{ position:relative; z-index:1; flex:1; width:100%; overflow-y:auto; touch-action:pan-y;
-    padding:16px 12px 14px; display:flex; flex-direction:column; gap:9px; }
-  .shopTab{ align-self:stretch; text-align:left; font-size:12px; font-weight:700; letter-spacing:2.5px; color:var(--ink);
-    background:linear-gradient(90deg, var(--gold), var(--warn));
-    border:3px solid var(--ink); border-radius:12px; padding:6px 14px; box-shadow:4px 4px 0 var(--ink); }
-  .shopRule{ height:4px; margin:8px 2px 4px; border-radius:4px; flex-shrink:0;
-    background:repeating-linear-gradient(90deg, var(--ink) 0 12px, rgba(0,0,0,0) 12px 20px); opacity:.7; }
-  /* Warenzeilen: Papier mit Schraffur-Textur */
-  #shop .pwr{ position:relative; overflow:hidden; background:linear-gradient(180deg,#fffdf3,#f0e6cf);
-    border:3px solid var(--ink); border-radius:14px; box-shadow:4px 4px 0 var(--ink); }
+    padding:14px 11px 12px; display:flex; flex-direction:column; gap:9px; }
+  .shopTab{ align-self:flex-start; font-size:11px; font-weight:700; letter-spacing:2.5px; color:var(--shTitle);
+    background:rgba(255,255,255,.85); border-radius:999px; padding:4px 14px;
+    box-shadow:0 2px 0 rgba(120,145,175,.45); }
+  .shopRule{ height:3px; margin:6px 6px 3px; border-radius:3px; flex-shrink:0;
+    background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.85) 20%, rgba(255,255,255,.85) 80%, rgba(255,255,255,0)); }
+  /* ---- Warenkarten ---- */
+  #shop .pwr{ position:relative; display:flex; align-items:center; gap:12px; padding:8px 10px 8px 8px;
+    background:linear-gradient(#FDFEFF,#EDF2F8); border:none; border-radius:18px;
+    box-shadow:0 3px 0 rgba(120,145,175,.5), 0 7px 14px rgba(30,70,130,.14); }
   #shop .pwr.slide{ animation:rowIn .34s cubic-bezier(.2,1.35,.4,1) backwards; animation-delay:calc(var(--i,0) * 45ms); }
-  #shop .pwr::before{ content:''; position:absolute; inset:0; pointer-events:none;
-    background:repeating-linear-gradient(-45deg, rgba(26,26,46,.055) 0 5px, rgba(0,0,0,0) 5px 11px); }
-  #shop .pwr>*{ position:relative; z-index:1; }
-  @keyframes rowIn{ from{opacity:0; transform:translateX(-26px) rotate(-1deg);} to{opacity:1; transform:none;} }
-  #shop .pwr.flash{ animation:rowFlash .6s ease; }
-  @keyframes rowFlash{ 0%{box-shadow:4px 4px 0 var(--ink), 0 0 0 0 rgba(255,179,0,.9);}
-    40%{box-shadow:4px 4px 0 var(--ink), 0 0 0 12px rgba(255,179,0,0); background:#fff6d8;}
-    100%{box-shadow:4px 4px 0 var(--ink), 0 0 0 0 rgba(255,179,0,0);} }
-  #shop .pwr .pico{ width:34px; text-align:center; }
-  #shop .pwr .pico .ic{ width:28px; height:28px; }
-  .pbtn.buy{ animation:btnPulse 1.2s ease-in-out infinite alternate; }
-  .pbtn.nope{ animation:nope .32s ease; }
+  @keyframes rowIn{ from{opacity:0; transform:translateX(-26px);} to{opacity:1; transform:none;} }
+  #shop .pwr.flash{ animation:rowFlash .7s ease; }
+  @keyframes rowFlash{ 0%{box-shadow:0 3px 0 rgba(120,145,175,.5), 0 0 0 0 rgba(91,215,91,.85);}
+    45%{box-shadow:0 3px 0 rgba(120,145,175,.5), 0 0 0 13px rgba(91,215,91,0); background:#eaffea;}
+    100%{box-shadow:0 3px 0 rgba(120,145,175,.5), 0 0 0 0 rgba(91,215,91,0);} }
+  /* farbige Symbol-Kachel */
+  #shop .pwr .pico{ width:70px; height:70px; flex:none; border-radius:15px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg, var(--c1,#5AA6F7), var(--c2,#1A6FD0));
+    border:2px solid rgba(255,255,255,.6);
+    box-shadow:inset 0 -5px 0 rgba(0,0,0,.16), inset 0 3px 0 rgba(255,255,255,.32), 0 2px 4px rgba(30,70,130,.2); }
+  #shop .pwr .pico .ic{ width:44px; height:44px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.28)); }
+  #shop .pwr .pname{ font-size:19px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--shTitle); }
+  #shop .pwr .pdesc{ font-size:12px; color:var(--shDesc); opacity:1; line-height:1.25; }
+  #shop .upBar{ gap:4px; margin-top:5px; }
+  #shop .upBar .ud{ width:16px; height:8px; border:none; border-radius:4px; background:#cddbea;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7); }
+  #shop .upBar .ud.on{ background:linear-gradient(#FFD866,#F0A400); }
+  /* Kauf-Knopf */
+  #shop .pbtn{ flex:none; min-width:78px; display:flex; align-items:center; justify-content:center; gap:4px;
+    font-size:15px; font-weight:700; color:#fff; border:none; border-radius:14px; padding:11px 12px;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); box-shadow:0 4px 0 var(--shGreenD); white-space:nowrap; }
+  #shop .pbtn .ic{ width:16px; height:16px; }
+  #shop .pbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--shGreenD); }
+  #shop .pbtn.cant{ background:linear-gradient(#d3dce6,#aebbc9); color:#5d6d81; box-shadow:0 4px 0 #8494a6; }
+  #shop .pbtn.buy{ animation:btnPulse 1.3s ease-in-out infinite alternate; }
+  #shop .pbtn.nope{ animation:nope .32s ease; }
   @keyframes nope{ 0%,100%{transform:none;} 20%{transform:translateX(-5px);} 60%{transform:translateX(5px);} }
-  /* Spezial-Kasten */
-  #shop .specialBox{ position:relative; overflow:hidden; display:flex; align-items:center; gap:11px; padding:12px;
-    border:4px solid var(--ink); border-radius:18px; box-shadow:5px 5px 0 var(--ink);
-    background:linear-gradient(135deg,#4b2fb8,#8f6bff 46%,#4b2fb8);
-    animation:specGlow 2.6s ease-in-out infinite alternate; }
-  @keyframes specGlow{ from{filter:drop-shadow(0 0 0 rgba(255,179,0,0));} to{filter:drop-shadow(0 0 10px rgba(255,179,0,.55));} }
+  /* ---- Angebots-Banner ---- */
+  #shop .specialBox{ position:relative; overflow:hidden; display:flex; align-items:center; gap:8px;
+    padding:18px 12px 14px; border:none; border-radius:20px;
+    background:linear-gradient(135deg,#A063F5,#7A34E0 52%,#5B1CC2);
+    box-shadow:0 4px 0 rgba(58,12,116,.65), 0 9px 18px rgba(58,20,116,.32); }
   #shop .specialBox::before{ content:''; position:absolute; inset:-60%; pointer-events:none;
-    background:conic-gradient(from 0deg, rgba(255,255,255,.18) 0 10deg, rgba(255,255,255,0) 10deg 34deg);
-    animation:specSpin 11s linear infinite; }
-  #shop .specialBox::after{ content:''; position:absolute; top:0; bottom:0; left:-45%; width:38%; pointer-events:none;
-    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.38), rgba(255,255,255,0));
-    animation:sheen 3.6s ease-in-out infinite; }
+    background:conic-gradient(from 0deg, rgba(255,255,255,.16) 0 9deg, rgba(255,255,255,0) 9deg 32deg);
+    animation:specSpin 13s linear infinite; }
+  #shop .specialBox::after{ content:''; position:absolute; top:0; bottom:0; left:-45%; width:36%; pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.34), rgba(255,255,255,0));
+    animation:sheen 4s ease-in-out infinite; }
   @keyframes specSpin{ to{transform:rotate(360deg);} }
   @keyframes sheen{ 0%{left:-45%;} 55%,100%{left:115%;} }
   #shop .specialBox>*{ position:relative; z-index:1; }
-  #shop .specialBox .pico .ic{ width:38px; height:38px; }
-  #shop .specialBox .pname{ font-size:15.5px; color:var(--gold); letter-spacing:.5px; padding-right:54px; }
-  #shop .specialBox .pdesc{ font-size:11.5px; color:var(--cream); opacity:.9; line-height:1.25; }
-  #shop .specialBox .pown{ font-size:11px; color:var(--warn); font-weight:700; margin-top:2px; }
-  #shop .specialBox .pbtn{ background:var(--ink); color:var(--gold); border-color:var(--ink); border-width:3px; }
-  #shop .specialBox .specTag{ position:absolute; top:0; right:0; z-index:2; font-size:8.5px; font-weight:700;
-    letter-spacing:1px; color:var(--ink); background:var(--warn); padding:2px 7px 2px 8px;
-    border-bottom-left-radius:9px; border-left:3px solid var(--ink); border-bottom:3px solid var(--ink); }
-  /* Fussleiste mit Werbe-Kachel */
-  .shopFoot{ position:relative; z-index:3; flex-shrink:0; width:100%; display:flex; align-items:center; gap:11px;
-    padding:10px 14px calc(10px + var(--adH)) 64px;
-    background:linear-gradient(rgba(14,14,26,.35), rgba(14,14,26,.9)); border-top:3px solid var(--ink); }
-  .shopFoot .btn.go{ flex:1; font-size:18px; padding:11px 18px; }
-  .adTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex-shrink:0; position:relative; overflow:hidden;
-    width:72px; height:72px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
-    background:linear-gradient(180deg,#20d5d5,#12a3a3); color:var(--ink); border:3px solid var(--ink);
-    border-radius:14px; box-shadow:3px 3px 0 var(--ink); padding:4px 3px 6px;
+  #shop .specialBox .pinfo{ display:flex; flex-direction:column; align-items:flex-start; gap:7px; }
+  #shop .specialBox .pname{ font-size:20px; color:#fff; text-transform:uppercase; letter-spacing:.4px; line-height:1.05; }
+  #shop .specialBox .pdesc{ font-size:12.5px; color:rgba(255,255,255,.93); line-height:1.25; }
+  #shop .specialBox .pown{ font-size:11.5px; font-weight:700; color:#FFE066; }
+
+  #shop .specialBox .specTag{ position:absolute; top:0; left:8px; z-index:3; font-size:10.5px; font-weight:700;
+    letter-spacing:1.2px; color:#6d4300; background:linear-gradient(#FFE066,#F5B518);
+    padding:3px 11px 4px; border-radius:0 0 9px 9px; box-shadow:0 2px 0 #b07d00; }
+  #shop .specialBox .specArt{ position:relative; flex:none; width:104px; height:104px; display:flex; align-items:center; justify-content:center; }
+  #shop .specialBox .specArt::before{ content:''; position:absolute; inset:0;
+    background:radial-gradient(closest-side, rgba(255,255,255,.42), rgba(255,255,255,0) 72%);
+    animation:artPulse 2.4s ease-in-out infinite alternate; }
+  @keyframes artPulse{ from{transform:scale(.82); opacity:.6;} to{transform:scale(1.06); opacity:1;} }
+  #shop .specialBox .specArt .ic{ position:relative; width:78px; height:78px; filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));
+    animation:artFloat 3.2s ease-in-out infinite alternate; }
+  @keyframes artFloat{ from{transform:translateY(-3px) rotate(-5deg);} to{transform:translateY(3px) rotate(5deg);} }
+  /* ---- Fussleiste ---- */
+  .shopFoot{ position:relative; z-index:5; flex-shrink:0; width:100%; display:flex; align-items:center; gap:8px;
+    padding:9px 10px calc(9px + var(--adH));
+    background:linear-gradient(var(--shBlue2), var(--shNavy));
+    box-shadow:0 -4px 0 rgba(6,26,74,.4), 0 -9px 16px rgba(6,26,74,.28); }
+  #shop .shopFoot .btn.go{ flex:none; display:flex; align-items:center; gap:6px; font-size:17px; letter-spacing:1px;
+    color:#fff; background:linear-gradient(var(--shBlue), var(--shBlue2)); border:none; border-radius:15px;
+    padding:12px 18px; box-shadow:0 4px 0 rgba(6,26,74,.6); animation:none; }
+  #shop .shopFoot .btn.go:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(6,26,74,.6); }
+  #shop .shopFoot .btn.go .ic{ width:15px; height:15px; transform:rotate(180deg); }
+  .footSlots{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+  .footIco{ pointer-events:auto; cursor:pointer; font-family:inherit; width:48px; height:48px; flex:none;
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    background:rgba(255,255,255,.16); border:2px solid rgba(255,255,255,.3); border-radius:13px;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16); }
+  .footIco:active{ transform:translateY(2px); }
+  .footIco .ic{ width:24px; height:24px; }
+  /* Werbe-Kachel */
+  .adTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex:none; position:relative; overflow:hidden;
+    width:64px; height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    padding:4px 3px 5px; color:#0b3b3b; border:2px solid rgba(255,255,255,.55); border-radius:14px;
+    background:linear-gradient(#4BE3D2,#12A8A8); box-shadow:0 4px 0 #0a7373;
     animation:tilePop .4s cubic-bezier(.2,1.5,.4,1); }
   @keyframes tilePop{ from{transform:scale(.6); opacity:0;} to{transform:none; opacity:1;} }
-  .adTile:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
-  .adTile.ready{ animation:tileGlow 1.5s ease-in-out infinite alternate; }
-  @keyframes tileGlow{ from{box-shadow:3px 3px 0 var(--ink);} to{box-shadow:3px 3px 0 var(--ink), 0 0 12px rgba(25,195,195,.85);} }
-  .adTile .ic{ width:20px; height:20px; }
-  .adTile .atCap{ font-size:8px; font-weight:700; letter-spacing:1px; opacity:.85; }
-  .adTile .atVal{ font-size:13px; font-weight:700; }
-  .adTile .atBar{ width:46px; height:5px; border:2px solid var(--ink); border-radius:4px; background:rgba(26,26,46,.25); overflow:hidden; }
-  .adTile .atBar i{ display:block; height:100%; background:var(--gold); }
-  .adTile.busy{ background:linear-gradient(180deg,#8d8d99,#6f6f7a); animation:none; }
-  /* Kurznachricht ueber der Fussleiste */
-  .shopToast{ position:absolute; left:12px; right:12px; bottom:calc(96px + var(--adH)); z-index:4; pointer-events:none;
-    text-align:center; font-size:12.5px; font-weight:700; color:var(--ink); background:var(--warn);
-    border:3px solid var(--ink); border-radius:12px; padding:7px 10px; box-shadow:3px 3px 0 var(--ink);
+  .adTile:active{ transform:translateY(3px); box-shadow:0 1px 0 #0a7373; }
+  .adTile.ready{ animation:tileGlow 1.6s ease-in-out infinite alternate; }
+  @keyframes tileGlow{ from{box-shadow:0 4px 0 #0a7373;} to{box-shadow:0 4px 0 #0a7373, 0 0 13px rgba(75,227,210,.95);} }
+  .adTile .ic{ width:17px; height:17px; }
+  .adTile .atCap{ font-size:7.5px; font-weight:700; letter-spacing:.8px; opacity:.9; }
+  .adTile .atVal{ font-size:13px; font-weight:700; line-height:1; }
+  .adTile .atBar{ width:40px; height:5px; border-radius:3px; background:rgba(11,59,59,.3); overflow:hidden; }
+  .adTile .atBar i{ display:block; height:100%; background:#FFD866; }
+  .adTile.busy{ background:linear-gradient(#b9c3cf,#8e9aa8); box-shadow:0 4px 0 #6d7784; animation:none; }
+  /* Kurznachricht */
+  .shopToast{ position:absolute; left:14px; right:14px; bottom:calc(92px + var(--adH)); z-index:6; pointer-events:none;
+    text-align:center; font-size:13px; font-weight:700; color:var(--shTitle); background:#fff;
+    border-radius:14px; padding:9px 12px;
+    box-shadow:0 4px 0 rgba(120,145,175,.5), 0 8px 16px rgba(30,70,130,.2);
     animation:toastIn .3s cubic-bezier(.2,1.4,.4,1); }
   @keyframes toastIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
   /* Fliegende Muenzen beim Kauf */
@@ -206,11 +275,12 @@
   .flyCoin .ic{ width:22px; height:22px; }
   #shop.pop .shopHead{ animation:topIn .32s cubic-bezier(.2,1.2,.4,1) backwards; }
   #shop.pop .shopFoot{ animation:navIn .3s cubic-bezier(.2,1.2,.4,1) backwards; }
+  #game:has(#shop:not(.hidden)) #muteBtn{ display:none; }   /* Ton sitzt im Shop in der Fussleiste */
   @media (prefers-reduced-motion: reduce){
-    #shop .pwr.slide, .adTile, .specialBox, .specialBox::before, .specialBox::after, .shopPurse .ic,
-    .pbtn.buy, .adTile.ready, .shopToast{ animation:none !important; }
+    #shop::before, #shop .pwr.slide, .adTile, #shop .specialBox::before, #shop .specialBox::after,
+    #shop .specialBox .specArt::before, #shop .specialBox .specArt .ic,
+    #shop .pbtn.buy, .adTile.ready, .shopToast, .shPlus.pulse{ animation:none !important; }
   }
-  #shop .pwr .pdesc{ color:var(--ink); opacity:.75; }
   #achievements .lead{ color:var(--cream); opacity:.8; }
   #skins .skin.sel{ background:rgba(255,210,63,.14); border-color:var(--gold); }
   .upBar .ud.pop{ animation:udPop .45s cubic-bezier(.2,1.6,.4,1); }
@@ -676,8 +746,17 @@
 
   <div id="shop" class="screen hidden">
     <div class="shopHead">
-      <div class="shopTitle"><svg class="ic"><use href="#i-cart"/></svg> SHOP</div>
-      <div class="shopPurse" id="purse"><svg class="ic"><use href="#i-coin"/></svg><span id="coinsShop">0</span></div>
+      <div class="shPill" id="purse">
+        <span class="pIco"><svg class="ic"><use href="#i-coin"/></svg></span>
+        <span class="pVal" id="coinsShop">0</span>
+        <button class="shPlus hidden" id="coinPlus" aria-label="M&uuml;nzen dazuverdienen">+</button>
+      </div>
+      <div class="shopPlaque"><b>SHOP</b></div>
+      <div class="shPill" id="tickets">
+        <span class="pIco tk"><svg class="ic"><use href="#i-ticket"/></svg></span>
+        <span class="pVal" id="tokensShop">0</span>
+        <button class="shPlus" id="tokenPlus" aria-label="Zum Spezial-Angebot">+</button>
+      </div>
     </div>
     <div class="shopScroll" id="shopScroll">
       <div class="shopTab">ITEMS</div>
@@ -686,8 +765,11 @@
       <div id="powerups"></div>
     </div>
     <div class="shopFoot">
-      <div id="adShop" class="hidden"></div>
-      <button class="btn go" id="shopBack">ZUR&Uuml;CK</button>
+      <button class="btn go" id="shopBack"><svg class="ic"><use href="#i-play"/></svg> ZUR&Uuml;CK</button>
+      <div class="footSlots">
+        <div id="adShop" class="hidden"></div>
+        <button class="footIco" id="muteBtn3" aria-label="Ton an oder aus"></button>
+      </div>
     </div>
   </div>
 
@@ -1967,17 +2049,19 @@ window.ADS=(function(){
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
   // Shop-Geldbeutel zaehlt hoch statt zu springen
   let purseRaf=null;
+  function fmtCoins(v){ return v>=1000000?(v/1000000).toFixed(1)+'M':(v>=100000?Math.round(v/1000)+'K':''+v); }
   function setPurse(v){
     const el=document.getElementById('coinsShop'); if(!el) return;
-    const from=parseInt(el.textContent,10)||0;
+    const from=parseInt(el.dataset.v,10)||0;
+    el.dataset.v=v;
     if(purseRaf){ cancelAnimationFrame(purseRaf); purseRaf=null; }
-    if(from===v||reduceMotion){ el.textContent=v; return; }
+    if(from===v||reduceMotion){ el.textContent=fmtCoins(v); return; }
     const p=document.getElementById('purse');
     if(p){ p.classList.remove('bump'); void p.offsetWidth; p.classList.add('bump'); }
     const t0=performance.now(), dur=Math.min(750,240+Math.abs(v-from)*2.5);
     const step=now=>{ const k=Math.min(1,(now-t0)/dur);
-      el.textContent=Math.round(from+(v-from)*(1-Math.pow(1-k,3)));
-      if(k<1) purseRaf=requestAnimationFrame(step); else { el.textContent=v; purseRaf=null; } };
+      el.textContent=fmtCoins(Math.round(from+(v-from)*(1-Math.pow(1-k,3))));
+      if(k<1) purseRaf=requestAnimationFrame(step); else { el.textContent=fmtCoins(v); purseRaf=null; } };
     purseRaf=requestAnimationFrame(step);
   }
   // Muenzen fliegen vom Kauf-Knopf in den Geldbeutel
@@ -2010,6 +2094,9 @@ window.ADS=(function(){
     ).join('');
   }
   const SPECIAL_PRICE=100;
+  // Kachelfarbe je Item – wie im Vorbild eine andere Farbe pro Zeile
+  const UP_TILE={ shield:['#5AA6F7','#1A6FD0'], boost:['#FFC94A','#EF8B00'], magnet:['#8ADB6E','#3F9E2E'],
+                  hint:['#BC90FF','#7A34E0'], coins:['#4BE3D2','#12A8A8'] };
   let upFlash='';                                  // gerade gekauftes Upgrade: Zeile blinkt nach dem Neuzeichnen
   let shopEnter=false;                             // Einflug-Animation nur beim Betreten, nicht nach jedem Kauf
   function renderUpgrades(){
@@ -2019,7 +2106,10 @@ window.ADS=(function(){
     for(const u of UPGRADES){
       const lvl=upLvl(u.key), val=u.base+lvl*u.step, maxed=lvl>=u.max;
       const row=document.createElement('div'); row.className='pwr'+(shopEnter?' slide':''); row.style.setProperty('--i',i++);
-      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic(u.icon); row.appendChild(ico);
+      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic(u.icon);
+      const col=UP_TILE[u.key]||['#5AA6F7','#1A6FD0'];
+      ico.style.setProperty('--c1',col[0]); ico.style.setProperty('--c2',col[1]);
+      row.appendChild(ico);
       const info=document.createElement('div'); info.className='pinfo';
       const fresh=(upFlash===u.key)?lvl-1:-1;       // der zuletzt gefuellte Punkt darf aufpoppen
       let dots=''; for(let d=0;d<u.max;d++) dots+='<span class="ud'+(d<lvl?' on':'')+(d===fresh?' pop':'')+'"></span>';
@@ -2041,26 +2131,32 @@ window.ADS=(function(){
   }
   function renderShop(){
     setPurse(save.coins);
+    const tk=document.getElementById('tokensShop'); if(tk) tk.textContent=save.specialTokens||0;
     const pw=document.getElementById('powerups');
     if(pw){
       pw.innerHTML='';
-      const box=document.createElement('div'); box.className='pwr specialBox';
-      const tag=document.createElement('div'); tag.className='specTag'; tag.textContent='SPEZIAL'; box.appendChild(tag);
-      const ico=document.createElement('div'); ico.className='pico'; ico.innerHTML=ic('ticket'); box.appendChild(ico);
+      const box=document.createElement('div'); box.className='pwr specialBox'; box.id='specialBox';
+      const tag=document.createElement('div'); tag.className='specTag'; tag.textContent='ANGEBOT!'; box.appendChild(tag);
       const info=document.createElement('div'); info.className='pinfo';
+      const btn=document.createElement('button'); btn.className='pbtn'; btn.innerHTML=SPECIAL_PRICE+' '+ic('coin');
       info.innerHTML='<div class="pname">Spezial-Ticket</div><div class="pdesc">Garantiert ein Special-Event in den ersten 2 Vierteln deiner nächsten Runde.</div>'
         +(save.specialTokens>0?'<div class="pown">Im Vorrat: '+save.specialTokens+'</div>':'');
-      box.appendChild(info);
-      const btn=document.createElement('button'); btn.className='pbtn'; btn.innerHTML=SPECIAL_PRICE+' '+ic('coin');
       if(save.coins>=SPECIAL_PRICE){ btn.classList.add('buy');
         btn.onclick=()=>{ if(save.coins<SPECIAL_PRICE) return;
           coinBurst(btn); save.coins-=SPECIAL_PRICE; save.specialTokens++; persist(); renderShop(); updateCoinUI();
           SND.play('correct'); SND.play('buy'); }; }
       else btn.classList.add('cant'), btn.onclick=()=>nopeBtn(btn);
-      box.appendChild(btn); pw.appendChild(box);
+      info.appendChild(btn);
+      box.appendChild(info);
+      const art=document.createElement('div'); art.className='specArt'; art.innerHTML=ic('ticket'); box.appendChild(art);
+      pw.appendChild(box);
     }
     renderAdShop();
     renderUpgrades();
+    // Das Plus an den Muenzen fuehrt zum Werbe-Video – nur wenn wirklich eines bereitsteht
+    const cp=document.getElementById('coinPlus');
+    if(cp){ const ok=ADS.rewardAvailable()&&ADS.shopCoins()>0;
+      cp.classList.toggle('hidden',!ok); cp.classList.toggle('pulse',ok); }
     shopEnter=false;
   }
   function renderSkins(){
@@ -4082,6 +4178,14 @@ window.ADS=(function(){
   document.getElementById('homeBtn').onclick=()=>{ SND.play('click'); SND.setTrack('menu'); hide('gameover'); state=ST.MENU; updateCoinUI(); updateMenuSkin(); renderBoard(document.getElementById('boardMenu'),null); show('menu'); };
   document.getElementById('shopBtn').onclick=()=>{ SND.play('click'); SND.play('swoosh'); SND.setTrack('menu');
     shopEnter=true; renderShop(); hide('menu'); show('shop'); };
+  document.getElementById('coinPlus').onclick=()=>{ if(ADS.rewardAvailable()) watchShopAd(); };
+  document.getElementById('tokenPlus').onclick=()=>{   // springt zum Angebot und hebt es kurz hervor
+    SND.play('click');
+    const box=document.getElementById('specialBox'), sc=document.getElementById('shopScroll');
+    if(!box||!sc) return;
+    sc.scrollTo({top:sc.scrollHeight,behavior:reduceMotion?'auto':'smooth'});
+    box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
+  };
   document.getElementById('shopBack').onclick=()=>{ SND.play('click'); SND.play('swoosh'); SND.setTrack('menu'); hide('shop');
     const t=document.getElementById('shopToast'); if(t) t.remove();
     updateCoinUI(); updateMenuSkin(); show('menu'); };
@@ -4097,10 +4201,13 @@ window.ADS=(function(){
   document.getElementById('minigame').addEventListener('pointerdown',e=>{ if(e.target&&e.target.id==='miniBtn') return; miniClick(); });
 
   const muteBtn=document.getElementById('muteBtn'), muteBtn2=document.getElementById('muteBtn2');
+  const muteBtn3=document.getElementById('muteBtn3');
   function refreshMute(){ muteBtn.classList.toggle('muted',save.muted); SND.setMuted(save.muted);
-    if(muteBtn2) muteBtn2.innerHTML=ic(save.muted?'sound-off':'sound-on'); }
+    const icon=ic(save.muted?'sound-off':'sound-on');
+    if(muteBtn2) muteBtn2.innerHTML=icon;
+    if(muteBtn3) muteBtn3.innerHTML=icon; }
   function toggleMute(){ save.muted=!save.muted; persist(); refreshMute(); if(!save.muted){ SND.ensure(); SND.play('click'); } }
-  muteBtn.onclick=toggleMute; if(muteBtn2) muteBtn2.onclick=toggleMute;
+  muteBtn.onclick=toggleMute; if(muteBtn2) muteBtn2.onclick=toggleMute; if(muteBtn3) muteBtn3.onclick=toggleMute;
 
   function updateMenuSkin(){
     for(const id of ['meSkin','meAvatar']){
