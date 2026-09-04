@@ -246,20 +246,22 @@
     box-shadow:inset 0 2px 0 rgba(255,255,255,.16); }
   .footIco:active{ transform:translateY(2px); }
   .footIco .ic{ width:24px; height:24px; }
-  /* Werbe-Kachel */
+  /* Werbe-Kachel: quadratisch, links unter dem Angebot */
+  #adShop{ align-self:flex-start; }
   .adTile{ pointer-events:auto; cursor:pointer; font-family:inherit; flex:none; position:relative; overflow:hidden;
-    width:64px; height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
-    padding:4px 3px 5px; color:#0b3b3b; border:2px solid rgba(255,255,255,.55); border-radius:14px;
-    background:linear-gradient(#4BE3D2,#12A8A8); box-shadow:0 4px 0 #0a7373;
+    width:88px; height:88px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    padding:6px 5px 7px; color:#0b3b3b; border:3px solid rgba(255,255,255,.6); border-radius:18px;
+    background:linear-gradient(#4BE3D2,#12A8A8); box-shadow:0 4px 0 #0a7373, 0 7px 14px rgba(18,110,110,.28);
     animation:tilePop .4s cubic-bezier(.2,1.5,.4,1); }
   @keyframes tilePop{ from{transform:scale(.6); opacity:0;} to{transform:none; opacity:1;} }
   .adTile:active{ transform:translateY(3px); box-shadow:0 1px 0 #0a7373; }
   .adTile.ready{ animation:tileGlow 1.6s ease-in-out infinite alternate; }
-  @keyframes tileGlow{ from{box-shadow:0 4px 0 #0a7373;} to{box-shadow:0 4px 0 #0a7373, 0 0 13px rgba(75,227,210,.95);} }
-  .adTile .ic{ width:17px; height:17px; }
-  .adTile .atCap{ font-size:7.5px; font-weight:700; letter-spacing:.8px; opacity:.9; }
-  .adTile .atVal{ font-size:13px; font-weight:700; line-height:1; }
-  .adTile .atBar{ width:40px; height:5px; border-radius:3px; background:rgba(11,59,59,.3); overflow:hidden; }
+  @keyframes tileGlow{ from{box-shadow:0 4px 0 #0a7373, 0 7px 14px rgba(18,110,110,.28);}
+    to{box-shadow:0 4px 0 #0a7373, 0 0 15px rgba(75,227,210,.95);} }
+  .adTile .ic{ width:26px; height:26px; }
+  .adTile .atCap{ font-size:9px; font-weight:700; letter-spacing:1px; opacity:.9; }
+  .adTile .atVal{ font-size:18px; font-weight:700; line-height:1; }
+  .adTile .atBar{ width:56px; height:6px; border-radius:3px; background:rgba(11,59,59,.3); overflow:hidden; }
   .adTile .atBar i{ display:block; height:100%; background:#FFD866; }
   .adTile.busy{ background:linear-gradient(#b9c3cf,#8e9aa8); box-shadow:0 4px 0 #6d7784; animation:none; }
   /* Kurznachricht */
@@ -763,11 +765,11 @@
       <div id="upgrades"></div>
       <div class="shopRule"></div>
       <div id="powerups"></div>
+      <div id="adShop" class="hidden"></div>
     </div>
     <div class="shopFoot">
       <button class="btn go" id="shopBack"><svg class="ic"><use href="#i-play"/></svg> ZUR&Uuml;CK</button>
       <div class="footSlots">
-        <div id="adShop" class="hidden"></div>
         <button class="footIco" id="muteBtn3" aria-label="Ton an oder aus"></button>
       </div>
     </div>
