@@ -841,10 +841,10 @@
   .achDetail .adStat{ font-size:16px; }
   #achievements .card{ max-height:78vh; overflow-y:auto; touch-action:pan-y; }
   #dialog.specialCaught .card{ background:var(--warn); border-color:var(--purple); box-shadow:8px 8px 0 var(--purple); }
-  /* Stern vor dem Special-Titel: rot wie die Ueberschrift, auf der gelben Karte waere Gold unsichtbar */
+  /* Stern vor dem Special-Titel: Gold auf dem violetten Titelband */
   #dialog.specialCaught h2::before{ content:''; display:inline-block; width:.8em; height:.8em; margin-right:.18em;
     vertical-align:-.02em; background:no-repeat center/contain
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z' fill='%23FF3B30' stroke='%231A1A2E' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3l4 9.2 10 .9-7.5 6.6 2.2 9.8L16 24.2 7.3 29.5l2.2-9.8L2 13.1l10-.9z' fill='%23FFD24A' stroke='%234a1580' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E"); }
   #achToast{ position:absolute; top:14px; left:50%; transform:translate(-50%,-160%); z-index:80; pointer-events:none;
     display:flex; align-items:center; gap:11px; width:calc(100% - 28px); max-width:380px;
     background:var(--ink); color:var(--cream); border:3px solid var(--gold); border-radius:16px; padding:10px 13px;
@@ -958,6 +958,80 @@
   #achievements .achDetail .adName{ color:var(--shTitle); }
   #achievements .achDetail .adDesc, #achievements .achDetail .adHint{ color:var(--shDesc); opacity:1; }
   #achievements .achDetail .adRw{ color:#E08A00; }
+  /* ---- Erwischt, Reaktion und Minigame im hellen Menue-Look (Layouts bleiben) ---- */
+  #dialog, #reaction, #minigame{ background:linear-gradient(rgba(8,14,34,.5), rgba(8,14,34,.72)); }
+  /* flex-shrink:0: ein Scroll-Container wird sonst unter seine Inhaltshoehe gequetscht */
+  #dialog .card, #reaction .card, #minigame .card{ border:none; border-radius:22px; flex-shrink:0;
+    background:linear-gradient(var(--shCard1), var(--shCard2));
+    box-shadow:0 4px 0 var(--shLine), 0 12px 26px rgba(8,18,45,.42); }
+  #dialog .card{ padding:0 18px 15px; max-height:min(86vh,760px); overflow-x:hidden; overflow-y:auto; touch-action:pan-y; }
+  /* Titelband bleibt beim Scrollen oben stehen – wie im Game-Over */
+  #dialog h2{ position:sticky; top:0; z-index:3; margin:0 -18px 11px; padding:11px 14px 12px;
+    font-size:27px; letter-spacing:1.5px; color:#fff; -webkit-text-stroke:4px #8d1409; paint-order:stroke fill;
+    background:linear-gradient(#FF6257,#DF2413); box-shadow:0 4px 0 rgba(120,20,10,.4); }
+  /* Die Anklage: helle Karte, aber heisser Text */
+  #accuseBig{ border:none; border-radius:15px; padding:9px 12px; margin:0 0 9px; font-size:17.5px;
+    color:#B3352B; background:linear-gradient(#FFF3F0,#FFDED7);
+    box-shadow:0 3px 0 rgba(190,90,70,.38); transform:rotate(-1deg); }
+  #dialog .sub{ color:var(--shDesc); font-weight:500; margin-bottom:9px; }
+  #dialog .tbtn{ border:none; border-radius:14px; padding:7px 9px; color:var(--shTitle);
+    background:linear-gradient(#FFFFFF,#F1F5FA); box-shadow:0 3px 0 var(--shLine); }
+  #dialog .tbtn small{ color:var(--shDesc); opacity:1; }
+  #dialog .tbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--shLine); }
+  #dialog .tbtn:disabled{ opacity:1; color:#9BB0C9; background:#E9EEF5; box-shadow:none; transform:translateY(3px); }
+  #dialog .tbtn:disabled small{ color:#A9BCD1; }
+  #dialog .crowdHint{ border:none; border-radius:13px; color:var(--shTitle);
+    background:linear-gradient(#EAF4FF,#D8E9FB); box-shadow:0 2px 0 rgba(120,145,175,.42); }
+  #dialog .crowdHint b{ color:var(--shBlue2); }
+  #dialog .crowdHint.bad{ background:linear-gradient(#FFF3F0,#FFDED7); box-shadow:0 2px 0 rgba(190,90,70,.38); }
+  #dialog .crowdHint.bad b{ color:#B3352B; }
+  #rageTxt{ color:var(--shDesc); }
+  #rageBar{ height:14px; background:#DCE6F2; border:none; border-radius:9px;
+    box-shadow:inset 0 2px 0 rgba(120,145,175,.22); }
+  #rageFill{ border-radius:9px; background:linear-gradient(#FF6257,#DF2413); }
+  #excuseInput{ border:none; border-radius:14px; color:var(--shTitle); background:#fff;
+    box-shadow:inset 0 2px 0 rgba(120,145,175,.2), 0 2px 0 var(--shLine); }
+  #excuseInput::placeholder{ color:#8FA7C4; }
+  #excuseInput:focus{ box-shadow:inset 0 2px 0 rgba(120,145,175,.2), 0 0 0 3px var(--shBlue); }
+  #excuseInput:disabled{ background:#F2F6FA; opacity:1; }
+  #excuseSend{ border:none; border-radius:16px; padding:13px; font-size:18px; color:#fff;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); box-shadow:0 5px 0 var(--shGreenD); }
+  #excuseSend:active{ transform:translateY(4px); box-shadow:0 1px 0 var(--shGreenD); }
+  #excuseSend:disabled{ background:linear-gradient(#CBD8E6,#AFC1D6); box-shadow:0 5px 0 #8FA3BA; opacity:1; }
+  #aiThinking{ color:var(--shBlue2); }
+  /* Special-Befragung: goldene Karte statt blauweiss */
+  #dialog.specialCaught .card{ background:linear-gradient(#FFFDF2,#FFEFC2);
+    box-shadow:0 4px 0 rgba(190,150,40,.55), 0 12px 26px rgba(8,18,45,.42); }
+  #dialog.specialCaught h2{ background:linear-gradient(#B06BF0,#7B2FD0);
+    -webkit-text-stroke-color:#4a1580; box-shadow:0 4px 0 rgba(60,15,110,.45); }
+  #dialog.specialCaught #accuseBig{ background:linear-gradient(#FFF6E0,#FFE49E); color:#8A5A00;
+    box-shadow:0 3px 0 rgba(190,150,40,.5); }
+  #dialog.specialCaught .tbtn{ background:linear-gradient(#FFFFFF,#FFF6E0); box-shadow:0 3px 0 rgba(190,150,40,.45); }
+  /* Reaktion: das Urteil der Menge */
+  #reaction .card{ padding:20px 18px 18px; }
+  #reaction h2{ font-size:26px; color:#1E7A2A; transform:rotate(-1.5deg); -webkit-text-stroke:0; }
+  #reaction h2 .ic{ width:.85em; height:.85em; vertical-align:-.1em; }
+  #reaction p{ font-size:15px; font-weight:500; color:var(--shDesc); margin-top:7px; }
+  /* Minigame */
+  #minigame .card{ padding:20px 18px 18px; }
+  #minigame h2{ font-size:26px; color:var(--shTitle); -webkit-text-stroke:0; }
+  #minigame .lead{ font-size:13px; color:var(--shDesc); margin-bottom:9px; }
+  #miniBarWrap{ height:30px; border:none; border-radius:13px; background:#DCE6F2;
+    box-shadow:inset 0 2px 0 rgba(120,145,175,.25); }
+  #miniBar{ background:linear-gradient(90deg,var(--shGreen),#FFC93F); }
+  #miniMid{ top:0; bottom:0; width:3px; background:rgba(120,145,175,.7); }
+  #miniTime{ font-size:19px; color:var(--shTitle); }
+  #minigame .btn.go{ width:100%; border:none; border-radius:16px; font-size:23px; padding:13px 20px; color:#fff;
+    background:linear-gradient(var(--shGreen), var(--shGreen2)); box-shadow:0 5px 0 var(--shGreenD); animation:none; }
+  #minigame .btn.go:active{ transform:translateY(4px); box-shadow:0 1px 0 var(--shGreenD); }
+  @media (max-height:660px){
+    #dialog h2{ font-size:23px; padding:9px 12px 10px; margin-bottom:8px; }
+    #accuseBig{ font-size:15.5px; padding:8px 10px; margin-bottom:7px; }
+    #dialog .sub{ margin-bottom:7px; }
+    #rageWrap{ margin:5px 0 9px; }
+    #excuseInput{ min-height:50px; }
+    #excuseSend{ font-size:16px; padding:11px; }
+  }
   /* ---- Startkarte des Mitspiel-Tutorials ---- */
   #tutSteps{ background:linear-gradient(rgba(14,26,60,.5), rgba(14,26,60,.66)); }
   #tutSteps .card{ background:linear-gradient(var(--shCard1), var(--shCard2)); border:none; border-radius:22px;
@@ -1328,11 +1402,11 @@
 
   <div id="minigame" class="screen hidden">
     <div class="card">
-      <h2 id="miniTitle" style="font-size:26px;color:var(--danger);">ARMDR&Uuml;CKEN!</h2>
-      <p class="lead" id="miniDesc" style="font-size:13px;margin-bottom:8px;">Spam-klicke so schnell du kannst, um den Bodybuilder wegzudr&uuml;cken!</p>
+      <h2 id="miniTitle">ARMDR&Uuml;CKEN!</h2>
+      <p class="lead" id="miniDesc">Spam-klicke so schnell du kannst, um den Bodybuilder wegzudr&uuml;cken!</p>
       <div id="miniBarWrap"><div id="miniBar"></div><div id="miniMid"></div></div>
       <div id="miniTime">6.0s</div>
-      <button class="btn go" id="miniBtn" style="width:100%;font-size:24px;">DR&Uuml;CKEN!</button>
+      <button class="btn go" id="miniBtn">DR&Uuml;CKEN!</button>
     </div>
   </div>
 
