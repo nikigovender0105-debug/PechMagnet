@@ -56,8 +56,6 @@
   /* Werbebanner (nur native App): schiebt die Menue-Inhalte um seine Hoehe nach oben */
   :root{ --adH:0px; }
   #menu, #skins, #achievements{ padding-bottom:calc(24px + var(--adH)); }
-  .btn.adBtn{ background:var(--teal); color:var(--ink); font-size:17px; padding:10px 18px; }
-  .btn.adBtn:disabled{ opacity:.6; cursor:default; }
   /* ---- Screen-Wechsel-Animationen ---- */
   .screen.pop{ animation:screenIn .22s ease; }
   @keyframes screenIn{ from{opacity:0;} to{opacity:1;} }
@@ -433,11 +431,50 @@
   #gameover .btn.go{ background:linear-gradient(var(--shGreen), var(--shGreen2));
     box-shadow:0 5px 0 var(--shGreenD); color:#fff; }
   #gameover #homeBtn{ background:linear-gradient(var(--shBlue), var(--shBlue2)); box-shadow:0 5px 0 rgba(6,26,74,.6); }
-  #gameover .btn.adBtn{ background:linear-gradient(#4BE3D2,#12A8A8); color:#0b3b3b;
-    box-shadow:0 4px 0 #0a7373; font-size:17px; padding:11px 18px; }
+
   #gameover .btn:active{ transform:translateY(4px); box-shadow:0 1px 0 rgba(6,26,74,.6); }
+  /* ---- Muenzen verdoppeln: eigene Karte mit allen Angaben ---- */
+  #gameover .dblCard{ position:relative; overflow:hidden; pointer-events:auto; cursor:pointer; font-family:inherit;
+    width:100%; max-width:360px; display:flex; align-items:center; gap:11px; text-align:left;
+    padding:11px 12px; border:none; border-radius:18px; color:#08383a;
+    background:linear-gradient(135deg,#63EFDC,#17B3B3 55%,#0E9A9A);
+    box-shadow:0 5px 0 #0a7373, 0 10px 20px rgba(10,90,90,.3); }
+  #gameover .dblCard:active{ transform:translateY(4px); box-shadow:0 1px 0 #0a7373; }
+  #gameover .dblCard::after{ content:''; position:absolute; top:0; bottom:0; left:-45%; width:38%; pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.45), rgba(255,255,255,0));
+    animation:sheen 3.4s ease-in-out infinite; }
+  #gameover .dblCard>*{ position:relative; z-index:1; }
+  #gameover .dblPlay{ flex:none; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.92); box-shadow:inset 0 -3px 0 rgba(10,90,90,.16), 0 2px 0 rgba(10,90,90,.32); }
+  #gameover .dblPlay .ic{ width:21px; height:21px; }
+  #gameover .dblTxt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  #gameover .dblTitle{ font-size:15px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+    padding-right:44px; line-height:1.12; }   /* Platz fuer die Fahne; auf engen Geraeten bricht der Titel um */
+  #gameover .dblCard.busy .dblTitle, #gameover .dblCard.done .dblTitle{ padding-right:0; }
+  #gameover .dblMath{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; }
+  #gameover .dblNow{ display:flex; align-items:center; gap:3px; background:rgba(8,56,58,.15); border-radius:8px; padding:2px 7px; }
+  #gameover .dblArrow{ opacity:.7; }
+  #gameover .dblNew{ display:flex; align-items:center; gap:3px; color:#7a3f00;
+    background:linear-gradient(#FFE066,#F5B518); border-radius:8px; padding:2px 8px; box-shadow:0 2px 0 #b07d00; }
+  #gameover .dblMath .ic{ width:14px; height:14px; }
+  #gameover .dblHint{ font-size:10.5px; font-weight:600; opacity:.82; }
+  #gameover .dblBadge{ position:absolute; top:0; right:0; z-index:2; font-size:10.5px; font-weight:700; letter-spacing:.5px;
+    color:#5a3600; background:linear-gradient(#FFE066,#F5B518); padding:3px 10px 4px;
+    border-bottom-left-radius:12px; box-shadow:0 2px 0 #b07d00;
+    animation:dblPulse 1.6s ease-in-out infinite alternate; }
+  @keyframes dblPulse{ from{transform:scale(1);} to{transform:scale(1.06);} }
+  #gameover .dblCard.busy{ background:linear-gradient(135deg,#c3ccd6,#8e9aa8); box-shadow:0 5px 0 #6d7784; color:#2b3542; }
+  #gameover .dblCard.busy::after{ animation:none; opacity:0; }
+  #gameover .dblCard.done{ color:#0c3d0c;
+    background:linear-gradient(135deg,#8BEE8B,#2E9E2E 60%,#25871f);
+    box-shadow:0 5px 0 var(--shGreenD), 0 10px 20px rgba(20,90,20,.28); }
+  #gameover .stat.pop{ animation:statPop .7s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes statPop{ 0%{transform:scale(1);} 30%{transform:scale(1.13); background:#FFF0C2;} 100%{transform:scale(1);} }
+  @media (prefers-reduced-motion: reduce){
+    #gameover .dblCard::after, #gameover .dblBadge, #gameover .stat.pop{ animation:none !important; }
+  }
   #gameover .btn.go:active{ box-shadow:0 1px 0 var(--shGreenD); }
-  #gameover .btn.adBtn:active{ box-shadow:0 1px 0 #0a7373; }
+
   /* Kurze Displays: alles etwas enger, damit Karte und Knoepfe komplett ins Bild passen */
   @media (max-height:660px){
     #gameover h2{ font-size:24px; padding:9px 12px 10px; margin-bottom:9px; -webkit-text-stroke-width:3px; }
@@ -448,7 +485,11 @@
     #gameover .stat .v{ font-size:20px; }
     #gameover .card{ max-height:60vh; padding-bottom:11px; }
     #gameover .btn{ font-size:17px; padding:10px 18px; }
-    #gameover .btn.adBtn{ font-size:14px; padding:9px 13px; }
+    #gameover .dblCard{ padding:9px 10px; gap:9px; }
+    #gameover .dblPlay{ width:38px; height:38px; }
+    #gameover .dblTitle{ font-size:13.5px; }
+    #gameover .dblMath{ font-size:12px; }
+    #gameover .dblHint{ display:none; }
   }
   .boardWrap{ margin-top:14px; }
   .boardTitle{ font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--purple); margin-bottom:6px; }
@@ -1035,7 +1076,7 @@
       </div>
     </div>
     <div class="btnrow hidden" id="rewardRow">
-      <button class="btn adBtn" id="rewardBtn"></button>
+      <button class="dblCard" id="rewardBtn"></button>
     </div>
     <div class="btnrow">
       <button class="btn go" id="retryBtn">NOCHMAL</button>
@@ -2299,7 +2340,7 @@ window.IAP=(function(){
     renderBoard(document.getElementById('board'),entry); renderBoard(document.getElementById('boardMenu'),entry);
     updateCoinUI();
     hide('dialog'); hide('reaction'); show('gameover');
-    lastEarned=earned; rewardTaken=false; syncRewardBtn(); ADS.onGameOver();
+    lastEarned=earned; rewardTaken=false; rewardDone=false; syncRewardBtn(); ADS.onGameOver();
   }
 
   function updateHUD(){ document.querySelector('#score .num').textContent=score; document.getElementById('coinsNum').textContent=coinsRun; document.getElementById('hsMenu').textContent=highscore; }
@@ -2321,8 +2362,9 @@ window.IAP=(function(){
     purseRaf=requestAnimationFrame(step);
   }
   // Muenzen fliegen vom Kauf-Knopf in den Geldbeutel
-  function coinBurst(fromEl,count){
-    const shop=document.getElementById('shop'), purse=document.getElementById('purse');
+  function coinBurst(fromEl,count,toEl,hostEl){
+    const shop=hostEl||document.getElementById('shop');
+    const purse=toEl||document.getElementById('purse');
     if(!shop||!purse||!fromEl||reduceMotion) return;
     const a=fromEl.getBoundingClientRect(), b=purse.getBoundingClientRect(), r=shop.getBoundingClientRect();
     const dx=(b.left+b.width/2)-(a.left+a.width/2), dy=(b.top+b.height/2)-(a.top+a.height/2);
@@ -4361,13 +4403,37 @@ window.IAP=(function(){
   document.getElementById('startBtn').onclick=()=>{ SND.ensure(); SND.setTrack('menu'); SND.play('click'); hide('menu'); startGame(); };
   document.getElementById('tutBtn').onclick=()=>{ SND.ensure(); SND.play('click'); beginPlay(); };
   // ---------- Rewarded-Video 1: Lauf-Muenzen verdoppeln ----------
-  let rewardTaken=false, lastEarned=0;
+  let rewardTaken=false, lastEarned=0, rewardDone=false;   // rewardDone: Erfolgsanzeige laeuft gerade
   function syncRewardBtn(){
     const row=document.getElementById('rewardRow'), btn=document.getElementById('rewardBtn');
     if(!row||!btn) return;
+    if(rewardDone) return;   // "Verdoppelt!" steht noch – sonst wuerde der onReady-Rueckruf sie sofort wegraeumen
     const ok=ADS.rewardAvailable()&&ADS.doubleRun()&&lastEarned>0&&!rewardTaken;   // ohne Beute nichts zu verdoppeln
     row.classList.toggle('hidden',!ok);
-    if(ok){ btn.disabled=false; btn.innerHTML=ic('play')+' M\u00dcNZEN VERDOPPELN: +'+lastEarned; }
+    if(!ok) return;
+    btn.disabled=false; btn.className='dblCard';
+    btn.innerHTML='<span class="dblBadge">\u00d72</span>'
+      +'<span class="dblPlay">'+ic('play')+'</span>'
+      +'<span class="dblTxt">'
+        +'<span class="dblTitle">M\u00fcnzen verdoppeln</span>'
+        +'<span class="dblMath">'
+          +'<span class="dblNow">'+ic('coin')+'+'+lastEarned+'</span>'
+          +'<span class="dblArrow">\u2192</span>'
+          +'<span class="dblNew">'+ic('coin')+'+'+(lastEarned*2)+'</span>'
+        +'</span>'
+        +'<span class="dblHint">Kurzes Video ansehen \u00b7 gratis</span>'
+      +'</span>';
+  }
+  // Zahl in der Muenz-Kachel hochzaehlen statt springen
+  function tweenGoCoins(from,to){
+    const el=document.getElementById('goCoins'); if(!el) return;
+    const fin='+'+to+' (\u00d72)';
+    if(reduceMotion){ el.textContent=fin; return; }
+    const t0=performance.now(), dur=600;
+    const step=now=>{ const k=Math.min(1,(now-t0)/dur);
+      el.textContent='+'+Math.round(from+(to-from)*(1-Math.pow(1-k,3)));
+      if(k<1) requestAnimationFrame(step); else el.textContent=fin; };
+    requestAnimationFrame(step);
   }
   ADS.onReady(()=>{
     const go=document.getElementById('gameover');
@@ -4378,14 +4444,27 @@ window.IAP=(function(){
   document.getElementById('rewardBtn').onclick=async()=>{
     const btn=document.getElementById('rewardBtn');
     if(rewardTaken||btn.disabled) return;
-    SND.play('click'); btn.disabled=true; btn.innerHTML='VIDEO L\u00c4DT \u2026';
+    SND.play('click');
+    btn.disabled=true; btn.className='dblCard busy';
+    btn.innerHTML='<span class="dblPlay">'+ic('play')+'</span>'
+      +'<span class="dblTxt"><span class="dblTitle">Video l\u00e4uft \u2026</span>'
+      +'<span class="dblHint">Bitte bis zum Ende ansehen</span></span>';
     const res=await ADS.showReward();
-    if(!res.ok){ syncRewardBtn(); return; }                       // abgebrochen: Button bleibt nutzbar
+    if(!res.ok){ syncRewardBtn(); return; }                       // abgebrochen: Karte bleibt nutzbar
     rewardTaken=true;
-    save.coins+=lastEarned; persist(); updateCoinUI(); SND.play('coin');
-    const gc=document.getElementById('goCoins'); if(gc) gc.textContent='+'+(lastEarned*2)+' (\u00d72)';
-    btn.innerHTML=ic('coin')+' VERDOPPELT: +'+(lastEarned*2);
-    setTimeout(()=>{ const r=document.getElementById('rewardRow'); if(r) r.classList.add('hidden'); },1600);
+    save.coins+=lastEarned; persist(); updateCoinUI(); SND.play('coin'); SND.play('buy');
+    const go=document.getElementById('gameover'), tile=document.getElementById('goCoins');
+    coinBurst(btn,8,tile,go);                                     // Muenzen fliegen in die Muenz-Kachel
+    tweenGoCoins(lastEarned,lastEarned*2);
+    const stat=tile&&tile.closest('.stat');
+    if(stat){ stat.classList.remove('pop'); void stat.offsetWidth; stat.classList.add('pop'); }
+    rewardDone=true; btn.className='dblCard done';
+    btn.innerHTML='<span class="dblPlay">'+ic('check')+'</span>'
+      +'<span class="dblTxt"><span class="dblTitle">Verdoppelt!</span>'
+        +'<span class="dblMath"><span class="dblNew">'+ic('coin')+'+'+(lastEarned*2)+'</span></span>'
+        +'<span class="dblHint">auf dein Konto gebucht</span></span>';
+    setTimeout(()=>{ rewardDone=false;
+      const r=document.getElementById('rewardRow'); if(r) r.classList.add('hidden'); },2200);
   };
 
   // ---------- Rewarded-Video 2: Muenzen im Shop ----------
