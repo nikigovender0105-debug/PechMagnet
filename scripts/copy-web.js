@@ -11,6 +11,7 @@ const outDir = path.join(root, 'www');
 const out = path.join(outDir, 'index.html');
 const AD_MARKER = '<!--ADMOB_CONFIG-->';
 const IAP_MARKER = '<!--IAP_CONFIG-->';
+const AI_MARKER = '<!--AI_CONFIG-->';
 
 // Nur die Felder, die das Spiel im Browser braucht – die App-ID bleibt in den nativen Projekten.
 function adsConfigScript() {
@@ -42,8 +43,24 @@ function iapConfigScript() {
   return '<script>window.IAP_CONFIG=' + json + ';</script>';
 }
 
+// Bewertung der getippten Ausreden: Endpunkt und Modell
+function aiConfigScript() {
+  const cfgFile = path.join(root, 'ai.config.json');
+  if (!fs.existsSync(cfgFile)) return '';
+  const cfg = JSON.parse(fs.readFileSync(cfgFile, 'utf8'));
+  const client = {
+    enabled: cfg.enabled !== false,
+    mode: cfg.mode === 'proxy' ? 'proxy' : 'anthropic',
+    endpoint: cfg.endpoint || '',
+    model: cfg.model || 'claude-sonnet-4-6',
+    timeoutMs: cfg.timeoutMs || 6000
+  };
+  const json = JSON.stringify(client).replace(/</g, '\\u003c');
+  return '<script>window.AI_CONFIG=' + json + ';</script>';
+}
+
 let html = fs.readFileSync(src, 'utf8');
-for (const [marker, code, name] of [[AD_MARKER, adsConfigScript(), 'AdMob'], [IAP_MARKER, iapConfigScript(), 'In-App-Kauf']]) {
+for (const [marker, code, name] of [[AD_MARKER, adsConfigScript(), 'AdMob'], [AI_MARKER, aiConfigScript(), 'Ausreden-Bewertung'], [IAP_MARKER, iapConfigScript(), 'In-App-Kauf']]) {
   if (html.indexOf(marker) < 0) {
     console.warn('Hinweis: Marker ' + marker + ' fehlt in pechmagnet.html – ' + name + '-Konfiguration nicht injiziert.');
     continue;

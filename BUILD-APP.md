@@ -250,7 +250,95 @@ Kauf-Konfiguration gebaut und der Bereich erscheint nicht.
 
 ---
 
-## 8. In die Stores hochladen
+## 8. Ausreden-Bewertung (die Menge urteilt)
+
+Wenn dich die Menge stellt, **tippst du selbst** eine Ausrede ein. Bewertet wird sie
+mit 0–100 Punkten; ab **50** kommst du durch und bekommst die Hälfte der Punkte
+als Spiel-Punkte dazu. Wortgleiche Wiederholungen im selben Lauf fliegen auf.
+
+Gesteuert wird das über `ai.config.json`:
+
+| Feld | Bedeutung |
+|------|-----------|
+| `enabled` | `false` = immer die lokale Wertung, kein Netz-Zugriff |
+| `mode` | `anthropic` (Anfrage im Format der Anthropic-API) oder `proxy` (schickt nur `{prompt, model}`) |
+| `endpoint` | URL, die die Bewertung liefert |
+| `model` | Modellname, der mitgeschickt wird |
+| `timeoutMs` | nach dieser Zeit wird abgebrochen (Standard 6000) |
+
+### Wichtig: in der echten App brauchst du einen eigenen Endpunkt
+
+Der Standard zeigt auf `https://api.anthropic.com/v1/messages`. Direkt aus der App
+funktioniert das **nicht** – dazu wäre ein API-Schlüssel nötig, und ein Schlüssel
+in der App ist für jeden auslesbar (fremde Kosten auf deiner Rechnung). Baue dafür
+einen winzigen eigenen Dienst, der den Schlüssel behält, und setze ihn hier ein:
+
+```json
+{
+  "enabled": true,
+  "mode": "proxy",
+  "endpoint": "https://dein-dienst.example.com/ausrede",
+  "model": "claude-sonnet-4-6",
+  "timeoutMs": 6000
+}
+```
+
+Der Dienst bekommt `{"prompt": "...", "model": "..."}` und muss `{"text": "..."}`
+zurückgeben – mehr nicht. Als Cloudflare Worker zum Kopieren:
+
+```js
+export default {
+  async fetch(req, env) {
+    if (req.method === 'OPTIONS') return cors(new Response(null, { status: 204 }));
+    const { prompt, model } = await req.json();
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: model || 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: String(prompt).slice(0, 4000) }]
+      })
+    });
+    const data = await r.json();
+    const text = (data.content || []).map(c => c.text || '').join('');
+    return cors(Response.json({ text }));
+  }
+};
+function cors(res) {
+  res.headers.set('Access-Control-Allow-Origin', '*');
+  res.headers.set('Access-Control-Allow-Headers', 'content-type');
+  return res;
+}
+```
+
+Schlüssel hinterlegen (nicht ins Repo):
+
+```bash
+npx wrangler secret put ANTHROPIC_API_KEY
+```
+
+### Ohne Endpunkt geht es trotzdem
+
+Antwortet nichts (Browser, Flugmodus, kein Dienst), bewertet das Spiel selbst:
+Länge, Mühe und ein paar Stichworte. Nach zwei Fehlversuchen fragt es gar nicht
+mehr, damit der Dialog nie hängt. Das Spiel ist also immer spielbar – nur die
+Kommentare der Menge sind dann Standardtexte.
+
+### Spicker
+
+Das Power-up **Spicker** setzt eine Ausrede ein, die **garantiert** durchgeht
+(unverändert abgeben). Mit Endpunkt sind das drei zum Ereignis passende Vorschläge,
+ohne Endpunkt eine aus dem eingebauten Pool. Das Shop-Upgrade erhöht die Ladungen
+pro Fund.
+
+---
+
+## 9. In die Stores hochladen
 
 | Store | Konto | Datei | Hinweis |
 |------|-------|-------|---------|

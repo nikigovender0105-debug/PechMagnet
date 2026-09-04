@@ -505,7 +505,7 @@
   .stat{ background:var(--ink); color:var(--cream); border-radius:12px; padding:8px 12px; min-width:90px; }
   .stat .k{ font-size:11px; letter-spacing:1px; opacity:.8; } .stat .v{ font-size:24px; font-weight:700; color:var(--gold); }
 
-  #dialog .card{ max-width:380px; }
+  #dialog .card{ max-width:380px; max-height:min(88vh,760px); overflow-y:auto; }
   #dialog h2{ font-size:26px; color:var(--danger); -webkit-text-stroke:1.5px var(--ink); paint-order:stroke fill; margin-bottom:4px; }
   #dialog .sub{ font-size:14px; color:var(--ink); margin-bottom:10px; font-weight:500; }
   .crowdHint{ background:#e2f6f6; border:2.5px solid var(--teal); color:var(--ink); border-radius:11px;
@@ -522,13 +522,33 @@
   #rageBar{ height:16px; background:#fff; border:3px solid var(--ink); border-radius:10px; overflow:hidden; }
   #rageFill{ height:100%; width:100%; background:var(--danger); }
   #rageTxt{ font-size:11px; font-weight:700; letter-spacing:1px; color:var(--ink); text-align:left; margin-bottom:3px; }
-  .excuses{ display:flex; flex-direction:column; gap:9px; }
-  .excuse{ pointer-events:auto; cursor:pointer; text-align:left; font-family:inherit; font-weight:600; font-size:15px;
-    color:var(--ink); background:#fff; border:3px solid var(--ink); border-radius:13px; padding:11px 13px;
-    box-shadow:3px 3px 0 var(--ink); line-height:1.25; transition:transform .05s, box-shadow .05s, background .1s; }
-  .excuse:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
-  .excuse.wrong{ background:#f0c9c6; color:#9a4b45; box-shadow:0 0 0 var(--ink); transform:translate(3px,3px); opacity:.7; pointer-events:none; }
+  /* ---- Ausreden-System: selbst tippen, die Menge bewertet ---- */
+  #accuseBig{ background:var(--danger); color:#fff; border:3px solid var(--ink); border-radius:12px;
+    padding:10px 12px; font-weight:700; font-size:19px; line-height:1.18; text-transform:uppercase;
+    box-shadow:4px 4px 0 var(--ink); transform:rotate(-1.2deg); margin:4px 0 10px; }
+  #excuseInput{ pointer-events:auto; width:100%; min-height:62px; font-family:inherit; font-weight:600;
+    font-size:16px; padding:10px; border:3px solid var(--ink); border-radius:11px; background:#fff;
+    color:var(--ink); resize:none; outline:none; -webkit-user-select:text; user-select:text; touch-action:auto; }
+  #excuseInput:focus{ box-shadow:0 0 0 3px var(--purple); }
+  #excuseInput:disabled{ opacity:.7; }
+  #excuseSend{ pointer-events:auto; cursor:pointer; width:100%; margin-top:8px; font-family:inherit; font-weight:700;
+    font-size:16px; letter-spacing:.5px; padding:11px; border:3px solid var(--ink); border-radius:11px;
+    background:var(--safe); color:var(--ink); box-shadow:3px 3px 0 var(--ink); }
+  #excuseSend:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
+  #excuseSend:disabled{ opacity:.5; pointer-events:none; box-shadow:none; }
+  #aiThinking{ display:none; margin-top:8px; font-weight:700; font-size:13px; color:var(--purple); }
+  #aiThinking.on{ display:block; }
+  #aiThinking .ic{ width:15px; height:15px; vertical-align:-.18em; }
+  .crowdHint.bad{ background:#fbe3e0; border-color:var(--danger); }
+  .crowdHint.bad b{ color:#b3352b; }
 
+  @media (max-height:660px){
+    #accuseBig{ font-size:16px; padding:8px 10px; margin:2px 0 7px; }
+    #excuseInput{ min-height:50px; }
+    #excuseSend{ font-size:15px; padding:9px; }
+    #dialog .sub{ margin-bottom:7px; }
+    #rageWrap{ margin:5px 0 9px; }
+  }
   #reaction .card{ background:var(--warn); }
   #reaction h2{ font-size:30px; color:var(--ink); transform:rotate(-2deg); }
   #reaction p{ font-size:16px; font-weight:600; color:var(--ink); margin-top:6px; }
@@ -1273,7 +1293,7 @@
       &bull; <span class="safe">LOS!</span> &ndash; ruhig weiterlaufen.<br>
       &bull; <b>STEHENBLEIBEN!</b> &ndash; Finger loslassen, sonst steigt der Verdacht.<br>
       &bull; Nicht in Leute reinrennen.<br>
-      &bull; Erwischt? Dreiste Ausrede w&auml;hlen.
+      &bull; Erwischt? <b>Tippe selbst</b> eine dreiste Ausrede &ndash; die Menge bewertet sie!
       </p>
     </div>
     <button class="btn go" id="tutBtn">VERSTANDEN</button>
@@ -1282,9 +1302,10 @@
   <div id="dialog" class="screen hidden">
     <div class="card">
       <h2>ERWISCHT!</h2>
+      <div id="accuseBig"></div>
       <div class="sub" id="caughtSub">Die Menge br&uuml;llt. Sag irgendwas Glaubhaftes!</div>
       <div class="tactics">
-        <button class="tbtn" id="listenBtn"><span><svg class="ic"><use href="#i-speech"/></svg> Belauschen</span><small>&#189; Zeit weg, Rest 2&times; schneller</small></button>
+        <button class="tbtn" id="spickBtn"><span><svg class="ic"><use href="#i-search"/></svg> Spicker</span><small>Ausrede, die sicher zieht</small></button>
         <button class="tbtn" id="bribeBtn"><span><svg class="ic"><use href="#i-moneybag"/></svg> Bestechen</span><small id="bribeCost">25 M&uuml;nzen</small></button>
       </div>
       <div id="crowdHint" class="crowdHint"></div>
@@ -1292,7 +1313,9 @@
         <div id="rageTxt">WUT DER MENGE</div>
         <div id="rageBar"><div id="rageFill"></div></div>
       </div>
-      <div class="excuses" id="excuses"></div>
+      <textarea id="excuseInput" rows="2" maxlength="220" placeholder="Deine Ausrede &hellip; sei kreativ!" autocomplete="off"></textarea>
+      <button id="excuseSend">AUSREDE ABGEBEN</button>
+      <div id="aiThinking"><svg class="ic"><use href="#i-speech"/></svg> Die Menge &uuml;berlegt, ob sie dir das glaubt &hellip;</div>
     </div>
   </div>
 
@@ -1464,6 +1487,7 @@ window.ADS=(function(){
            onReady:cb=>{ readyCbs.push(cb); } };
 })();
 </script>
+<script>window.AI_CONFIG={"enabled":true,"mode":"anthropic","endpoint":"https://api.anthropic.com/v1/messages","model":"claude-sonnet-4-6","timeoutMs":6000};</script>
 <script>window.IAP_CONFIG={"products":[{"id":"coins_small","type":"consumable","slot":"coins","icon":"coin","name":"Kleiner Beutel","desc":"1.000 Münzen sofort auf dein Konto.","coins":1000,"short":"1.000","tile":["#5AA6F7","#1A6FD0"]},{"id":"coins_medium","type":"consumable","slot":"coins","icon":"moneybag","name":"Prall gefüllt","desc":"6.000 Münzen – deutlich mehr fürs Geld.","coins":6000,"short":"6.000","tag":"BELIEBT","tile":["#FFC94A","#EF8B00"]},{"id":"coins_large","type":"consumable","slot":"coins","icon":"gem","name":"Tresor","desc":"20.000 Münzen – der beste Kurs.","coins":20000,"short":"20.000","tag":"TOP","tile":["#BC90FF","#7A34E0"]},{"id":"no_ads","type":"non_consumable","slot":"special","icon":"ban","name":"Werbung entfernen","desc":"Keine Banner, keine Vollbild-Anzeigen. Freiwillige Videos für Münzen bleiben.","noAds":true,"feats":["Kein Banner","Keine Vollbild-Anzeigen","Videos bleiben"],"tile":["#8ADB6E","#3F9E2E"]},{"id":"skin_pack","type":"non_consumable","slot":"special","icon":"shirt","name":"Skin-Paket","desc":"Fünf Premium-Skins auf einmal: Neon-Geist, Galaxie, Der König, Zauberer und Regenbogen.","skins":["neon","galaxie","koenig","zauberer","regenbogen"],"feats":["Neon-Geist","Galaxie","Der König","Zauberer","Regenbogen"],"tag":"5 SKINS","tile":["#FF7FC8","#D6249F"]},{"id":"starter_pack","type":"non_consumable","slot":"starter","icon":"rocket","name":"Starter-Paket","desc":"3.000 Münzen, 3 Spezial-Tickets und Werbung entfernt – alles in einem.","coins":3000,"tickets":3,"noAds":true,"offerDays":7,"feats":["3.000 Münzen","3 Spezial-Tickets","Werbung entfernt"],"tag":"NUR EINMAL","tile":["#FFD24A","#F0821A"]}]};</script>
 <script>
 /* ---------- In-App-Kaeufe: Google Play ----------
@@ -1711,32 +1735,6 @@ window.IAP=(function(){
     nature:['Höhere Gewalt, fragen Sie Petrus.','Das war nur eine steife Brise.','Klimawandel, nicht ich.','Ich bin Wetterforscher im Feldeinsatz.','Naturgewalten kann man nicht festnehmen.','Das war reine Thermik, Physik eben.'],
     tech:['Bitte starten Sie mich neu.','Das war ein Software-Update, kein Angriff.','Ich befolge nur meine Programmierung.','Garantiefall, wenden Sie sich an den Hersteller.','Mein Akku ist gleich leer, keine Zeit für Schuld.']
   };
-  // Großer gemeinsamer Pool FALSCHER Antworten – für jede Befragung nutzbar
-  const EXCUSE_GENERIC=[
-    'Okay, ihr habt mich – Spaß, war nur ein Test.','Das mache ich jeden Dienstag, gewöhnt euch dran.','Ich bereue absolut nichts.','Wer fragt, ist selber schuld.','Beweise? Habt ihr keine.','Das war künstlerische Freiheit.','Ich identifiziere mich als unschuldig.','Mein Horoskop hat mir das geraten.','Die Stimmen in meinem Kopf waren es.','Ich habe nur Befehle befolgt.',
-    'Das stand so im Internet.','Ein Magier hat mich verzaubert.','Ich bin gegen alles allergisch, auch gegen Schuld.','Das war mein böser Zwilling.','Ich war’s, aber stilvoll.','Schaut mal, ein dreiköpfiger Affe!','Ich spreche nur mit meinem Anwalt-Hamster.','Das ergibt im Kontext total Sinn.','Ich habe heute frei, also zählt das nicht.','Karma, nicht ich.',
-    'Ich bin zu hübsch fürs Gefängnis.','Das war eine soziale Studie.','Ich teste nur eure Reaktionszeit.','Niemand hat das wirklich gesehen.','Ich bin nur eine Simulation.','Das Universum wollte es so.','Ich habe meine Brille vergessen.','War das schlimm? Fand ich nicht.','Mein Hund hat meine Ausrede gefressen.','Ich bin neu in der Stadt.',
-    'Das macht doch jeder.','Ich war kurz im Urlaub, im Kopf.','Ich kann nicht lesen, also keine Schilder.','Ich bin Influencer, das war Content.','Likes sind wichtiger als Gesetze.','Ich habe das geträumt und es wurde wahr.','Reden wir lieber über das Wetter.','Ich bin im Zeugenschutzprogramm.','Das war Performancekunst.','Ich sammle Erfahrungen, keine Beweise.',
-    'Mein inneres Kind hat das getan.','Ich war hypnotisiert.','Das war reine Notwehr gegen Langeweile.','Ich habe Rabattmarken dafür.','Fragt meine Mutter, die glaubt mir.','Ich bin nur die Vertretung.','Das war ein Versehen mit Ansage.','Ich habe die AGB nicht gelesen.','Ich dachte, das wäre ein Spielplatz.','Ich bin gerade im Charakter, bitte nicht stören.',
-    'Das war ein Geschenk an die Stadt.','Ich habe nur den Schwung mitgenommen.','Ihr seht das alle viel zu eng.','Ich habe einen Coupon für eine freie Ausrede.','Das war Teil meiner Bucket-List.','Ich bin Tourist, ich darf das.','Ich habe nur an etwas Schönes gedacht.','Mein GPS hat mich hierher geführt.','Das war eindeutig die Schwerkraft.','Ich habe nur kurz die Augen zugemacht.',
-    'Ich bin allergisch gegen Verantwortung.','Das war eine spontane Eingebung.','Ich übe für ein Theaterstück.','Ich habe nichts gehört, nichts gesehen.','Das war ein klassisches Missverständnis.','Ich bin nur ein unschuldiger Passant mit Pech.','Mein Sternzeichen ist Chaos.','Das war reine Selbstverteidigung.','Ich habe das von einem Tutorial.','Ich bin im falschen Universum gelandet.',
-    'Das war Teil eines geheimen Plans.','Ich habe nur den Knopf gedrückt, der Rest kam von allein.','Ich bin ein Method Actor.','Ich habe mich nur gestreckt.','Ich bin auf einer geheimen Mission.','Das war schon so, als ich aufwachte.','Ich bin zu müde für Konsequenzen.','Das war definitiv jemand mit meinem Gesicht.','Ich habe nur Pech, kein böses Blut.','Ich bin der Zukunft drei Schritte voraus.',
-    'Das fällt unter Reisekosten.','Ich bin im Praktikum, das zählt halb.','Mein Bauchgefühl war stärker als ich.','Ich habe nur den Trend befolgt.','Das war ein Test der Notfallpläne.','Ich bin nur die Stimme aus dem Off.','Das war reine Improvisation.','Ich liefere nur Vibes, keine Beweise.','Ich habe das für einen Freund getan.','Das war günstiger als die Alternative.',
-    'Ich bin emotional gerade nicht verfügbar.','Ich habe das in einem früheren Leben verbrochen.','Das war ein Upgrade, kein Schaden.','Ich habe nur den Anfang gemacht, der Rest war Eigendynamik.','Ich habe das aus Versehen mit Absicht getan.','Mein Anwalt ist auch nur ein Goldfisch.','Ich bin gegen meinen Willen anwesend.','Das war ein Geschenk des Schicksals.','Ich habe nur den Beat gefühlt.','Ihr habt angefangen, mit dem Existieren.',
-    'Ich bin der Hauptcharakter, ihr seid NPCs.','Das war ein klitzekleiner Kollateralschaden.','Ich habe nur das Gleichgewicht der Stadt korrigiert.','Mein Aszendent ist heute schwierig.','Ich bin verkleidet, das ist nicht mein echtes Ich.','Das war ein Probealarm.','Ich teste die Versicherung der Stadt.','Ich bin nur kurz aus der Realität geschlüpft.','Das war doch nur geliehen.','Mein Akku war leer, ich konnte nicht denken.',
-    'Das ist Teil meiner Selbstfindung.','Ich habe das Tutorial übersprungen.','Ich bin nur ein Avatar.','Das war ein limitiertes Sonderangebot.','Ich habe die Quittung leider verloren.','Ich bin allergisch gegen „Nein“.','Das war Networking.','Ich habe nur laut nachgedacht, mit den Händen.','Mein Therapeut sagt, ich soll loslassen.','Ich bin ein Frühaufsteher, da passiert sowas.',
-    'Das war ein technisches K.o., nicht meine Schuld.','Ich habe nur den roten Knopf gefunden.','Ich bin im Trainingslager für Pechvögel.','Das war ein interaktives Erlebnis.','Ich habe meine Aura nur kurz ausgebreitet.','Ich bin zu old school für Regeln.','Das war ein freundschaftliches Foul.','Ich habe nur den Domino-Effekt gestartet.','Mein Glückskeks hat mich gewarnt, ich habe ihn ignoriert.','Ich bin spirituell unschuldig.',
-    'Das war eine kostenlose Vorführung.','Ich habe nur die Tür aufgehalten, für das Chaos.','Ich bin Linkshänder, das erklärt alles.','Das war ein VIP-Erlebnis für euch.','Ich habe nur kurz die Kontrolle abgegeben.','Ich bin im Energiesparmodus.','Das war reine Reflexsache.','Ich habe eine Fortbildung in Pannen.','Ich bin nur das Bauernopfer.','Das war eine Spende an die Statistik.',
-    'Ich habe nur den Wind gerufen, er kam von selbst.','Ich bin emotional in Rente.','Das war ein Easter Egg.','Ich habe nur den Trailer gedreht.','Mein Glück hat heute Pause.','Ich bin der Beobachter, nicht der Täter.','Das war ein kosmischer Zufall.','Ich habe nur die Physik herausgefordert.','Ich bin gerade nicht ich selbst.','Das war ein Bonuslevel.',
-    'Ich habe das geerbt, samt Schaden.','Ich bin nur Statist in meinem eigenen Leben.','Das war Teamarbeit, fragt das Team.','Ich habe nur kurz geblinzelt, und zack.','Ich bin gegen Gebühr unsichtbar.','Das war eine kulturelle Bereicherung.','Ich habe das für die Geschichtsbücher getan.','Ich bin nur der Bote, nicht die Botschaft.','Das war ein Versprecher, mit Folgen.','Ich habe nur an die Decke geschaut.',
-    'Ich bin im Ausnahmezustand, persönlich.','Das war ein freiwilliges Praktikum im Chaos.','Ich habe nur die Schwerkraft beleidigt.','Ich bin pleite, also unschuldig.','Das war eine optische Täuschung.','Ich habe nur den Anfang vom Ende eingeleitet.','Ich bin gerade im Flugmodus.','Das war eine geheime Tradition.','Ich habe nur die Stimmung aufgelockert.','Ich bin gegen Vorurteile, auch gegen Schuldvorwürfe.',
-    'Das war ein Praktikumstag bei der Katastrophe.','Ich habe nur dem Drehbuch gefolgt.','Ich bin nur ein Gerücht.','Das war ein Missgeschick deluxe.','Ich habe nur an mein Mittagessen gedacht.','Ich bin der unzuverlässige Erzähler.','Das war eine spontane Spendenaktion.','Ich habe nur kurz Pause von der Logik gemacht.','Ich bin gegen alles versichert, außer Schuld.','Das war reine Unterhaltung.',
-    'Ich bin nur ein Produkt meiner Umgebung.','Das war ein Geschenk, das weitergibt.','Ich habe nur den Schalter gestreichelt.','Ich bin im falschen Jahrhundert geboren.','Das war ein Beta-Test.','Ich habe nur kurz die Augen gerollt, und es passierte.','Ich bin gerade auf Selbstfindung, nicht auf Schuldsuche.','Das war ein dezenter Hinweis des Universums.','Ich bin nur ein Platzhalter.','Das war reine Routine für mich.',
-    'Ich habe es getan, aber mit Liebe.','Ich war’s nicht, ich war Pause.','Das war die unsichtbare Hand des Marktes.','Ich habe nur kurz die Welt gespeichert und neu geladen.','Mein Bildschirm hat geruckelt, im echten Leben.','Ich bin nur ein Nebencharakter mit großen Träumen.','Das war ein Feature, kein Bug.','Ich habe nur dem Trend „Chaos“ ein Like gegeben.','Mein Schutzengel hat gerade Mittagspause.','Das war reine Kunst am Bau.',
-    'Ich habe nur den Cheat-Code eingegeben.','Das war ein Glitch in der Matrix.','Ich bin nur das Tutorial-Schild.','Mein Avatar ist durchgedreht, nicht ich.','Das war ein Speicherfehler.','Ich habe nur kurz die Realität gepatcht.','Ich bin nur ein Ladebildschirm mit Beinen.','Das war ein Würfelwurf, schlechte Werte.','Ich habe nur das Schicksal angeschubst.','Mein Pech-Level ist einfach maximal.',
-    'Das war ein Kollateralapplaus.','Ich bin nur die Demoversion.','Das war ein spontanes Feuerwerk der Gefühle.','Ich habe nur den Schwarm gefüttert.','Mein Praktikum verlangt Chaos.','Das war ein nicht jugendfreier Zufall.','Ich bin gegen die Hausordnung immun.','Das war reine Schwerelosigkeit.','Ich habe nur den Notausgang getestet.','Mein Karma ist in der Werkstatt.',
-    'Das war ein Versuchsballon, im wörtlichen Sinn.','Ich bin nur ein wandelnder Disclaimer.','Das war eine Spende an die Anekdoten.','Ich habe nur die Stadt etwas aufgemischt.','Mein innerer Schweinehund hat die Leine gerissen.','Das war reine Selbstironie.','Ich bin nur ein Statistikfehler.','Das war ein Feature-Request der Schwerkraft.'
-  ];
   const REACTIONS=[
     ['Hmm... ok?','Die Menge nickt verwirrt und geht weiter.'],
     ['Klingt logisch.','Niemand hat etwas verstanden. Perfekt.'],
@@ -1766,7 +1764,7 @@ window.IAP=(function(){
     {key:'boost', name:'Speed-Boost',icon:'bolt',unit:'s',base:12,step:3,max:5,desc:'Dauer des Tempo-Boosts'},
     // weiches Trennzeichen: bricht auf schmalen Displays als "MUENZ-/MAGNET" statt mitten im Wort
     {key:'magnet',name:'Münz\u00admagnet',icon:'magnet',unit:'s',base:10,step:3,max:5,desc:'Dauer der Münz-Anziehung'},
-    {key:'hint',  name:'Spicker',icon:'search',unit:'×',base:1,step:1,max:5,desc:'Aufgedeckte Antworten pro Spicker'},
+    {key:'hint',  name:'Spicker',icon:'search',unit:'×',base:1,step:1,max:5,desc:'Sichere Ausreden pro Spicker'},
     {key:'coins', name:'Geldsack',icon:'moneybag',unit:' Mü.',base:10,step:5,max:5,desc:'Münzen pro Geldsack'}
   ];
   function upLvl(key){ return (save.upgrades&&save.upgrades[key])|0; }
@@ -1774,7 +1772,10 @@ window.IAP=(function(){
   const UP_COSTS=[300,750,3000,8000,18000];
   function upCost(lvl){ return UP_COSTS[lvl]!=null?UP_COSTS[lvl]:UP_COSTS[UP_COSTS.length-1]; }
   let shake=0, youHint=0;
-  let rageTimer=0, rageMax=4.6, rageDrain=1, excuseSet=[], reactTimer=0, stareStill=0;
+  let rageTimer=0, rageMax=4.6, rageDrain=1, reactTimer=0, stareStill=0;
+  // Ausreden-System: der Spieler tippt selbst, die Menge (KI) bewertet
+  let excuseCorrects=[], excuseAccusation='', excuseEvaluating=false, excuseSuggestions=[], usedExcuses=[];
+  let guaranteedExcuse='';   // vom Spicker eingesetzter Text – kommt ungeprüft durch
   let excusesRun=0, caughtRun=0, itemsRun=0, weatherRun={};   // Zähler für Erfolge pro Lauf
   let specialTimer=0, specialMode=false, specialBanner='', specialAnimT=0, caughtWasSpecial=false, currentSpecialKey='';
   const SPECIAL_DUR=2.1;
@@ -2262,7 +2263,7 @@ window.IAP=(function(){
   function resetWorld(){
     tutStop();
     zones=[]; npcs=[]; coins=[]; items=[]; obstacles=[]; magnetTime=0; pickFx=[]; hintCharges=0; coinsRun=0; lastZoneTypeId=null;
-    excusesRun=0; caughtRun=0; itemsRun=0; weatherRun={};
+    excusesRun=0; caughtRun=0; itemsRun=0; weatherRun={}; usedExcuses=[];
     player.x=W/2; player.y=0; player.vx=player.vy=0; player.moving=false;
     bottomY=240; topGenY=bottomY;
     addZoneAbove();
@@ -2307,7 +2308,7 @@ window.IAP=(function(){
       text:'Renn niemanden an und nimm bei Absperrungen die L\u00fccke. Lauf ein St\u00fcck sauber durch.',
       cue:'arrow', ok:'Elegant vorbei!' },
     { title:'Erwischt? Dreist bleiben',
-      text:'Die Menge stellt dich. W\u00e4hle die passende Ausrede \u2013 hier kostet ein Fehler nichts.',
+      text:'Die Menge stellt dich. <b>Tippe selbst</b> eine Ausrede ein \u2013 hier kostet ein Fehler nichts.',
       cue:'', ok:'Astrein gelogen!' }
   ];
   const TUT={active:false,i:0,t:0,markY:0,markCoins:0,fired:false,wait:0};
@@ -2505,68 +2506,44 @@ window.IAP=(function(){
     const kind=(currentEvent&&EXCUSES[currentEvent.kind])?currentEvent.kind:'fall';
     const pool=EXCUSES[kind];
     let corrects=pool.filter(e=>e.ok).map(e=>e.t); if(EXCUSE_OK[kind]) corrects=corrects.concat(EXCUSE_OK[kind]);
-    let wrongs=pool.filter(e=>!e.ok).map(e=>e.t).concat(EXCUSE_GENERIC);
-    for(let i=wrongs.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[wrongs[i],wrongs[j]]=[wrongs[j],wrongs[i]];}
-    const base=[{t:pick(corrects),ok:true},{t:wrongs[0],ok:false},{t:wrongs[1],ok:false},{t:wrongs[2],ok:false}];
-    for(let i=base.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[base[i],base[j]]=[base[j],base[i]];}
-    excuseSet=base;
-    const box=document.getElementById('excuses'); box.innerHTML='';
-    const btns=[];
-    excuseSet.forEach((e,i)=>{ const b=document.createElement('button'); b.className='excuse'; b.textContent=e.t;
-      b.onclick=()=>pickExcuse(i,b); box.appendChild(b); btns.push(b); });
-    // Spicker: deckt eine falsche Antwort auf (markiert sie, nicht mehr anklickbar)
-    if(hintCharges>0){
-      const wrongIdx=[]; excuseSet.forEach((e,i)=>{ if(!e.ok) wrongIdx.push(i); });
-      const reveal=Math.min(hintCharges,wrongIdx.length-1); // mind. 1 falsche bleibt verdeckt
-      for(let r=0;r<reveal;r++){ const k=(Math.random()*wrongIdx.length)|0, idx=wrongIdx.splice(k,1)[0];
-        btns[idx].classList.add('wrong'); btns[idx].insertAdjacentHTML('afterbegin',ic('ban')+' '); }
-      hintCharges-=reveal; updateHintHUD();
-    }
+    excuseCorrects=corrects; excuseEvaluating=false;
+    excuseAccusation=(currentEvent&&currentEvent.label)?currentEvent.label:'Hier herrscht totales Chaos!';
+    excuseSuggestions=[]; fetchExcuseSuggestions(excuseAccusation);   // Vorschlaege im Hintergrund laden
+    document.getElementById('accuseBig').textContent='\u201e'+excuseAccusation.replace(/!+$/,'')+'\u201c \u2013 UND DU WARST DAS?!';
+    const exInp=document.getElementById('excuseInput');
+    exInp.value=''; exInp.disabled=false; exInp.placeholder='Deine Ausrede \u2026 sei kreativ!';
+    document.getElementById('excuseSend').disabled=false;
+    document.getElementById('aiThinking').classList.remove('on');
     document.getElementById('caughtSub').textContent=specialMode
       ? (currentEvent&&currentEvent.subText?currentEvent.subText:'Du wirst direkt zur Rede gestellt!')
       : (confrontMode
         ? 'Du bist direkt in jemanden reingerannt! Sag schnell was!'
-        : (currentEvent?('"'+currentEvent.label+'" \u2013 und alle starren dich an.'):'Die Menge br\u00fcllt. Sag irgendwas!'));
-    // Taktik-Optionen: Belauschen (Hinweis gegen Zeit) & Bestechen (Flucht gegen M\u00fcnzen)
+        : 'Alle starren dich an. Rede dich raus \u2013 tippe deine Ausrede!');
     const hintEl=document.getElementById('crowdHint');
-    if(hintEl){
-      hintEl.style.display='none';
-      const wordsOf=t=>t.split(/\s+/).map(w=>w.replace(/[^A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df-]/g,'')).filter(w=>w.length>=5);
-      const correctTxt=excuseSet.find(e=>e.ok).t;
-      const cands=wordsOf(correctTxt).sort((a,b)=>b.length-a.length);
-      // L\u00e4ngen aller langen W\u00f6rter in den falschen Antworten
-      const wrongLens=new Set();
-      excuseSet.forEach(e=>{ if(!e.ok) wordsOf(e.t).forEach(w=>wrongLens.add(w.length)); });
-      let pendingHint=null;
-      // nur die Buchstaben-Anzahl verraten \u2013 Wortl\u00e4nge muss eindeutig sein
-      const hw=cands.find(w=>!wrongLens.has(w.length));
-      if(hw){
-        pendingHint=ic('speech')+' Jemand aus der Menge fl\u00fcstert: \u201eSag was mit einem Wort mit <b>'+hw.length+' Buchstaben</b> \u2026\u201c';
-      } else {
-        // Fallback: eindeutiges Wort, dann Anfangsbuchstabe + L\u00e4nge
-        const fw=cands.find(w=>!excuseSet.some(e=>!e.ok&&e.t.toLowerCase().indexOf(w.toLowerCase())>=0));
-        if(fw) pendingHint=ic('speech')+' Jemand aus der Menge fl\u00fcstert: \u201eSag was mit <b>\u201a'+fw[0]+'\u2026\u2018 ('+fw.length+' Buchstaben)</b> \u2026\u201c';
-      }
-      const lb=document.getElementById('listenBtn');
-      lb.disabled=!pendingHint;
-      lb.onclick=()=>{ if(!pendingHint) return;
-        rageTimer=Math.max(0.5,rageTimer-rageMax/2);                                   // Lauschen kostet die halbe Zeit …
-        rageDrain=2;                                                                   // … und danach tickt sie doppelt so schnell
-        hintEl.innerHTML=pendingHint; hintEl.style.display='';
-        lb.disabled=true; SND.play('click');
-      };
-      const bribeCost=25+streetsCleared*5;
-      document.getElementById('bribeCost').textContent=bribeCost+' M\u00fcnzen';
-      const bb=document.getElementById('bribeBtn');
-      bb.disabled=save.coins<bribeCost;
-      bb.onclick=()=>{ if(state!==ST.CAUGHT||save.coins<bribeCost) return;
-        save.coins-=bribeCost; persist(); updateCoinUI(); escapeCatch(true);
-      };
-    }
+    hintEl.style.display='none'; hintEl.classList.remove('bad');
+    // Taktik 1 \u2013 Spicker: setzt eine passende Ausrede ein, die garantiert durchgeht (kostet 1 Ladung)
+    guaranteedExcuse='';
+    const sb=document.getElementById('spickBtn');
+    sb.disabled=!(hintCharges>0);
+    sb.onclick=()=>{ if(state!==ST.CAUGHT||hintCharges<=0||excuseEvaluating) return;
+      const sug=takeSuggestion(); exInp.value=sug; guaranteedExcuse=sug;
+      hintCharges--; updateHintHUD(); sb.disabled=!(hintCharges>0);
+      hintEl.classList.remove('bad');
+      hintEl.innerHTML=ic('search')+' Spicker eingesetzt \u2013 diese Ausrede zieht <b>garantiert</b>. Einfach abgeben!';
+      hintEl.style.display=''; SND.play('click'); };
+    // Taktik 2 \u2013 Bestechen: Flucht gegen Muenzen
+    const bribeCost=25+streetsCleared*5;
+    document.getElementById('bribeCost').textContent=bribeCost+' M\u00fcnzen';
+    const bb=document.getElementById('bribeBtn');
+    bb.disabled=save.coins<bribeCost;
+    bb.onclick=()=>{ if(state!==ST.CAUGHT||save.coins<bribeCost||excuseEvaluating) return;
+      save.coins-=bribeCost; persist(); updateCoinUI(); escapeCatch(true);
+    };
     if(TUT.active){                                   // Situation bleibt stehen, der Tipp kommt dazu
+      tutExcuseTries=0;
       tutSubBase=document.getElementById('caughtSub').textContent;
       document.getElementById('caughtSub').textContent=tutSubBase
-        +' \u2013 Tipp: die Ausrede antippen, die dazu passt. Im Tutorial kostet ein Fehler nichts.';
+        +' \u2013 Tipp: tippe irgendeine dreiste Ausrede ein. Im Tutorial kommt jede durch.';
     }
     caughtWasSpecial=specialMode;
     document.getElementById('dialog').classList.toggle('specialCaught',specialMode);
@@ -2574,19 +2551,134 @@ window.IAP=(function(){
     document.getElementById('rageFill').style.width='100%';
     show('dialog');
   }
-  function pickExcuse(i,btn){
-    if(state!==ST.CAUGHT) return;
-    if(excuseSet[i].ok){ escapeCatch(); }
-    else{ btn.classList.add('wrong'); shake=reduceMotion?6:14; SND.play('wrong');
-      if(TUT.active){ btn.disabled=true;                                    // Tutorial: einfach nochmal versuchen
-        document.getElementById('caughtSub').textContent=tutSubBase
-          +' \u2013 Daneben! Probier eine andere \u2013 hier kostet das nichts.';
-        return; }
-      endGame('Falsche Ausrede \u2013 die Menge rastet aus!'); }
+  // ---------- Ausreden-Bewertung ----------
+  // Die Menge wird von einer KI gespielt. Ohne Verbindung (Browser, Flugmodus,
+  // kein Endpunkt konfiguriert) bewertet die lokale Notwertung \u2013 das Spiel
+  // bleibt also immer spielbar.
+  function escHtml(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  let tutExcuseTries=0;
+  const AICFG=window.AI_CONFIG||{};
+  const AI_URL=AICFG.endpoint||'https://api.anthropic.com/v1/messages';
+  const AI_MODEL=AICFG.model||'claude-sonnet-4-6';
+  const AI_TIMEOUT=AICFG.timeoutMs||6000;
+  const AI_ON=AICFG.enabled!==false;
+  // Nach zwei Fehlschlaegen wird nicht mehr gefragt: sonst wartet der Dialog jedes Mal
+  // ins Timeout. Der Vorschlag-Abruf beim Erwischen ist dabei die kostenlose Probe.
+  let aiFails=0; const AI_MAX_FAILS=2;
+  async function askExcuseAI(prompt){
+    if(!AI_ON||aiFails>=AI_MAX_FAILS) throw new Error('kein KI-Endpunkt');
+    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),AI_TIMEOUT);
+    try{
+      const body=(AICFG.mode==='proxy')
+        ? { prompt:prompt, model:AI_MODEL }
+        : { model:AI_MODEL, max_tokens:1000, messages:[{role:'user',content:prompt}] };
+      const res=await fetch(AI_URL,{ method:'POST', signal:ctl.signal,
+        headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data=await res.json();
+      const txt=(typeof data.text==='string') ? data.text
+        : (data.content||[]).map(c=>c.text||'').join('');
+      aiFails=0;
+      return String(txt||'').replace(/```json|```/g,'').trim();
+    } catch(e){ aiFails++; throw e; }
+    finally { clearTimeout(to); }
   }
-  function escapeCatch(bribed){
+  // Holt zur konkreten Beschuldigung passende Ausreden (laeuft im Hintergrund)
+  async function fetchExcuseSuggestions(accusation){
+    try{
+      const avoid=usedExcuses.length?('\n\nVermeide Ausreden, die diesen bereits benutzten \u00e4hneln:\n- '+usedExcuses.join('\n- ')):'';
+      const prompt='Lustiges Cartoon-Spiel: Der Spieler wurde bei diesem Chaos-Ereignis erwischt:\n"'+accusation
+        +'"\n\nSchreibe 3 kurze, dreiste, kreative Ausreden (je max. 10 W\u00f6rter), die KONKRET zu genau diesem Ereignis passen und die Schuld witzig von sich weisen.'
+        +avoid+'\n\nAntworte NUR mit einem JSON-Array aus 3 Strings, ohne Markdown:\n["...","...","..."]';
+      const arr=JSON.parse(await askExcuseAI(prompt));
+      if(Array.isArray(arr)&&accusation===excuseAccusation)
+        excuseSuggestions=arr.filter(x=>typeof x==='string'&&x.trim()).map(x=>x.trim().slice(0,120));
+    }catch(e){ /* kein Problem \u2013 Fallback ist der Kategorie-Pool */ }
+  }
+  // Beste verfuegbare Vorschlags-Ausrede (KI zuerst, sonst Kategorie-Pool)
+  function takeSuggestion(){
+    if(excuseSuggestions.length) return excuseSuggestions.splice((Math.random()*excuseSuggestions.length)|0,1)[0];
+    return pick(excuseCorrects);
+  }
+  function localExcuseScore(txt){
+    // Notbewertung ohne KI: Laenge, Muehe und ein paar Stichworte
+    const norm=x=>x.toLowerCase().replace(/[^a-z\u00e4\u00f6\u00fc\u00df ]/g,'').replace(/\s+/g,' ').trim();
+    if(usedExcuses.some(u=>norm(u)===norm(txt))) return 15;   // exakt wiederholt \u2013 kennt die Menge schon
+    const t=txt.toLowerCase(); let pt=32;
+    const words=txt.trim().split(/\s+/).length;
+    pt+=Math.min(24,words*3);
+    if(/keine ahnung|wei\u00df nicht|weiss nicht|^ka$|^nein$|egal|halt so/.test(t)) pt-=30;
+    if(/auftrag|stadt|test|inspektion|physik|anwalt|zuf\u00e4llig|versicherung|beweis|zeuge/.test(t)) pt+=12;
+    if(words>=7) pt+=8;
+    return clamp(Math.round(pt),5,78);
+  }
+  // Kommentare der Notwertung \u2013 getrennt, damit eine Ablehnung nicht freundlich klingt
+  const LOCAL_OK=[
+    'Die Menge murmelt unentschlossen und l\u00e4sst dich z\u00f6gernd ziehen.',
+    'Ein Achselzucken geht durch die Reihen. Passt schon.',
+    'Jemand nickt langsam. Der Rest hat schon wieder was anderes zu tun.'
+  ];
+  const LOCAL_BAD=[
+    'Das kauft dir hier wirklich niemand ab.',
+    'Die Menge verschr\u00e4nkt die Arme. Zu schwach.',
+    'Erst Gel\u00e4chter, dann wird es unangenehm.'
+  ];
+  async function evalExcuseAI(txt){
+    const usedList=usedExcuses.length?('\n\nDIESE AUSREDEN HAT DER SPIELER IN DIESER RUNDE SCHON ERFOLGREICH BENUTZT:\n- '
+      +usedExcuses.join('\n- ')+'\nWICHTIG: Wenn die neue Ausrede im Kern dieselbe ist wie eine bereits benutzte (auch umformuliert), '
+      +'glaubt die Menge sie NICHT mehr \u2013 gib dann h\u00f6chstens 25 Punkte und weise im Kommentar frech darauf hin, dass sie den Trick schon kennt.'):'';
+    const prompt='Du bist die aufgebrachte Menschenmenge in einem lustigen Cartoon-Spiel. Der Spieler wurde bei einem Chaos-Ereignis erwischt und gibt eine selbst getippte Ausrede ab.'
+      +'\n\nEREIGNIS: "'+excuseAccusation+'"\nAUSREDE DES SPIELERS: "'+txt+'"'+usedList
+      +'\n\nBewerte die Ausrede nach Kreativit\u00e4t, Dreistigkeit und ob sie zum Ereignis passt. Absurde, aber clevere Ausreden d\u00fcrfen gut abschneiden. '
+      +'Faule Antworten wie "wei\u00df nicht" oder Ein-Wort-Antworten schneiden sehr schlecht ab (unter 30). Richtig witzige oder passende Ausreden bekommen 60-95.'
+      +'\n\nAntworte NUR mit einem JSON-Objekt, ohne Markdown, ohne Backticks:\n{"punkte": <Zahl 0-100>, "kommentar": "<1 kurzer frecher Satz auf Deutsch als Reaktion der Menge, direkt an den Spieler>"}';
+    const r=JSON.parse(await askExcuseAI(prompt));
+    return { p:clamp(Math.round(Number(r.punkte)||0),0,100), c:String(r.kommentar||'').slice(0,180) };
+  }
+  const EXCUSE_PASS=50;   // ab so vielen Punkten glaubt die Menge dir
+  async function submitExcuse(){
+    if(state!==ST.CAUGHT||excuseEvaluating) return;
+    const exInp=document.getElementById('excuseInput'), txt=exInp.value.trim();
+    if(!txt){ exInp.placeholder='Schweigen macht dich nur verd\u00e4chtiger!'; return; }
+    excuseEvaluating=true; exInp.disabled=true; exInp.blur();
+    document.getElementById('excuseSend').disabled=true;
+    // Spicker-Ausrede unveraendert abgegeben? Dann keine Bewertung \u2013 die zieht immer.
+    if(guaranteedExcuse&&txt===guaranteedExcuse.trim()){
+      excuseEvaluating=false; guaranteedExcuse='';
+      usedExcuses.push(txt);
+      escapeCatch(false,{p:75,c:'Dein Spicker sitzt \u2013 die Menge nickt und macht dir Platz.'});
+      return;
+    }
+    document.getElementById('aiThinking').classList.add('on');
+    let v;
+    try{ v=await evalExcuseAI(txt); }
+    catch(e){ const pt=localExcuseScore(txt);
+      v={ p:pt, c:pick(pt>=EXCUSE_PASS?LOCAL_OK:LOCAL_BAD) }; }
+    excuseEvaluating=false;
+    if(state!==ST.CAUGHT) return;   // z.B. inzwischen bestochen worden
+    document.getElementById('aiThinking').classList.remove('on');
+    if(v.p>=EXCUSE_PASS){ usedExcuses.push(txt); escapeCatch(false,v); return; }
+    shake=reduceMotion?6:14; SND.play('wrong');
+    if(TUT.active){                                   // Im Tutorial: erst nochmal versuchen, dann durchwinken
+      tutExcuseTries++;
+      const hintEl=document.getElementById('crowdHint');
+      if(tutExcuseTries<2){
+        hintEl.classList.add('bad');
+        hintEl.innerHTML='<b>'+v.p+'/100 \u2013 zu schwach:</b> \u201e'+escHtml(v.c)+'\u201c Probier eine dreistere \u2013 hier kostet das nichts.';
+        hintEl.style.display='';
+        exInp.disabled=false; exInp.value=''; exInp.placeholder='Noch dreister \u2026';
+        document.getElementById('excuseSend').disabled=false;
+        return;
+      }
+      escapeCatch(false,{p:Math.max(v.p,55),c:'Die Menge winkt dich durch \u2013 im Tutorial noch.'});
+      return;
+    }
+    endGame('Ausrede abgelehnt ('+v.p+'/100): \u201e'+v.c+'\u201c');
+  }
+  function escapeCatch(bribed,verdict){
     SND.play(bribed?'coin':'correct');
     if(!bribed){
+      if(verdict) score+=Math.round(verdict.p/2);   // gute Ausreden bringen extra Punkte
       if(caughtWasSpecial){ score+=120+streetsCleared*5; unlockAch('survive_special'); if(currentSpecialKey) unlockAch('sp_'+currentSpecialKey); }
       else score+=40+streetsCleared*5;
       excusesRun++; if(excusesRun>=5) unlockAch('excuse_5');
@@ -2594,7 +2686,8 @@ window.IAP=(function(){
     caughtWasSpecial=false; bumpCD=1.2; hide('dialog');
     suspicion=Math.min(suspicion,50); susLocked=false; setSusBar();
     SND.setTrack('game');
-    const r=bribed?['Geschmiert! '+ic('moneybag'),'Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']:pick(REACTIONS);
+    const r=bribed?['Geschmiert! '+ic('moneybag'),'Die Menge steckt das Geld ein und schaut betont weg. Diesmal.']
+      :(verdict?[verdict.p+'/100 \u2013 Durchgekommen!',verdict.c||'Die Menge kauft es dir ab.']:pick(REACTIONS));
     document.getElementById('reactTitle').innerHTML=r[0];
     document.getElementById('reactText').textContent=r[1];
     show('reaction'); state=ST.REACT; reactTimer=1.5;
@@ -4854,6 +4947,9 @@ window.IAP=(function(){
   document.getElementById('tsNext').onclick=()=>{ SND.ensure(); SND.play('click'); tutBegin(); };
   document.getElementById('tsSkip').onclick=()=>{ SND.ensure(); SND.play('click'); tutSkipAll(); };
   document.getElementById('tcSkip').onclick=()=>{ SND.play('click'); tutSkipAll(); };
+  document.getElementById('excuseSend').addEventListener('click',submitExcuse);
+  document.getElementById('excuseInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); submitExcuse(); } });
   // ---------- Rewarded-Video 1: Lauf-Muenzen verdoppeln ----------
   let rewardTaken=false, lastEarned=0, rewardDone=false;   // rewardDone: Erfolgsanzeige laeuft gerade
   function syncRewardBtn(){
